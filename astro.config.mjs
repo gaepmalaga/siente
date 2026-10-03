@@ -22,8 +22,11 @@ const blogAntiguo = [
   'cada-cuanto-hay-que-revisarse-la-vista',
 ];
 
+// Astro no antepone la subcarpeta a los destinos de las redirecciones.
+const conBase = (ruta) => `${BASE_PATH.replace(/\/$/, '')}${ruta}`;
+
 /** @type {Record<string, string>} */
-const redirects = {
+const redirectsSinBase = {
   '/es': '/',
   '/es/sobre-nosotros': '/sobre-nosotros/',
   '/es/servicios-opticos': '/optica-barajas/',
@@ -38,7 +41,8 @@ const redirects = {
   // El enlace corto para la bio de Instagram.
   '/links': '/enlaces/',
 };
-for (const slug of blogAntiguo) redirects[`/es/blog/${slug}`] = `/blog/${slug}/`;
+for (const slug of blogAntiguo) redirectsSinBase[`/es/blog/${slug}`] = `/blog/${slug}/`;
+const redirects = Object.fromEntries(Object.entries(redirectsSinBase).map(([de, a]) => [de, conBase(a)]));
 
 export default defineConfig({
   site: SITE_URL,
