@@ -1,34 +1,107 @@
 ---
+// El contenido se adapta solo: si no hay ID de Google Analytics configurado,
+// la web no usa cookies y así lo dice.
 import PaginaTexto from '../layouts/PaginaTexto.astro';
+import { negocio } from '../lib/negocio';
+
+const ga = negocio.analitica.ga4;
 ---
 
 <PaginaTexto
   titulo="Política de cookies"
   tituloSeo="Política de cookies · Siente, centro óptico y auditivo"
-  descripcion="Esta web de Siente no usa cookies de publicidad ni de analítica. Te explicamos qué almacenamiento local usa y por qué no verás un banner de cookies."
+  descripcion="Qué cookies usa la web de Siente, centro óptico y auditivo en Barajas, para qué sirven y cómo aceptarlas o rechazarlas."
   ruta="/politica-de-cookies/"
   actualizado="octubre de 2026"
 >
-  <p><strong>Esta web no usa cookies de publicidad, de analítica ni de seguimiento.</strong> Por eso no verás ningún banner de cookies al entrar.</p>
-
-  <h2>¿Qué guarda la web en tu navegador?</h2>
   <p>
-    Solo una preferencia técnica: si usas el botón <strong>«Tamaño de letra»</strong>, tu navegador recuerda el tamaño
-    elegido mediante el almacenamiento local (<em>localStorage</em>) para que no tengas que volver a cambiarlo en cada
-    página. No sirve para identificarte, no se envía a ningún servidor y puedes borrarlo desde la configuración de tu
-    navegador.
+    Una cookie es un pequeño archivo que una web guarda en tu navegador. Te explicamos cuáles usa esta web y cómo puedes
+    decidir sobre ellas.
   </p>
+
+  {
+    ga ? (
+      <>
+        <h2>Cookies de analítica (solo si las aceptas)</h2>
+        <p>
+          Usamos <strong>Google Analytics 4</strong>, de Google Ireland Ltd., para saber cuántas personas visitan la web, qué
+          páginas consultan y qué botones usan (por ejemplo, «Pedir cita» o «WhatsApp»). Nos sirve para mejorar la web.
+          <strong>No usamos estas cookies para publicidad</strong> y Google Analytics no recoge tu dirección IP completa.
+        </p>
+        <p>Estas cookies <strong>solo se instalan si pulsas «Aceptar»</strong> en el aviso de cookies.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Cookie</th>
+              <th>Proveedor</th>
+              <th>Para qué sirve</th>
+              <th>Duración</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>_ga</code></td>
+              <td>Google</td>
+              <td>Distinguir visitantes de forma anónima</td>
+              <td>2 años</td>
+            </tr>
+            <tr>
+              <td><code>_ga_{ga.replace('G-', '')}</code></td>
+              <td>Google</td>
+              <td>Mantener el estado de la visita</td>
+              <td>2 años</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Google puede tratar estos datos fuera del Espacio Económico Europeo con las garantías adecuadas. Más información en la{' '}
+          <a href="https://policies.google.com/privacy?hl=es" target="_blank" rel="noopener">política de privacidad de Google</a>.
+        </p>
+
+        <h2>Cómo cambiar tu decisión</h2>
+        <p>
+          Puedes aceptar o rechazar en cualquier momento desde el enlace <strong>«Configurar cookies»</strong> del pie de
+          página, o <button type="button" class="enlace-boton" data-abrir-cookies>pulsando aquí</button>. Si las rechazas
+          después de haberlas aceptado, las borramos. También puedes eliminarlas desde la configuración de tu navegador.
+        </p>
+      </>
+    ) : (
+      <p><strong>Ahora mismo esta web no usa cookies de analítica, publicidad ni seguimiento</strong>, así que no verás ningún aviso de cookies.</p>
+    )
+  }
+
+  <h2>Preferencias guardadas en tu navegador</h2>
+  <p>
+    Además, la web guarda en tu navegador (con <em>localStorage</em>, no con cookies) dos preferencias técnicas que no
+    sirven para identificarte ni se envían a ningún servidor:
+  </p>
+  <ul>
+    <li>El <strong>tamaño de letra</strong> que elijas con el botón «Tamaño de letra».</li>
+    {ga && <li>Tu <strong>decisión sobre las cookies</strong>, para no preguntarte en cada página (te lo volveremos a preguntar pasado un año).</li>}
+  </ul>
 
   <h2>Servicios de terceros</h2>
   <p>
-    Algunos enlaces llevan a servicios externos (WhatsApp, Google Maps, Instagram, Facebook…). Al visitarlos, esos
-    servicios pueden instalar sus propias cookies según sus políticas. El mapa interactivo de OpenStreetMap solo se carga
-    si pulsas «Ver mapa interactivo».
+    Algunos enlaces llevan a servicios externos (WhatsApp, Google Maps, Instagram, Facebook…), que pueden usar sus propias
+    cookies según sus políticas. El mapa interactivo de OpenStreetMap solo se carga si pulsas «Ver mapa interactivo».
   </p>
 
-  <h2>Cambios</h2>
-  <p>
-    Si en el futuro se incorporase alguna herramienta que use cookies no necesarias, se actualizará esta política y se
-    solicitará tu consentimiento previo.
-  </p>
+  <h2>Responsable</h2>
+  <p>{negocio.razonSocial} · NIF {negocio.nif} · <a href={`mailto:${negocio.email}`}>{negocio.email}</a></p>
 </PaginaTexto>
+
+<style>
+  .enlace-boton {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--tinta);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: var(--roble);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+</style>

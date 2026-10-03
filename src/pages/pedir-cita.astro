@@ -337,7 +337,8 @@ const migas = [
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!validar()) return;
-      const { texto } = componer();
+      const { texto, servicio } = componer();
+      window.sienteEvento?.('generate_lead', { canal: 'whatsapp', servicio });
       const numero = (form.dataset.whatsapp ?? '').replace(/\D/g, '');
       window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener');
       terminado();
@@ -346,6 +347,7 @@ const migas = [
     form.querySelector('[data-email-boton]')?.addEventListener('click', () => {
       if (!validar()) return;
       const { texto, servicio } = componer();
+      window.sienteEvento?.('generate_lead', { canal: 'email', servicio });
       location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(`Cita: ${servicio}`)}&body=${encodeURIComponent(texto.replace(/\*/g, ''))}`;
       terminado();
     });

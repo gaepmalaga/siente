@@ -1,0 +1,51 @@
+---
+// Aviso de cookies. Solo existe si hay un ID de Google Analytics configurado en
+// /admin (Configuración → Datos del centro → Analítica). Google Analytics no se
+// carga hasta que la persona pulsa «Aceptar», y «Rechazar» está al mismo nivel
+// (criterio de la AEPD).
+import { negocio } from '../lib/negocio';
+import { url } from '../lib/url';
+
+const id = negocio.analitica.ga4;
+---
+
+{
+  id && (
+    <div class="cookies" data-cookies data-ga={id} role="dialog" aria-labelledby="cookies-titulo" aria-describedby="cookies-texto" hidden>
+      <p id="cookies-titulo" class="cookies-titulo">¿Nos ayudas a mejorar la web?</p>
+      <p id="cookies-texto" class="cookies-texto">
+        Con tu permiso usamos cookies de Google Analytics para saber qué páginas y botones son útiles. No las usamos para
+        publicidad. <a href={url('/politica-de-cookies/')}>Más información</a>
+      </p>
+      <div class="cookies-botones">
+        <button type="button" class="boton pequeno" data-cookies-rechazar>Rechazar</button>
+        <button type="button" class="boton pequeno" data-cookies-aceptar>Aceptar</button>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .cookies {
+    position: fixed;
+    z-index: 60;
+    left: 12px;
+    right: 12px;
+    bottom: calc(92px + env(safe-area-inset-bottom));
+    display: grid;
+    gap: 10px;
+    padding: 20px;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    box-shadow: 0 0 0 1px var(--linea), var(--sombra-2);
+  }
+  .cookies[hidden] { display: none; }
+  .cookies-titulo { font-weight: 800; font-size: 1.1rem; }
+  .cookies-texto { font-size: 0.98rem; color: var(--tinta-2); }
+  .cookies-texto a { color: var(--tinta); font-weight: 700; }
+  .cookies-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  @media (min-width: 1080px) {
+    .cookies { left: 24px; right: auto; bottom: 24px; width: 420px; }
+  }
+  :global(body.desnuda) .cookies { bottom: calc(16px + env(safe-area-inset-bottom)); }
+</style>

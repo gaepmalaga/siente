@@ -15,3 +15,6 @@ Thumbs.db
 
 # configuración local del editor
 .claude/
+
+# material en bruto (incluye fotos de terceros sin permiso confirmado)
+fotos/

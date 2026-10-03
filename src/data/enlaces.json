@@ -8,14 +8,16 @@
       "tipo": "whatsapp",
       "url": "",
       "destacado": true,
+      "secundario": false,
       "visible": true
     },
     {
       "texto": "Revisión de la vista gratis",
-      "detalle": "Pide tu cita en un minuto",
+      "detalle": "Elige día y hora en un minuto",
       "tipo": "cita",
       "url": "",
       "destacado": false,
+      "secundario": false,
       "visible": true
     },
     {
@@ -24,14 +26,7 @@
       "tipo": "web",
       "url": "/plan-veo/",
       "destacado": false,
-      "visible": true
-    },
-    {
-      "texto": "Llamar al centro",
-      "detalle": "910 248 330",
-      "tipo": "llamar",
-      "url": "",
-      "destacado": false,
+      "secundario": false,
       "visible": true
     },
     {
@@ -40,30 +35,52 @@
       "tipo": "mapa",
       "url": "",
       "destacado": false,
+      "secundario": false,
       "visible": true
     },
     {
-      "texto": "Audífonos y revisión auditiva",
-      "detalle": "Cabina insonorizada y seguimiento",
+      "texto": "Llamar al centro",
+      "detalle": "910 248 330",
+      "tipo": "llamar",
+      "url": "",
+      "destacado": false,
+      "secundario": false,
+      "visible": true
+    },
+    {
+      "texto": "Guardar en contactos",
+      "detalle": "",
+      "tipo": "contacto",
+      "url": "",
+      "destacado": false,
+      "secundario": true,
+      "visible": true
+    },
+    {
+      "texto": "Audífonos",
+      "detalle": "",
       "tipo": "web",
       "url": "/audifonos-barajas/",
       "destacado": false,
+      "secundario": true,
       "visible": true
     },
     {
-      "texto": "Déjanos tu reseña en Google",
-      "detalle": "Nos ayuda muchísimo",
+      "texto": "Reseñas en Google",
+      "detalle": "",
       "tipo": "resenas",
       "url": "",
       "destacado": false,
+      "secundario": true,
       "visible": true
     },
     {
       "texto": "Nuestra web",
-      "detalle": "Servicios, consejos y blog",
+      "detalle": "",
       "tipo": "web",
       "url": "/",
       "destacado": false,
+      "secundario": true,
       "visible": true
     }
   ]

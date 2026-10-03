@@ -6,7 +6,7 @@ import { telHref, waHref, WA_SALUDO } from '../lib/negocio';
 import { url } from '../lib/url';
 ---
 
-<nav class="acciones-movil" aria-label="Contacto rápido">
+<nav class="acciones-movil" aria-label="Contacto rápido" data-zona="barra-movil">
   <a href={telHref()}><Icono nombre="Phone" /><span>Llamar</span></a>
   <a href={waHref(WA_SALUDO)} target="_blank" rel="noopener" class="wa"><IconoMarca nombre="whatsapp" /><span>WhatsApp</span></a>
   <a href={url('/pedir-cita/')} class="cita"><Icono nombre="CalendarCheck" /><span>Pedir cita</span></a>

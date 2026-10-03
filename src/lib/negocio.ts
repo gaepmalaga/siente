@@ -57,6 +57,9 @@ const Negocio = z.object({
     enlace: z.string().optional().default(''),
   }),
   planVeo: z.object({ activo: z.boolean().default(true), fin: z.string() }),
+  analitica: z
+    .object({ ga4: z.string().regex(/^(G-[A-Z0-9]+)?$/, 'El ID de Google Analytics empieza por G-').optional().default('') })
+    .default({ ga4: '' }),
 });
 
 const Enlaces = z.object({
@@ -66,9 +69,10 @@ const Enlaces = z.object({
     z.object({
       texto: z.string(),
       detalle: z.string().optional().default(''),
-      tipo: z.enum(['whatsapp', 'cita', 'llamar', 'mapa', 'resenas', 'instagram', 'facebook', 'web']),
+      tipo: z.enum(['whatsapp', 'cita', 'llamar', 'mapa', 'resenas', 'instagram', 'facebook', 'contacto', 'web']),
       url: z.string().optional().default(''),
       destacado: z.boolean().optional().default(false),
+      secundario: z.boolean().optional().default(false),
       visible: z.boolean().optional().default(true),
     }),
   ),
@@ -202,6 +206,8 @@ export function resolverEnlace(e: (typeof enlacesPagina.enlaces)[number]): { hre
       return { href: negocio.redes.instagram, externo: true };
     case 'facebook':
       return { href: negocio.redes.facebook, externo: true };
+    case 'contacto':
+      return { href: url('/siente.vcf'), externo: false };
     default: {
       const externo = /^https?:/i.test(e.url);
       return { href: externo ? e.url : url(e.url || '/'), externo };

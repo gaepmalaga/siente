@@ -67,7 +67,7 @@ const preguntas = [
   esquemas={[esquemaFaq(preguntas)]}
 >
   <!-- ═══ HERO ═══ -->
-  <section class="hero">
+  <section class="hero" data-zona="portada">
     <div class="contenedor hero-rejilla">
       <div class="hero-texto">
         <h1>
@@ -242,7 +242,8 @@ const preguntas = [
       </div>
       <div class="mosaico">
         <figure class="m1" data-aparecer>
-          <Image src={fotos['expositor-gafas']} alt="Expositor de gafas con estantes de madera en el centro Siente" widths={[400, 700]} sizes="(min-width: 1000px) 340px, 50vw" />
+          <Image src={fotos['recepcion-rotulo']} alt="Recepción de Siente con el rótulo de madera iluminado sobre la pared de listones" widths={[400, 700, 1000]} sizes="(min-width: 1000px) 340px, 50vw" />
+          <figcaption>Nuestra recepción</figcaption>
         </figure>
         <figure class="m2" data-aparecer style="--retraso: 0.08s">
           <Image src={fotos['gabinete-optometria']} alt="Gabinete de optometría de Siente con foróptero y lámpara de hendidura" widths={[400, 700]} sizes="(min-width: 1000px) 340px, 50vw" />
@@ -253,7 +254,7 @@ const preguntas = [
           <figcaption>Cabina de audiometría</figcaption>
         </figure>
         <figure class="m4" data-aparecer style="--retraso: 0.24s">
-          <Image src={fotos['gafas-sol']} alt="Gafas de sol de colores en un estante de madera" widths={[400, 800]} sizes="(min-width: 1000px) 340px, 50vw" />
+          <Image src={fotos['interior-general']} alt="Vista general del interior de Siente con expositores de gafas y la puerta de audiología" widths={[400, 800, 1080]} sizes="(min-width: 1000px) 340px, 50vw" />
         </figure>
       </div>
     </div>

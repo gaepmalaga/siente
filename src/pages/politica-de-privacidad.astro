@@ -13,8 +13,7 @@ import { url } from '../lib/url';
 >
   <p>
     Esta web está diseñada para <strong>recoger el mínimo de datos posible</strong>. No usamos formularios que guarden tus
-    datos en un servidor, no usamos cookies de publicidad ni de analítica y no cedemos datos a terceros con fines
-    comerciales.
+    datos en un servidor, no usamos cookies de publicidad y no cedemos datos a terceros con fines comerciales.
   </p>
 
   <h2>Responsable del tratamiento</h2>
@@ -44,6 +43,20 @@ import { url } from '../lib/url';
     plazos que exige la ley.
   </p>
 
+  {
+    negocio.analitica.ga4 && (
+      <>
+        <h3>Estadísticas de uso de la web</h3>
+        <p>
+          Si aceptas las cookies de analítica, usamos Google Analytics 4 para obtener estadísticas sobre cómo se usa la web
+          (páginas visitadas, botones pulsados, tipo de dispositivo). La base legal es tu <strong>consentimiento</strong>, que
+          puedes retirar en cualquier momento desde «Configurar cookies». Más detalles en la{' '}
+          <a href={url('/politica-de-cookies/')}>política de cookies</a>.
+        </p>
+      </>
+    )
+  }
+
   <h2>Servicios de terceros</h2>
   <p>
     Si usas WhatsApp, Google Maps, Apple Maps, Waze, Instagram o Facebook desde los enlaces de esta web, esos servicios
@@ -66,7 +79,5 @@ import { url } from '../lib/url';
   </p>
 
   <h2>Cookies</h2>
-  <p>
-    Esta web no usa cookies de analítica ni de publicidad. Más información en la <a href={url('/politica-de-cookies/')}>política de cookies</a>.
-  </p>
+  <p>Consulta la <a href={url('/politica-de-cookies/')}>política de cookies</a>.</p>
 </PaginaTexto>

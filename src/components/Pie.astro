@@ -21,7 +21,7 @@ const oido = servicios.filter((s) => s.data.area === 'oido');
 const anio = new Date().getFullYear();
 ---
 
-<footer class="pie">
+<footer class="pie" data-zona="pie">
   <div class="madera pie-franja" aria-hidden="true"></div>
   <div class="contenedor pie-rejilla">
     <div class="pie-marca">
@@ -87,6 +87,7 @@ const anio = new Date().getFullYear();
       <li><a href={url('/politica-de-cookies/')}>Cookies</a></li>
       <li><a href={url('/accesibilidad/')}>Accesibilidad</a></li>
       <li><a href={url('/mapa-web/')}>Mapa web</a></li>
+      {negocio.analitica.ga4 && <li><button type="button" class="pie-boton" data-abrir-cookies>Configurar cookies</button></li>}
     </ul>
   </div>
 </footer>
@@ -147,6 +148,8 @@ const anio = new Date().getFullYear();
     font-size: 0.92rem;
   }
   .pie-legal ul { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .pie-boton { padding: 0; border: 0; background: none; color: var(--papel); font-size: inherit; cursor: pointer; }
+  .pie-boton:hover { text-decoration: underline; text-underline-offset: 3px; }
   @media (min-width: 720px) {
     .pie-rejilla { grid-template-columns: 1fr 1fr; }
   }

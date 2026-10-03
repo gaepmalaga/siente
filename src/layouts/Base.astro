@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Cabecera from '../components/Cabecera.astro';
 import Pie from '../components/Pie.astro';
 import AccionesMovil from '../components/AccionesMovil.astro';
+import AvisoCookies from '../components/AvisoCookies.astro';
 import { negocio, horarioParaCliente } from '../lib/negocio';
 import { url, urlAbsoluta } from '../lib/url';
 import { esquemaNegocio, esquemaWeb, esquemaMigas } from '../lib/schema';
@@ -115,6 +116,7 @@ const todosEsquemas = [esquemaNegocio(), esquemaWeb(), ...(migas ? [esquemaMigas
         </>
       )
     }
+    <AvisoCookies />
     <script>
       import '../scripts/sitio.ts';
     </script>

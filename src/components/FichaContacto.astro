@@ -14,7 +14,7 @@ interface Props {
 const { titulo = 'Pide tu cita', servicio, mensaje = 'Hola, os escribo desde la web. Me gustaría pedir cita.' } = Astro.props;
 ---
 
-<aside class="ficha" aria-label="Pedir cita">
+<aside class="ficha" aria-label="Pedir cita" data-zona="ficha-lateral">
   <p class="ficha-titulo">{titulo}</p>
   <EstadoApertura class="ficha-estado" />
   <a class="boton bloque" href={url(`/pedir-cita/${servicio ? `?servicio=${servicio}` : ''}`)}><Icono nombre="CalendarCheck" /> Pedir cita</a>

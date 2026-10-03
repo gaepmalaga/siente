@@ -34,17 +34,61 @@
   "whatsapp": "34641446882",
   "email": "opticayaudio@sienteyve.es",
   "horario": [
-    { "dia": "lunes", "abre": "10:00", "cierra": "13:30" },
-    { "dia": "lunes", "abre": "17:00", "cierra": "20:00" },
-    { "dia": "martes", "abre": "10:00", "cierra": "13:30" },
-    { "dia": "martes", "abre": "17:00", "cierra": "20:00" },
-    { "dia": "miercoles", "abre": "10:00", "cierra": "13:30" },
-    { "dia": "miercoles", "abre": "17:00", "cierra": "20:00" },
-    { "dia": "jueves", "abre": "10:00", "cierra": "13:30" },
-    { "dia": "jueves", "abre": "17:00", "cierra": "20:00" },
-    { "dia": "viernes", "abre": "10:00", "cierra": "13:30" },
-    { "dia": "viernes", "abre": "17:00", "cierra": "20:00" },
-    { "dia": "sabado", "abre": "10:30", "cierra": "13:30" }
+    {
+      "dia": "lunes",
+      "abre": "10:00",
+      "cierra": "13:30"
+    },
+    {
+      "dia": "lunes",
+      "abre": "17:00",
+      "cierra": "20:00"
+    },
+    {
+      "dia": "martes",
+      "abre": "10:00",
+      "cierra": "13:30"
+    },
+    {
+      "dia": "martes",
+      "abre": "17:00",
+      "cierra": "20:00"
+    },
+    {
+      "dia": "miercoles",
+      "abre": "10:00",
+      "cierra": "13:30"
+    },
+    {
+      "dia": "miercoles",
+      "abre": "17:00",
+      "cierra": "20:00"
+    },
+    {
+      "dia": "jueves",
+      "abre": "10:00",
+      "cierra": "13:30"
+    },
+    {
+      "dia": "jueves",
+      "abre": "17:00",
+      "cierra": "20:00"
+    },
+    {
+      "dia": "viernes",
+      "abre": "10:00",
+      "cierra": "13:30"
+    },
+    {
+      "dia": "viernes",
+      "abre": "17:00",
+      "cierra": "20:00"
+    },
+    {
+      "dia": "sabado",
+      "abre": "10:30",
+      "cierra": "13:30"
+    }
   ],
   "redes": {
     "instagram": "https://www.instagram.com/sienteyve/",
@@ -52,8 +96,21 @@
     "googleMaps": "https://www.google.com/maps/search/?api=1&query=Centro+%C3%93ptico+y+Auditivo+Siente%2C+Avenida+de+Logro%C3%B1o+112%2C+28042+Madrid",
     "resenasGoogle": "https://www.google.com/maps/search/?api=1&query=Centro+%C3%93ptico+y+Auditivo+Siente%2C+Avenida+de+Logro%C3%B1o+112%2C+28042+Madrid"
   },
-  "zonas": ["Barajas", "Alameda de Osuna", "Casco Histórico de Barajas", "Timón", "Corralejos", "Aeropuerto"],
-  "marcas": ["Owlet", "Mr. Boho", "Matt Black", "Oticon", "Phonak"],
+  "zonas": [
+    "Barajas",
+    "Alameda de Osuna",
+    "Casco Histórico de Barajas",
+    "Timón",
+    "Corralejos",
+    "Aeropuerto"
+  ],
+  "marcas": [
+    "Owlet",
+    "Mr. Boho",
+    "Matt Black",
+    "Oticon",
+    "Phonak"
+  ],
   "aviso": {
     "activo": false,
     "texto": "",
@@ -62,5 +119,8 @@
   "planVeo": {
     "activo": true,
     "fin": "2026-12-31"
+  },
+  "analitica": {
+    "ga4": ""
   }
 }

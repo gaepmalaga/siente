@@ -1,3 +1,5 @@
+import { iniciarCookies } from './analitica';
+
 // JavaScript común a todas las páginas. Es poco y opcional: sin él la web se
 // lee y funciona igual (enlaces a teléfono, WhatsApp y mapa son HTML normal).
 
@@ -72,6 +74,11 @@ function pintarEstado() {
     });
     // Resalta el día de hoy en las tablas de horario.
     const { dia } = ahoraEnMadrid();
+    const hoy = horario[DIAS[dia]] ?? [];
+    document.querySelectorAll<HTMLElement>('[data-horario-hoy]').forEach((el) => {
+      el.textContent = hoy.length ? `Hoy: ${hoy.map((t) => `${t.abre} – ${t.cierra}`).join(' · ')}` : 'Hoy cerrado';
+      el.hidden = false;
+    });
     document.querySelectorAll<HTMLElement>('[data-dias]').forEach((fila) => {
       fila.classList.toggle('hoy', (fila.dataset.dias ?? '').split(',').includes(DIAS[dia]));
     });
@@ -146,7 +153,23 @@ function aparecer() {
   elementos.forEach((el) => observador.observe(el));
 }
 
+// Cuenta atrás de fechas límite (Plan VEO): actualiza los días y oculta el
+// bloque cuando la fecha ha pasado, aunque la web no se haya recompilado.
+function cuentaAtras() {
+  document.querySelectorAll<HTMLElement>('[data-fin]').forEach((bloque) => {
+    const fin = new Date(`${bloque.dataset.fin}T23:59:59+01:00`).getTime();
+    const dias = Math.ceil((fin - Date.now()) / 86_400_000);
+    if (dias < 0) {
+      bloque.hidden = true;
+      return;
+    }
+    bloque.querySelectorAll('[data-pv-dias]').forEach((n) => (n.textContent = String(dias)));
+  });
+}
+
 pintarEstado();
+cuentaAtras();
+iniciarCookies();
 tamanoTexto();
 menuMovil();
 cabeceraConScroll();

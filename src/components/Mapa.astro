@@ -10,7 +10,7 @@ const d = 0.0045;
 const osm = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - d}%2C${lat - d / 1.6}%2C${lng + d}%2C${lat + d / 1.6}&layer=mapnik&marker=${lat}%2C${lng}`;
 ---
 
-<div class="mapa">
+<div class="mapa" data-zona="mapa">
   <div class="mapa-lienzo" data-mapa data-src={osm}>
     <svg class="mapa-ilustracion" viewBox="0 0 600 380" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
       <rect width="600" height="380" fill="#efe6d8"></rect>

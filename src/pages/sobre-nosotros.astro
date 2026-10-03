@@ -3,7 +3,6 @@ import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Migas from '../components/Migas.astro';
 import Icono from '../components/Icono.astro';
-import Rotulo from '../components/Rotulo.astro';
 import BandaCita from '../components/BandaCita.astro';
 import { negocio } from '../lib/negocio';
 import { fotos } from '../lib/fotos';
@@ -37,7 +36,17 @@ const valores = [
             Por eso juntamos óptica y audición en un mismo centro, en pleno barrio de Barajas.
           </p>
         </div>
-        <Rotulo class="sn-rotulo" />
+        <figure class="sn-foto madera">
+          <Image
+            src={fotos['recepcion-rotulo']}
+            alt="Recepción de Siente con el rótulo de madera iluminado sobre la pared de listones"
+            widths={[480, 800, 1080]}
+            sizes="(min-width: 1000px) 520px, 100vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+          <figcaption>Así nos encontrarás en la Avenida de Logroño, 112</figcaption>
+        </figure>
       </div>
     </div>
   </section>
@@ -85,8 +94,8 @@ const valores = [
         <h2 class="titulo-seccion">Pásate a conocernos</h2>
       </div>
       <div class="galeria">
-        <figure class="g1"><Image src={fotos['expositor-gafas']} alt="Expositor de gafas graduadas con estantes de madera" widths={[400, 800]} sizes="(min-width: 1000px) 400px, 50vw" /></figure>
-        <figure class="g2"><Image src={fotos['gafas-carey']} alt="Monturas carey en estante de madera" widths={[600, 1000]} sizes="(min-width: 1000px) 800px, 100vw" /></figure>
+        <figure class="g1"><Image src={fotos['expositor-listones']} alt="Expositor de gafas iluminado junto a la pared de listones de madera" widths={[400, 800]} sizes="(min-width: 1000px) 400px, 50vw" /></figure>
+        <figure class="g2"><Image src={fotos['interior-general']} alt="Vista general del interior de Siente" widths={[600, 1080]} sizes="(min-width: 1000px) 800px, 100vw" /><figcaption>El centro por dentro</figcaption></figure>
         <figure class="g3"><Image src={fotos['gabinete-optometria']} alt="Gabinete de optometría con foróptero" widths={[400, 800]} sizes="(min-width: 1000px) 400px, 50vw" /><figcaption>Gabinete de optometría</figcaption></figure>
         <figure class="g4"><Image src={fotos['cabina-audiometria']} alt="Cabina insonorizada de audiometría" widths={[400, 800]} sizes="(min-width: 1000px) 400px, 50vw" /><figcaption>Cabina de audiometría</figcaption></figure>
         <figure class="g5"><Image src={fotos['expositor-audifonos']} alt="Expositor de audífonos" widths={[400, 800]} sizes="(min-width: 1000px) 400px, 50vw" /></figure>
@@ -102,7 +111,15 @@ const valores = [
   .sn-rejilla { display: grid; gap: 40px; align-items: center; margin-top: 28px; }
   .sn-texto { display: grid; gap: 22px; }
   .sn-texto h1 { font-size: var(--paso-5); line-height: 0.98; letter-spacing: -0.045em; max-width: 12ch; }
-  .sn-rejilla :global(.sn-rotulo) { min-height: 420px; }
+  .sn-foto { position: relative; margin: 0; padding: 14px; border-radius: var(--radio-l); }
+  .sn-foto :global(img) { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: calc(var(--radio-l) - 10px); }
+  .sn-foto figcaption {
+    position: absolute; left: 28px; bottom: 28px; right: 28px;
+    padding: 8px 14px; border-radius: 999px;
+    background: rgb(23 20 17 / 0.8); color: var(--papel);
+    font-size: 0.92rem; font-weight: 700; text-align: center;
+  }
+  @media (min-width: 1000px) { .sn-foto { max-width: 520px; justify-self: end; } }
   @media (min-width: 1000px) { .sn-rejilla { grid-template-columns: 1.1fr 1fr; gap: 64px; } }
 
   .valores-seccion { background: var(--papel-2); }
