@@ -9,11 +9,12 @@ interface Props {
 const { claro = false, class: clase = '' } = Astro.props;
 ---
 
-<a href={url('/')} class:list={['logo', clase, { claro }]} aria-label="Siente, centro óptico y auditivo. Ir al inicio">
+<a href={url('/')} class:list={['logo', clase, { claro }]}>
   <LogoMarca class="logo-icono" />
-  <span class="logo-texto" aria-hidden="true">
+  <span class="logo-texto">
     <span class="logo-nombre">SIENTE</span>
     <span class="logo-sub">Centro óptico &amp; auditivo</span>
+    <span class="sr-only">, ir al inicio</span>
   </span>
 </a>
 

@@ -25,7 +25,7 @@
   --roble-claro: #d9b78c;
   --roble-oscuro: #87572c;
   --luz: #ffd08c;
-  --wa: #1faf55;
+  --wa: #157f3b; /* verde WhatsApp oscurecido: contraste 5:1 con blanco */
   --wa-oscuro: #0b6a31;
   --linea: rgb(23 20 17 / 0.12);
   --linea-fuerte: rgb(23 20 17 / 0.22);
@@ -228,7 +228,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .boton.secundario { --fondo: transparent; --texto: var(--tinta); border-color: var(--tinta); }
 .boton.secundario:hover { background: var(--tinta); color: var(--papel); }
 .boton.wa { --fondo: var(--wa); --texto: #fff; border-color: var(--wa); }
-.boton.wa:hover { --fondo: #189a49; }
+.boton.wa:hover { --fondo: #0e6c31; }
 .boton.claro { --fondo: var(--papel); --texto: var(--tinta); border-color: var(--papel); }
 .boton.contorno-claro { --fondo: transparent; --texto: var(--papel); border-color: rgb(248 244 238 / 0.55); }
 .boton.contorno-claro:hover { background: var(--papel); color: var(--tinta); }
