@@ -1,0 +1,122 @@
+---
+import '../styles/global.css';
+import Cabecera from '../components/Cabecera.astro';
+import Pie from '../components/Pie.astro';
+import AccionesMovil from '../components/AccionesMovil.astro';
+import { negocio, horarioParaCliente } from '../lib/negocio';
+import { url, urlAbsoluta } from '../lib/url';
+import { esquemaNegocio, esquemaWeb, esquemaMigas } from '../lib/schema';
+import fuenteNormal from '@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-400-normal.woff2?url';
+import fuenteNegrita from '@fontsource/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-800-normal.woff2?url';
+import fuenteMono from '@fontsource/courier-prime/files/courier-prime-latin-700-normal.woff2?url';
+
+interface Props {
+  titulo: string;
+  descripcion: string;
+  /** Imagen para redes sociales (ruta interna). */
+  imagen?: string;
+  tipo?: 'website' | 'article';
+  noindex?: boolean;
+  esquemas?: object[];
+  migas?: { nombre: string; ruta: string }[];
+  /** Página sin cabecera ni pie (p. ej. /enlaces/). */
+  desnuda?: boolean;
+  publicado?: Date;
+  modificado?: Date;
+}
+
+const {
+  titulo,
+  descripcion,
+  imagen = '/og/inicio.png',
+  tipo = 'website',
+  noindex = false,
+  esquemas = [],
+  migas,
+  desnuda = false,
+  publicado,
+  modificado,
+} = Astro.props;
+
+// En la demo (github.io) no queremos que Google la indexe y compita con la web
+// actual. Al pasar al dominio definitivo se pone PUBLIC_NOINDEX=false.
+const demo = import.meta.env.PUBLIC_NOINDEX === 'true';
+const robots = noindex || demo ? 'noindex, nofollow' : 'index, follow, max-image-preview:large';
+const canonica = new URL(Astro.url.pathname, Astro.site).href;
+const imagenAbs = urlAbsoluta(imagen);
+
+const todosEsquemas = [esquemaNegocio(), esquemaWeb(), ...(migas ? [esquemaMigas(migas)] : []), ...esquemas];
+---
+
+<!doctype html>
+<html lang="es-ES">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{titulo}</title>
+    <meta name="description" content={descripcion} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonica} />
+
+    <meta property="og:type" content={tipo} />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:site_name" content={negocio.nombre} />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={canonica} />
+    <meta property="og:image" content={imagenAbs} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={titulo} />
+    {publicado && <meta property="article:published_time" content={publicado.toISOString()} />}
+    {modificado && <meta property="article:modified_time" content={modificado.toISOString()} />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="geo.region" content="ES-MD" />
+    <meta name="geo.placename" content={`${negocio.direccion.barrio}, ${negocio.direccion.ciudad}`} />
+    <meta name="geo.position" content={`${negocio.geo.lat};${negocio.geo.lng}`} />
+    <meta name="ICBM" content={`${negocio.geo.lat}, ${negocio.geo.lng}`} />
+
+    <meta name="theme-color" content="#f8f4ee" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={url('/favicon-32.png')} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />
+    <link rel="manifest" href={url('/manifest.webmanifest')} />
+    <link rel="sitemap" href={url('/sitemap.xml')} />
+
+    <link rel="preload" href={fuenteNormal} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fuenteNegrita} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fuenteMono} as="font" type="font/woff2" crossorigin />
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      try {
+        var t = localStorage.getItem('siente-texto');
+        if (t && t !== 'normal') document.documentElement.dataset.texto = t;
+      } catch (e) {}
+    </script>
+
+    {todosEsquemas.map((e) => <script type="application/ld+json" set:html={JSON.stringify(e)} />)}
+    <script id="horario-datos" type="application/json" set:html={horarioParaCliente()} />
+    <slot name="cabeza" />
+  </head>
+  <body class:list={{ desnuda }}>
+    <a class="saltar" href="#contenido">Saltar al contenido</a>
+    {!desnuda && <Cabecera />}
+    <main id="contenido">
+      <slot />
+    </main>
+    {
+      !desnuda && (
+        <>
+          <Pie />
+          <AccionesMovil />
+        </>
+      )
+    }
+    <script>
+      import '../scripts/sitio.ts';
+    </script>
+  </body>
+</html>

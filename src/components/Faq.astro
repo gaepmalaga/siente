@@ -1,0 +1,65 @@
+---
+// Preguntas frecuentes en acordeón nativo (<details>): accesible y sin JS.
+import Icono from './Icono.astro';
+
+interface Props {
+  preguntas: { q: string; a: string }[];
+  titulo?: string;
+  antetitulo?: string;
+}
+const { preguntas, titulo = 'Preguntas frecuentes', antetitulo = 'Resolvemos tus dudas' } = Astro.props;
+---
+
+<div class="faq">
+  <div class="faq-cab">
+    <span class="antetitulo">{antetitulo}</span>
+    <h2 class="titulo-seccion">{titulo}</h2>
+  </div>
+  <div class="faq-lista">
+    {
+      preguntas.map((p, i) => (
+        <details open={i === 0}>
+          <summary>
+            <span>{p.q}</span>
+            <span class="faq-signo" aria-hidden="true"><Icono nombre="Plus" /></span>
+          </summary>
+          <p>{p.a}</p>
+        </details>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .faq { display: grid; gap: 36px; }
+  .faq-cab { display: grid; gap: 16px; align-content: start; }
+  .faq-lista { border-top: 1.5px solid var(--tinta); }
+  details { border-bottom: 1px solid var(--linea-fuerte); }
+  summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 0;
+    font-size: var(--paso-1);
+    font-weight: 700;
+    line-height: 1.3;
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  .faq-signo {
+    display: grid; place-items: center;
+    width: 42px; height: 42px; flex: none;
+    border-radius: 50%;
+    border: 1.5px solid var(--linea-fuerte);
+    transition: transform 0.25s, background 0.2s;
+  }
+  .faq-signo :global(.icono) { width: 20px; height: 20px; }
+  details[open] .faq-signo { transform: rotate(45deg); background: var(--tinta); color: var(--papel); border-color: var(--tinta); }
+  details p { padding: 0 56px 24px 0; font-size: 1.12rem; color: var(--tinta-2); max-width: 70ch; }
+  @media (min-width: 960px) {
+    .faq { grid-template-columns: 1fr 1.6fr; gap: 64px; }
+    .faq-cab { position: sticky; top: 120px; }
+  }
+</style>

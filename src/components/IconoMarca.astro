@@ -1,0 +1,26 @@
+---
+// Logotipos de redes y servicios (Simple Icons, licencia CC0).
+import { siWhatsapp, siInstagram, siFacebook, siGoogle, siGooglemaps, siApple, siWaze } from 'simple-icons';
+
+const iconos = {
+  whatsapp: siWhatsapp,
+  instagram: siInstagram,
+  facebook: siFacebook,
+  google: siGoogle,
+  googlemaps: siGooglemaps,
+  apple: siApple,
+  waze: siWaze,
+};
+
+interface Props {
+  nombre: keyof typeof iconos;
+  class?: string;
+}
+
+const { nombre, class: clase = '' } = Astro.props;
+const icono = iconos[nombre];
+---
+
+<svg class={`icono ${clase}`} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+  <path d={icono.path}></path>
+</svg>

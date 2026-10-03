@@ -1,0 +1,95 @@
+---
+// Franja del Plan VEO. Desaparece sola cuando pasa la fecha de fin.
+import Icono from './Icono.astro';
+import { negocio, planVeoVigente, planVeoFin } from '../lib/negocio';
+import { url } from '../lib/url';
+
+const vigente = planVeoVigente();
+const diasAlCompilar = Math.max(0, Math.ceil((planVeoFin.getTime() - Date.now()) / 86_400_000));
+const fechaFin = planVeoFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Madrid' });
+---
+
+{
+  vigente && (
+    <section class="plan-veo" aria-labelledby="pv-titulo" data-fin={negocio.planVeo.fin}>
+      <div class="contenedor pv-rejilla">
+        <div class="pv-texto" data-aparecer>
+          <span class="etiqueta">Plan VEO · Ministerio de Sanidad</span>
+          <h2 id="pv-titulo">
+            Gafas o lentillas para menores de 16 años, con <span class="pv-cifra">hasta 100 €</span> de ayuda.
+          </h2>
+          <p>
+            Somos óptica adherida. Si tu hijo o hija tiene un problema de graduación, <strong>lo tramitamos nosotros en el momento</strong>: tú no rellenas nada. Si el producto cuesta menos de 100 €, no pagas nada.
+          </p>
+          <div class="pv-acciones">
+            <a class="boton" href={url('/pedir-cita/?servicio=plan-veo')}>
+              <Icono nombre="CalendarCheck" /> Pedir cita Plan VEO
+            </a>
+            <a class="enlace-flecha" href={url('/plan-veo/')}>
+              Requisitos y documentos <Icono nombre="ArrowRight" />
+            </a>
+          </div>
+        </div>
+        <div class="pv-cuenta" data-aparecer style="--retraso: 0.1s">
+          <span class="pv-cuenta-numero" data-pv-dias>{diasAlCompilar}</span>
+          <span class="pv-cuenta-texto">días para que termine el plan</span>
+          <span class="pv-cuenta-fecha">Hasta el {fechaFin}</span>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .plan-veo {
+    position: relative;
+    background: #f6d9d3;
+    background-image:
+      radial-gradient(60% 120% at 100% 0%, rgb(255 255 255 / 0.6), transparent 60%),
+      radial-gradient(40% 80% at 0% 100%, rgb(232 150 150 / 0.25), transparent 70%);
+    padding-block: clamp(56px, 7vw, 96px);
+  }
+  .pv-rejilla { display: grid; gap: 36px; align-items: center; }
+  .pv-texto { display: grid; gap: 20px; justify-items: start; }
+  .pv-texto h2 { font-size: var(--paso-3); max-width: 22ch; }
+  .pv-texto p { max-width: 54ch; font-size: 1.15rem; color: var(--tinta-2); }
+  .pv-cifra { white-space: nowrap; background: linear-gradient(180deg, transparent 60%, rgb(255 255 255 / 0.85) 60%); }
+  .pv-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+  .pv-cuenta {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: 34px 28px;
+    border-radius: var(--radio-l);
+    background: var(--tinta);
+    color: var(--papel);
+    text-align: center;
+    box-shadow: var(--sombra-2);
+  }
+  .pv-cuenta-numero {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: clamp(4rem, 3rem + 4vw, 6.5rem);
+    line-height: 1;
+    color: var(--luz);
+  }
+  .pv-cuenta-texto { font-weight: 700; font-size: 1.2rem; }
+  .pv-cuenta-fecha { color: rgb(248 244 238 / 0.7); }
+  @media (min-width: 900px) {
+    .pv-rejilla { grid-template-columns: 1.6fr 1fr; gap: 56px; }
+  }
+</style>
+
+<script>
+  // Recalcula los días restantes en el navegador (la web es estática).
+  document.querySelectorAll<HTMLElement>('[data-fin]').forEach((bloque) => {
+    const fin = new Date(`${bloque.dataset.fin}T23:59:59+01:00`).getTime();
+    const dias = Math.ceil((fin - Date.now()) / 86_400_000);
+    if (dias < 0) {
+      bloque.hidden = true;
+      return;
+    }
+    const n = bloque.querySelector('[data-pv-dias]');
+    if (n) n.textContent = String(dias);
+  });
+</script>

@@ -1,0 +1,70 @@
+{
+  "titulo": "Centro Óptico y Auditivo Siente",
+  "subtitulo": "Óptica y audífonos en Barajas · Avenida de Logroño, 112",
+  "enlaces": [
+    {
+      "texto": "Pedir cita por WhatsApp",
+      "detalle": "Te contestamos enseguida",
+      "tipo": "whatsapp",
+      "url": "",
+      "destacado": true,
+      "visible": true
+    },
+    {
+      "texto": "Revisión de la vista gratis",
+      "detalle": "Pide tu cita en un minuto",
+      "tipo": "cita",
+      "url": "",
+      "destacado": false,
+      "visible": true
+    },
+    {
+      "texto": "Plan VEO: gafas para menores de 16",
+      "detalle": "Hasta 100 € de ayuda. Lo tramitamos nosotros",
+      "tipo": "web",
+      "url": "/plan-veo/",
+      "destacado": false,
+      "visible": true
+    },
+    {
+      "texto": "Llamar al centro",
+      "detalle": "910 248 330",
+      "tipo": "llamar",
+      "url": "",
+      "destacado": false,
+      "visible": true
+    },
+    {
+      "texto": "Cómo llegar",
+      "detalle": "Avenida de Logroño, 112 · Barajas",
+      "tipo": "mapa",
+      "url": "",
+      "destacado": false,
+      "visible": true
+    },
+    {
+      "texto": "Audífonos y revisión auditiva",
+      "detalle": "Cabina insonorizada y seguimiento",
+      "tipo": "web",
+      "url": "/audifonos-barajas/",
+      "destacado": false,
+      "visible": true
+    },
+    {
+      "texto": "Déjanos tu reseña en Google",
+      "detalle": "Nos ayuda muchísimo",
+      "tipo": "resenas",
+      "url": "",
+      "destacado": false,
+      "visible": true
+    },
+    {
+      "texto": "Nuestra web",
+      "detalle": "Servicios, consejos y blog",
+      "tipo": "web",
+      "url": "/",
+      "destacado": false,
+      "visible": true
+    }
+  ]
+}

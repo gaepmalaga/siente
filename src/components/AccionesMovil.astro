@@ -1,0 +1,51 @@
+---
+// Barra fija inferior en móvil: lo que más se usa, siempre a un toque.
+import Icono from './Icono.astro';
+import IconoMarca from './IconoMarca.astro';
+import { telHref, waHref, WA_SALUDO } from '../lib/negocio';
+import { url } from '../lib/url';
+---
+
+<nav class="acciones-movil" aria-label="Contacto rápido">
+  <a href={telHref()}><Icono nombre="Phone" /><span>Llamar</span></a>
+  <a href={waHref(WA_SALUDO)} target="_blank" rel="noopener" class="wa"><IconoMarca nombre="whatsapp" /><span>WhatsApp</span></a>
+  <a href={url('/pedir-cita/')} class="cita"><Icono nombre="CalendarCheck" /><span>Pedir cita</span></a>
+</nav>
+
+<style>
+  .acciones-movil {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    background: rgb(248 244 238 / 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--linea);
+  }
+  .acciones-movil a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 58px;
+    border-radius: 16px;
+    background: var(--blanco);
+    box-shadow: inset 0 0 0 1.5px var(--linea);
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-decoration: none;
+  }
+  .acciones-movil :global(.icono) { width: 22px; height: 22px; }
+  .acciones-movil .wa { background: var(--wa); color: #fff; box-shadow: none; }
+  .acciones-movil .cita { background: var(--tinta); color: var(--papel); box-shadow: none; }
+  :global(body) { padding-bottom: calc(82px + env(safe-area-inset-bottom)); }
+  @media (min-width: 1080px) {
+    .acciones-movil { display: none; }
+    :global(body) { padding-bottom: 0; }
+  }
+</style>

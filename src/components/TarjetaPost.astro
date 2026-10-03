@@ -1,0 +1,48 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { url } from '../lib/url';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  destacado?: boolean;
+}
+const { post, destacado = false } = Astro.props;
+const { title, description, date, cover, coverAlt, category } = post.data;
+const CATEGORIA = { vista: 'Vista', oido: 'Oído', general: 'Consejos' } as const;
+const fecha = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<article class:list={['post', { destacado }]} data-categoria={category}>
+  <a href={url(`/blog/${post.id}/`)} class="post-enlace">
+    <div class="post-imagen">
+      {cover && <img src={url(cover)} alt={coverAlt ?? ''} loading="lazy" decoding="async" width="810" height="1080" />}
+      <span class="etiqueta roble post-cat">{CATEGORIA[category]}</span>
+    </div>
+    <div class="post-texto">
+      <time datetime={date.toISOString()} class="apagado">{fecha}</time>
+      <h3>{title}</h3>
+      {destacado && <p>{description}</p>}
+    </div>
+  </a>
+</article>
+
+<style>
+  .post-enlace { display: grid; gap: 16px; text-decoration: none; height: 100%; }
+  .post-imagen {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radio);
+    overflow: hidden;
+    background: var(--arena);
+  }
+  .post-imagen img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .post-enlace:hover img { transform: scale(1.04); }
+  .post-cat { position: absolute; left: 14px; top: 14px; }
+  .post-texto { display: grid; gap: 8px; }
+  .post-texto time { font-size: 0.95rem; }
+  .post-texto h3 { font-size: var(--paso-1); line-height: 1.2; letter-spacing: -0.015em; }
+  .post-enlace:hover h3 { text-decoration: underline; text-decoration-color: var(--roble); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+  .post-texto p { color: var(--tinta-2); }
+  .destacado .post-imagen { aspect-ratio: 16 / 10; }
+  .destacado h3 { font-size: var(--paso-2); }
+</style>

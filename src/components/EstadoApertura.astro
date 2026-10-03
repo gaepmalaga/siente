@@ -1,0 +1,47 @@
+---
+// «Abierto ahora · hasta las 20:00». Lo calcula el navegador con la hora de
+// Madrid; sin JavaScript se queda oculto y no molesta.
+interface Props {
+  class?: string;
+}
+const { class: clase = '' } = Astro.props;
+---
+
+<span class:list={['estado', clase]} data-estado hidden>
+  <span class="punto" aria-hidden="true"></span>
+  <span data-estado-texto>Consultando horario…</span>
+</span>
+
+<style>
+  .estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .estado[hidden] { display: none; }
+  .punto {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    flex: none;
+    border-radius: 50%;
+    background: #b3412c;
+  }
+  .estado[data-abierto='true'] .punto { background: #1f9d4c; }
+  @media (prefers-reduced-motion: no-preference) {
+    .estado[data-abierto='true'] .punto::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      border: 2px solid #1f9d4c;
+      animation: pulso 2s ease-out infinite;
+    }
+  }
+  @keyframes pulso {
+    from { transform: scale(0.5); opacity: 0.9; }
+    to { transform: scale(1.5); opacity: 0; }
+  }
+</style>

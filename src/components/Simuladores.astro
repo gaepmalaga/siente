@@ -1,0 +1,300 @@
+---
+// Dos demostraciones interactivas: cómo se ve sin las gafas adecuadas y por qué
+// con pérdida auditiva «se oye pero no se entiende». Funcionan con teclado y,
+// sin JavaScript, simplemente muestran el texto nítido.
+import Icono from './Icono.astro';
+import { url } from '../lib/url';
+
+// Consonantes agudas: las primeras que se pierden con la edad.
+const MUY_AGUDAS = /[sSzZfFxX]/;
+const AGUDAS = /[tTpPkKqQ]/;
+
+function trocear(frase: string) {
+  const letras = [...frase];
+  return letras.map((l, i) => {
+    const sig = (letras[i + 1] ?? '').toLowerCase();
+    let f = 0;
+    if (MUY_AGUDAS.test(l) || (/[cC]/.test(l) && /[eiéí]/.test(sig))) f = 1;
+    else if (AGUDAS.test(l) || /[cC]/.test(l) || (/[hH]/.test(l) && /[cC]/.test(letras[i - 1] ?? ''))) f = 2;
+    return { l, f };
+  });
+}
+
+const frases = [
+  '¿Quedamos el sábado a las seis para tomar café?',
+  'Abuela, ¿te has tomado ya las pastillas?',
+  'Los fideos están fríos, ¿se los pasas a Sofía?',
+];
+---
+
+<section class="simuladores seccion" aria-labelledby="sim-titulo">
+  <div class="contenedor">
+    <div class="cabecera-seccion centrada" data-aparecer>
+      <span class="antetitulo sin-raya">Compruébalo tú</span>
+      <h2 id="sim-titulo" class="titulo-seccion">Así se vive <em>sin ver ni oír bien</em></h2>
+      <p class="entradilla">
+        Mueve los controles. Muchas personas se acostumbran a ver borroso o a pedir que les repitan las cosas, y no saben
+        cuánto se están perdiendo.
+      </p>
+    </div>
+
+    <div class="sim-rejilla">
+      <!-- VISIÓN -->
+      <article class="sim tarjeta" data-sim-vista data-aparecer>
+        <header class="sim-cab">
+          <span class="sim-icono"><Icono nombre="Eye" /></span>
+          <div>
+            <h3>Tu vista</h3>
+            <p class="apagado">Arrastra para «ponerte las gafas».</p>
+          </div>
+        </header>
+
+        <div class="sim-pestanas" role="tablist" aria-label="Distancia">
+          <button type="button" role="tab" aria-selected="true" data-escena="cerca">De cerca</button>
+          <button type="button" role="tab" aria-selected="false" data-escena="lejos">De lejos</button>
+        </div>
+
+        <div class="sim-escenario" data-escenario>
+          <div class="escena escena-cerca" data-escena-panel="cerca">
+            <div class="movil" aria-hidden="true">
+              <div class="movil-cab"><span class="movil-avatar">M</span> Mamá</div>
+              <p class="burbuja">¿Has pedido ya cita para graduarte la vista? 😊</p>
+              <p class="burbuja yo">Esta semana sin falta. Es gratis, ¿no?</p>
+              <p class="burbuja">¡Sí! En Siente, en la Avenida de Logroño.</p>
+            </div>
+          </div>
+          <div class="escena escena-lejos" data-escena-panel="lejos" hidden>
+            <div class="cartel" aria-hidden="true">
+              <div class="cartel-metro"><span class="cartel-m">M</span><span>Barajas</span><span class="cartel-linea">8</span></div>
+              <div class="cartel-calle">Avenida de Logroño</div>
+              <div class="cartel-bus">
+                <span>Próximo autobús</span><strong>3 min</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <label class="sim-control">
+          <span class="sim-etiquetas"><span>Sin gafas</span><span>Con tus gafas</span></span>
+          <input type="range" min="0" max="100" value="12" data-nitidez aria-label="Nitidez de la visión" />
+        </label>
+        <a class="enlace-flecha" href={url('/optica-barajas/revision-de-la-vista/')}>
+          Revisa tu vista gratis <Icono nombre="ArrowRight" />
+        </a>
+      </article>
+
+      <!-- AUDICIÓN -->
+      <article class="sim tarjeta" data-sim-oido data-nivel="moderada" data-aparecer style="--retraso: 0.12s">
+        <header class="sim-cab">
+          <span class="sim-icono"><Icono nombre="Ear" /></span>
+          <div>
+            <h3>Tu oído</h3>
+            <p class="apagado">Así llega una frase con pérdida auditiva.</p>
+          </div>
+        </header>
+
+        <div class="sim-pestanas" role="radiogroup" aria-label="Nivel de audición">
+          <button type="button" role="radio" aria-checked="false" data-nivel-opcion="normal">Normal</button>
+          <button type="button" role="radio" aria-checked="false" data-nivel-opcion="leve">Pérdida leve</button>
+          <button type="button" role="radio" aria-checked="true" data-nivel-opcion="moderada">Moderada</button>
+        </div>
+
+        <div class="sim-escenario frase-escenario">
+          {
+            frases.map((frase, i) => (
+              <p class="frase" data-frase={i} hidden={i !== 0}>
+                <span class="sr-only">{frase}</span>
+                <span aria-hidden="true">
+                  {trocear(frase).map(({ l, f }) => (f ? <span data-f={f}>{l}</span> : l))}
+                </span>
+              </p>
+            ))
+          }
+          <button type="button" class="otra-frase" data-otra-frase>
+            <Icono nombre="RefreshCw" /> Otra frase
+          </button>
+        </div>
+
+        <p class="sim-nota">
+          Las consonantes agudas —<strong>s, f, z, t, p</strong>— son las primeras que se pierden. Por eso se oye, pero <strong>no se entiende</strong>.
+        </p>
+        <a class="enlace-flecha" href={url('/audifonos-barajas/revision-auditiva/')}>
+          Haz tu revisión auditiva <Icono nombre="ArrowRight" />
+        </a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .simuladores { background: var(--papel-2); }
+  .sim-rejilla { display: grid; gap: 24px; }
+  @media (min-width: 960px) { .sim-rejilla { grid-template-columns: 1fr 1fr; gap: 32px; } }
+
+  .sim {
+    display: grid;
+    gap: 22px;
+    align-content: start;
+    padding: clamp(22px, 3vw, 36px);
+  }
+  .sim-cab { display: flex; gap: 16px; align-items: center; }
+  .sim-cab h3 { font-size: var(--paso-2); }
+  .sim-icono {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    flex: none;
+    border-radius: 18px;
+    background: var(--tinta);
+    color: var(--luz);
+  }
+  .sim-icono :global(.icono) { width: 28px; height: 28px; }
+
+  .sim-pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 5px;
+    border-radius: 999px;
+    background: var(--papel-2);
+    justify-self: start;
+  }
+  .sim-pestanas button {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .sim-pestanas [aria-selected='true'],
+  .sim-pestanas [aria-checked='true'] { background: var(--tinta); color: var(--papel); }
+
+  .sim-escenario {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 300px;
+    padding: 28px 18px;
+    border-radius: var(--radio);
+    background:
+      radial-gradient(90% 70% at 50% 0%, rgb(255 208 140 / 0.35), transparent 70%),
+      var(--papel);
+    overflow: hidden;
+  }
+  .escena { width: 100%; display: grid; place-items: center; filter: blur(var(--desenfoque, 0px)); transition: filter 0.12s linear; }
+  .escena[hidden] { display: none; }
+
+  .movil {
+    width: min(100%, 300px);
+    padding: 16px;
+    border-radius: 30px;
+    background: #fff;
+    box-shadow: 0 0 0 8px var(--tinta), var(--sombra-2);
+    display: grid;
+    gap: 10px;
+    font-size: 1rem;
+  }
+  .movil-cab { display: flex; align-items: center; gap: 10px; font-weight: 800; padding-bottom: 8px; border-bottom: 1px solid var(--linea); }
+  .movil-avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--roble-claro); }
+  .burbuja { justify-self: start; max-width: 86%; padding: 9px 13px; border-radius: 16px 16px 16px 4px; background: var(--papel-2); line-height: 1.35; }
+  .burbuja.yo { justify-self: end; border-radius: 16px 16px 4px 16px; background: #d9fbe0; }
+
+  .cartel { display: grid; gap: 12px; width: min(100%, 340px); }
+  .cartel-metro {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-radius: 10px;
+    background: #fff; box-shadow: var(--sombra-1);
+    font-size: 1.6rem; font-weight: 800;
+  }
+  .cartel-m { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: #c8102e; color: #fff; font-size: 1.4rem; }
+  .cartel-linea { margin-left: auto; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #e66a9b; color: #fff; font-size: 1.3rem; }
+  .cartel-calle { padding: 12px 16px; border-radius: 8px; background: #234d8c; color: #fff; font-weight: 800; font-size: 1.25rem; text-align: center; border: 3px solid #fff; box-shadow: 0 0 0 2px #234d8c; }
+  .cartel-bus { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-radius: 8px; background: #111; color: #ffb000; font-family: var(--mono); font-size: 1.1rem; }
+  .cartel-bus strong { font-size: 1.5rem; }
+
+  .sim-control { display: grid; gap: 8px; }
+  .sim-etiquetas { display: flex; justify-content: space-between; font-weight: 700; font-size: 0.98rem; color: var(--apagado); }
+  .sim-control input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .sim-control input::-webkit-slider-runnable-track { height: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--arena), var(--roble)); }
+  .sim-control input::-moz-range-track { height: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--arena), var(--roble)); }
+  .sim-control input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 34px; height: 34px; margin-top: -12px;
+    border-radius: 50%; background: var(--tinta);
+    border: 4px solid #fff; box-shadow: var(--sombra-1);
+  }
+  .sim-control input::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: var(--tinta); border: 4px solid #fff; }
+
+  .frase-escenario { gap: 18px; }
+  .frase {
+    max-width: 22ch;
+    font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    text-align: center;
+  }
+  .frase[hidden] { display: none; }
+  .frase [data-f] { transition: opacity 0.35s, filter 0.35s, color 0.35s; }
+  [data-nivel='leve'] .frase [data-f='1'] { opacity: 0.18; filter: blur(2px); }
+  [data-nivel='moderada'] .frase [data-f='1'] { opacity: 0.06; filter: blur(3px); }
+  [data-nivel='moderada'] .frase [data-f='2'] { opacity: 0.22; filter: blur(2px); }
+  .otra-frase {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 44px; padding: 0 16px;
+    border: 1.5px solid var(--linea-fuerte); border-radius: 999px;
+    background: #fff; font-weight: 700; cursor: pointer;
+  }
+  .otra-frase :global(.icono) { width: 18px; height: 18px; }
+  .sim-nota { color: var(--tinta-2); }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-sim-vista]').forEach((sim) => {
+    const rango = sim.querySelector<HTMLInputElement>('[data-nitidez]')!;
+    const escenario = sim.querySelector<HTMLElement>('[data-escenario]')!;
+    const aplicar = () => {
+      const borroso = ((100 - Number(rango.value)) / 100) * 7;
+      escenario.style.setProperty('--desenfoque', `${borroso.toFixed(2)}px`);
+    };
+    rango.addEventListener('input', aplicar);
+    aplicar();
+
+    const pestanas = sim.querySelectorAll<HTMLButtonElement>('[data-escena]');
+    pestanas.forEach((p) =>
+      p.addEventListener('click', () => {
+        pestanas.forEach((o) => o.setAttribute('aria-selected', String(o === p)));
+        sim.querySelectorAll<HTMLElement>('[data-escena-panel]').forEach((panel) => {
+          panel.hidden = panel.dataset.escenaPanel !== p.dataset.escena;
+        });
+      }),
+    );
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-sim-oido]').forEach((sim) => {
+    const opciones = sim.querySelectorAll<HTMLButtonElement>('[data-nivel-opcion]');
+    opciones.forEach((o) =>
+      o.addEventListener('click', () => {
+        sim.dataset.nivel = o.dataset.nivelOpcion;
+        opciones.forEach((x) => x.setAttribute('aria-checked', String(x === o)));
+      }),
+    );
+    const frases = [...sim.querySelectorAll<HTMLElement>('[data-frase]')];
+    let actual = 0;
+    sim.querySelector('[data-otra-frase]')?.addEventListener('click', () => {
+      frases[actual].hidden = true;
+      actual = (actual + 1) % frases.length;
+      frases[actual].hidden = false;
+    });
+  });
+</script>

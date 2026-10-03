@@ -1,0 +1,81 @@
+---
+// El rótulo de madera retroiluminado del mostrador de Siente, sobre la pared de
+// listones de roble. Todo en CSS/SVG: pesa menos que una foto y se ve nítido.
+import LogoMarca from './LogoMarca.astro';
+
+interface Props {
+  class?: string;
+}
+const { class: clase = '' } = Astro.props;
+---
+
+<div class:list={['rotulo madera', clase]} role="img" aria-label="Rótulo luminoso de Siente sobre la pared de listones de madera del centro">
+  <div class="rotulo-luz">
+    <LogoMarca class="rotulo-gafas" animado />
+    <span class="rotulo-nombre">SIENTE</span>
+    <span class="rotulo-repisa"></span>
+  </div>
+  <slot />
+</div>
+
+<style>
+  .rotulo {
+    display: grid;
+    place-items: center;
+    min-height: 420px;
+    border-radius: var(--radio-l);
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08), var(--sombra-2);
+  }
+  .rotulo::before {
+    /* viñeta: los bordes más oscuros, como la foto del local de noche */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 90% at 50% 40%, transparent 45%, rgb(30 16 6 / 0.45));
+    pointer-events: none;
+  }
+  .rotulo-luz {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    width: min(78%, 460px);
+    color: #f6e2c0;
+  }
+  .rotulo-luz :global(.rotulo-gafas) {
+    width: 100%;
+    filter: drop-shadow(0 0 5px rgb(255 222 165 / 0.95)) drop-shadow(0 0 22px rgb(255 196 120 / 0.65))
+      drop-shadow(0 0 60px rgb(255 170 90 / 0.4));
+  }
+  .rotulo-nombre {
+    margin-top: 6%;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: clamp(3rem, 2rem + 4.2vw, 5.4rem);
+    line-height: 1;
+    letter-spacing: 0.05em;
+    text-shadow:
+      0 0 5px rgb(255 222 165 / 0.95),
+      0 0 22px rgb(255 196 120 / 0.65),
+      0 0 60px rgb(255 170 90 / 0.45);
+  }
+  .rotulo-repisa {
+    width: 72%;
+    height: 9px;
+    margin-top: 10px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #e9cfa2, #b98652);
+    box-shadow: 0 10px 18px -6px rgb(40 20 6 / 0.6), 0 0 26px rgb(255 190 110 / 0.35);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rotulo-luz { animation: encender 1.6s ease-out both; }
+  }
+  @keyframes encender {
+    0% { opacity: 0.12; filter: saturate(0.3); }
+    18% { opacity: 0.9; }
+    24% { opacity: 0.3; }
+    34% { opacity: 1; }
+    40% { opacity: 0.55; }
+    100% { opacity: 1; filter: none; }
+  }
+</style>

@@ -1,0 +1,67 @@
+# Compila la web con Astro y la publica en GitHub Pages en cada push a main.
+#
+# Cada cambio hecho desde el panel /admin es un commit a main, así que la web
+# se republica sola en uno o dos minutos.
+#
+# Variables del repositorio (Settings → Secrets and variables → Actions →
+# Variables) para pasar de la demo al dominio definitivo sin tocar código:
+#   SITE_URL        https://gaepmalaga.github.io   →  https://www.sienteyve.es
+#   BASE_PATH       /siente                        →  /
+#   PUBLIC_NOINDEX  true (demo, Google no la indexa) → false
+name: Publicar en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  compilar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar la web
+        run: npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL || 'https://gaepmalaga.github.io' }}
+          BASE_PATH: ${{ vars.BASE_PATH || '/siente' }}
+          PUBLIC_NOINDEX: ${{ vars.PUBLIC_NOINDEX || 'true' }}
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      - name: Empaquetar el sitio
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  publicar:
+    needs: compilar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - name: Desplegar
+        id: despliegue
+        uses: actions/deploy-pages@v4

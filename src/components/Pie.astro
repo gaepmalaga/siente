@@ -1,0 +1,156 @@
+---
+import Logo from './Logo.astro';
+import Icono from './Icono.astro';
+import IconoMarca from './IconoMarca.astro';
+import { getCollection } from 'astro:content';
+import {
+  negocio,
+  telHref,
+  waHref,
+  WA_SALUDO,
+  horarioAgrupado,
+  direccionCompleta,
+  mapas,
+  planVeoVigente,
+} from '../lib/negocio';
+import { url } from '../lib/url';
+
+const servicios = (await getCollection('servicios')).sort((a, b) => a.data.order - b.data.order);
+const vista = servicios.filter((s) => s.data.area === 'vista');
+const oido = servicios.filter((s) => s.data.area === 'oido');
+const anio = new Date().getFullYear();
+---
+
+<footer class="pie">
+  <div class="madera pie-franja" aria-hidden="true"></div>
+  <div class="contenedor pie-rejilla">
+    <div class="pie-marca">
+      <Logo claro />
+      <p class="pie-eslogan">{negocio.eslogan}.</p>
+      <address>
+        <a href={mapas.comoLlegar} target="_blank" rel="noopener">{direccionCompleta}</a><br />
+        <a href={telHref()}>{negocio.telefono}</a> · <a href={telHref(negocio.movil)}>{negocio.movil}</a><br />
+        <a href={`mailto:${negocio.email}`}>{negocio.email}</a>
+      </address>
+      <div class="pie-redes">
+        {negocio.redes.instagram && <a href={negocio.redes.instagram} target="_blank" rel="noopener" aria-label="Instagram"><IconoMarca nombre="instagram" /></a>}
+        {negocio.redes.facebook && <a href={negocio.redes.facebook} target="_blank" rel="noopener" aria-label="Facebook"><IconoMarca nombre="facebook" /></a>}
+        <a href={waHref(WA_SALUDO)} target="_blank" rel="noopener" aria-label="WhatsApp"><IconoMarca nombre="whatsapp" /></a>
+        <a href={mapas.google} target="_blank" rel="noopener" aria-label="Google Maps"><IconoMarca nombre="googlemaps" /></a>
+      </div>
+    </div>
+
+    <div class="pie-col">
+      <h2>Óptica</h2>
+      <ul role="list">
+        <li><a href={url('/optica-barajas/')}>Óptica en Barajas</a></li>
+        {vista.map((s) => <li><a href={url(`/optica-barajas/${s.id}/`)}>{s.data.title}</a></li>)}
+        {planVeoVigente() && <li><a href={url('/plan-veo/')}>Plan VEO</a></li>}
+      </ul>
+    </div>
+
+    <div class="pie-col">
+      <h2>Audición</h2>
+      <ul role="list">
+        <li><a href={url('/audifonos-barajas/')}>Centro auditivo</a></li>
+        {oido.map((s) => <li><a href={url(`/audifonos-barajas/${s.id}/`)}>{s.data.title}</a></li>)}
+      </ul>
+      <h2 class="pie-h2-sep">El centro</h2>
+      <ul role="list">
+        <li><a href={url('/sobre-nosotros/')}>Sobre nosotros</a></li>
+        <li><a href={url('/blog/')}>Blog</a></li>
+        <li><a href={url('/contacto/')}>Contacto y cómo llegar</a></li>
+      </ul>
+    </div>
+
+    <div class="pie-col">
+      <h2>Horario</h2>
+      <dl class="pie-horario">
+        {
+          horarioAgrupado().map((g) => (
+            <div>
+              <dt>{g.dias}</dt>
+              <dd>{g.tramos.length ? g.tramos.map((t) => <span>{t}</span>) : 'Cerrado'}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <a class="boton claro pequeno" href={url('/pedir-cita/')}><Icono nombre="CalendarCheck" /> Pedir cita</a>
+    </div>
+  </div>
+
+  <div class="contenedor pie-legal">
+    <p>© {anio} {negocio.razonSocial} · NIF {negocio.nif}</p>
+    <ul role="list">
+      <li><a href={url('/aviso-legal/')}>Aviso legal</a></li>
+      <li><a href={url('/politica-de-privacidad/')}>Privacidad</a></li>
+      <li><a href={url('/politica-de-cookies/')}>Cookies</a></li>
+      <li><a href={url('/accesibilidad/')}>Accesibilidad</a></li>
+      <li><a href={url('/mapa-web/')}>Mapa web</a></li>
+    </ul>
+  </div>
+</footer>
+
+<style>
+  .pie {
+    background: var(--tinta);
+    color: rgb(248 244 238 / 0.82);
+    font-size: 1rem;
+  }
+  .pie-franja { height: 14px; }
+  .pie a { color: var(--papel); text-decoration: none; }
+  .pie a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .pie-rejilla {
+    display: grid;
+    gap: 44px;
+    padding-block: 72px 48px;
+  }
+  .pie-marca { display: grid; gap: 18px; align-content: start; }
+  .pie-eslogan {
+    font-family: var(--mono);
+    font-size: 1.15rem;
+    color: var(--roble-claro);
+  }
+  .pie address { font-style: normal; line-height: 1.8; }
+  .pie-redes { display: flex; gap: 10px; }
+  .pie-redes a {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1.5px solid rgb(248 244 238 / 0.25);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .pie-redes a:hover { background: var(--papel); color: var(--tinta); border-color: var(--papel); }
+  .pie-redes :global(.icono) { width: 20px; height: 20px; }
+  .pie h2 {
+    margin-bottom: 14px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--roble-claro);
+  }
+  .pie .pie-h2-sep { margin-top: 28px; }
+  .pie-col ul { display: grid; gap: 8px; }
+  .pie-horario { display: grid; gap: 10px; margin: 0 0 22px; }
+  .pie-horario dt { font-weight: 700; color: var(--papel); }
+  .pie-horario dd { margin: 0; display: grid; }
+  .pie-legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px 24px;
+    padding-block: 22px 28px;
+    border-top: 1px solid rgb(248 244 238 / 0.14);
+    font-size: 0.92rem;
+  }
+  .pie-legal ul { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  @media (min-width: 720px) {
+    .pie-rejilla { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1080px) {
+    .pie-rejilla { grid-template-columns: 1.4fr 1fr 1fr 1fr; }
+  }
+</style>

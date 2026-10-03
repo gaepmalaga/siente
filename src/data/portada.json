@@ -1,0 +1,28 @@
+{
+  "antetitulo": "Óptica y centro auditivo en Barajas",
+  "titulo": "Ver bien. Oír mejor.",
+  "subtitulo": "Revisamos tu vista y tu audición con calma, te explicamos las opciones con claridad y te acompañamos después. En la Avenida de Logroño, 112.",
+  "promos": [
+    {
+      "etiqueta": "Gratis",
+      "titulo": "Revisión de la vista",
+      "texto": "Graduación completa y consejo honesto, sin compromiso.",
+      "enlace": "/optica-barajas/revision-de-la-vista/",
+      "visible": true
+    },
+    {
+      "etiqueta": "Plan VEO",
+      "titulo": "Gafas para menores de 16",
+      "texto": "Hasta 100 € al año de ayuda pública. Lo tramitamos nosotros.",
+      "enlace": "/plan-veo/",
+      "visible": true
+    },
+    {
+      "etiqueta": "Audición",
+      "titulo": "Revisión auditiva en cabina",
+      "texto": "Audiometría en cabina insonorizada y adaptación personalizada.",
+      "enlace": "/audifonos-barajas/revision-auditiva/",
+      "visible": true
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+---
+import { horarioPorDia, DIAS, NOMBRE_DIA, formatoTramo, type Dia } from '../lib/negocio';
+
+// Agrupa días seguidos con el mismo horario y recuerda qué días abarca cada fila
+// para poder resaltar «hoy» desde el navegador.
+const porDia = horarioPorDia();
+const filas: { dias: Dia[]; tramos: string[] }[] = [];
+for (const d of DIAS) {
+  const tramos = porDia[d].map(formatoTramo);
+  const ultima = filas.at(-1);
+  if (ultima && ultima.tramos.join() === tramos.join()) ultima.dias.push(d);
+  else filas.push({ dias: [d], tramos });
+}
+const nombre = (dias: Dia[]) =>
+  dias.length === 1
+    ? NOMBRE_DIA[dias[0]]
+    : dias.length === 2
+      ? `${NOMBRE_DIA[dias[0]]} y ${NOMBRE_DIA[dias[1]].toLowerCase()}`
+      : `${NOMBRE_DIA[dias[0]]} a ${NOMBRE_DIA[dias.at(-1)!].toLowerCase()}`;
+---
+
+<table class="horario">
+  <caption class="sr-only">Horario de apertura</caption>
+  <tbody>
+    {
+      filas.map((f) => (
+        <tr data-dias={f.dias.join(',')}>
+          <th scope="row">{nombre(f.dias)}</th>
+          <td>{f.tramos.length ? f.tramos.map((t) => <span>{t}</span>) : <span class="cerrado">Cerrado</span>}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>
+
+<style>
+  .horario { width: 100%; border-collapse: collapse; font-size: 1.08rem; }
+  .horario th, .horario td { padding: 14px 0; border-bottom: 1px solid var(--linea); vertical-align: top; }
+  .horario th { text-align: left; font-weight: 700; padding-right: 16px; }
+  .horario td { text-align: right; }
+  .horario td span { display: block; font-variant-numeric: tabular-nums; }
+  .horario .cerrado { color: var(--apagado); }
+  .horario tr:global(.hoy) th::after {
+    content: 'Hoy';
+    margin-left: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--tinta);
+    color: var(--papel);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    vertical-align: 2px;
+  }
+</style>

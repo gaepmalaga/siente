@@ -1,0 +1,58 @@
+---
+// Las gafas con ondas de sonido del logotipo de Siente, redibujadas en SVG
+// para que se vean nítidas a cualquier tamaño (el original era un PNG).
+interface Props {
+  class?: string;
+  /** Las ondas laten como si emitieran sonido. */
+  animado?: boolean;
+  /** Muestra u oculta las ondas laterales. */
+  ondas?: boolean;
+  titulo?: string;
+}
+
+const { class: clase = '', animado = false, ondas = true, titulo } = Astro.props;
+---
+
+<svg
+  class:list={['logo-marca', clase, { animado }]}
+  viewBox={ondas ? '-12 -2 1624 486' : '230 40 1140 450'}
+  xmlns="http://www.w3.org/2000/svg"
+  role={titulo ? 'img' : undefined}
+  aria-label={titulo}
+  aria-hidden={titulo ? undefined : 'true'}
+>
+  <g fill="none" stroke="currentColor" stroke-linecap="round">
+    <g class="montura">
+      <circle cx="514" cy="265" r="189" stroke-width="48"></circle>
+      <circle cx="1086" cy="265" r="189" stroke-width="48"></circle>
+      <path d="M690 196 Q800 100 910 196" stroke-width="46"></path>
+      <path d="M278 172 H336" stroke-width="56"></path>
+      <path d="M1322 172 H1264" stroke-width="56"></path>
+    </g>
+    {
+      ondas && (
+        <g class="ondas" stroke-width="22">
+          <path class="onda o1" d="M203 98 Q133 184 203 270" />
+          <path class="onda o2" d="M145 43 Q31 184 145 325" />
+          <path class="onda o3" d="M78 10 Q-58 184 78 357" />
+          <path class="onda o1" d="M1397 98 Q1467 184 1397 270" />
+          <path class="onda o2" d="M1455 43 Q1569 184 1455 325" />
+          <path class="onda o3" d="M1522 10 Q1658 184 1522 357" />
+        </g>
+      )
+    }
+  </g>
+</svg>
+
+<style>
+  .logo-marca { overflow: visible; }
+  @media (prefers-reduced-motion: no-preference) {
+    .animado .onda { animation: latido 2.6s ease-in-out infinite; }
+    .animado .o2 { animation-delay: 0.22s; }
+    .animado .o3 { animation-delay: 0.44s; }
+  }
+  @keyframes latido {
+    0%, 100% { opacity: 1; }
+    45% { opacity: 0.18; }
+  }
+</style>

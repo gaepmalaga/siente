@@ -1,0 +1,98 @@
+---
+// Reseñas reales que el centro añade desde /admin. Si todavía no hay ninguna,
+// se muestra una invitación a dejar reseña en Google (nunca reseñas inventadas).
+import Icono from './Icono.astro';
+import IconoMarca from './IconoMarca.astro';
+import { resenas, negocio, mapas } from '../lib/negocio';
+
+const lista = resenas.resenas;
+const enlaceResenas = negocio.redes.resenasGoogle || mapas.google;
+---
+
+<section class="resenas seccion" aria-labelledby="resenas-titulo">
+  <div class="contenedor">
+    {
+      lista.length > 0 ? (
+        <>
+          <div class="cabecera-seccion" data-aparecer>
+            <span class="antetitulo">Lo que dicen de nosotros</span>
+            <h2 id="resenas-titulo" class="titulo-seccion">
+              Vecinos de Barajas que ya <em>ven y oyen mejor</em>
+            </h2>
+            {resenas.notaMedia && (
+              <p class="nota">
+                <span class="nota-numero">{resenas.notaMedia.toFixed(1).replace('.', ',')}</span>
+                <span class="estrellas" aria-label={`${resenas.notaMedia} de 5 estrellas`}>★★★★★</span>
+                {resenas.totalResenas && <span class="apagado">{resenas.totalResenas} reseñas en Google</span>}
+              </p>
+            )}
+          </div>
+          <ul role="list" class="resenas-lista">
+            {lista.map((r, i) => (
+              <li class="resena tarjeta" data-aparecer style={`--retraso: ${(i % 3) * 0.08}s`}>
+                <span class="estrellas" aria-label={`${r.estrellas} de 5 estrellas`}>
+                  {'★'.repeat(r.estrellas)}
+                  <span class="vacias">{'★'.repeat(5 - r.estrellas)}</span>
+                </span>
+                <blockquote>{r.texto}</blockquote>
+                <p class="resena-autor">
+                  <strong>{r.autor}</strong>
+                  <span class="apagado">{[r.fuente, r.fecha].filter(Boolean).join(' · ')}</span>
+                </p>
+              </li>
+            ))}
+          </ul>
+          <a class="enlace-flecha" href={enlaceResenas} target="_blank" rel="noopener">
+            Ver todas las reseñas en Google <Icono nombre="ArrowUpRight" />
+          </a>
+        </>
+      ) : (
+        <div class="invitacion madera" data-aparecer>
+          <div class="invitacion-dentro">
+            <IconoMarca nombre="google" class="invitacion-g" />
+            <h2 id="resenas-titulo">¿Ya nos conoces?</h2>
+            <p>Tu opinión ayuda a otros vecinos de Barajas a encontrarnos. Te lleva un minuto.</p>
+            <a class="boton claro" href={enlaceResenas} target="_blank" rel="noopener">
+              Déjanos tu reseña en Google <Icono nombre="ArrowUpRight" />
+            </a>
+          </div>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .nota { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 1.1rem; }
+  .nota-numero { font-family: var(--mono); font-weight: 700; font-size: 2.4rem; line-height: 1; }
+  .estrellas { color: #e1a03c; letter-spacing: 2px; font-size: 1.2rem; }
+  .estrellas .vacias { color: var(--arena); }
+  .resenas-lista { display: grid; gap: 20px; margin-bottom: 32px; }
+  @media (min-width: 800px) { .resenas-lista { grid-template-columns: repeat(3, 1fr); } }
+  .resena { display: grid; gap: 14px; align-content: start; padding: 28px; }
+  .resena blockquote { margin: 0; font-size: 1.12rem; line-height: 1.6; }
+  .resena-autor { display: grid; }
+
+  .invitacion {
+    border-radius: var(--radio-l);
+    overflow: hidden;
+    padding: clamp(40px, 7vw, 88px) 24px;
+    text-align: center;
+  }
+  .invitacion-dentro {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    max-width: 560px;
+    margin-inline: auto;
+    padding: clamp(28px, 4vw, 44px);
+    border-radius: var(--radio);
+    background: rgb(248 244 238 / 0.94);
+    box-shadow: var(--sombra-2);
+  }
+  .invitacion-dentro :global(.invitacion-g) { width: 40px; height: 40px; }
+  .invitacion h2 { font-size: var(--paso-3); }
+  .invitacion p { font-size: 1.15rem; color: var(--tinta-2); }
+  .invitacion .boton.claro { --fondo: var(--tinta); --texto: var(--papel); border-color: var(--tinta); }
+</style>

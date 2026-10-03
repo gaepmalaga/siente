@@ -1,0 +1,296 @@
+---
+import Logo from './Logo.astro';
+import Icono from './Icono.astro';
+import IconoMarca from './IconoMarca.astro';
+import EstadoApertura from './EstadoApertura.astro';
+import { negocio, telHref, waHref, WA_SALUDO, planVeoVigente, horarioAgrupado } from '../lib/negocio';
+import { url } from '../lib/url';
+
+const ruta = Astro.url.pathname;
+const navegacion = [
+  { texto: 'Óptica', ruta: '/optica-barajas/' },
+  { texto: 'Audífonos', ruta: '/audifonos-barajas/' },
+  ...(planVeoVigente() ? [{ texto: 'Plan VEO', ruta: '/plan-veo/' }] : []),
+  { texto: 'Blog', ruta: '/blog/' },
+  { texto: 'Nosotros', ruta: '/sobre-nosotros/' },
+  { texto: 'Contacto', ruta: '/contacto/' },
+];
+const activo = (r: string) => ruta.startsWith(url(r));
+const aviso = negocio.aviso;
+---
+
+{
+  aviso.activo && aviso.texto && (
+    <div class="aviso">
+      <div class="contenedor aviso-dentro">
+        <Icono nombre="Info" />
+        {aviso.enlace ? (
+          <a href={url(aviso.enlace)}>{aviso.texto}</a>
+        ) : (
+          <span>{aviso.texto}</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+<div class="barra-superior">
+  <div class="contenedor barra-dentro">
+    <EstadoApertura />
+    <div class="barra-derecha">
+      <a class="barra-tel" href={telHref()}><Icono nombre="Phone" /> {negocio.telefono}</a>
+      <div class="tamano" role="group" aria-label="Tamaño de la letra">
+        <span class="tamano-etiqueta">Tamaño de letra</span>
+        <button type="button" data-texto-opcion="normal" aria-pressed="true" aria-label="Letra normal">A</button>
+        <button type="button" data-texto-opcion="grande" aria-pressed="false" aria-label="Letra grande" class="t2">A</button>
+        <button type="button" data-texto-opcion="enorme" aria-pressed="false" aria-label="Letra muy grande" class="t3">A</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<header class="cabecera" data-cabecera>
+  <div class="contenedor cabecera-dentro">
+    <Logo />
+    <nav class="nav" aria-label="Principal">
+      <ul role="list">
+        {
+          navegacion.map((n) => (
+            <li>
+              <a href={url(n.ruta)} aria-current={activo(n.ruta) ? 'page' : undefined}>
+                {n.texto}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="cabecera-acciones">
+      <a class="boton pequeno cita-escritorio" href={url('/pedir-cita/')}>
+        <Icono nombre="CalendarCheck" /> Pedir cita
+      </a>
+      <button class="boton-menu" type="button" data-abrir-menu aria-haspopup="dialog" aria-controls="menu-movil">
+        <Icono nombre="Menu" />
+        <span>Menú</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<dialog id="menu-movil" class="menu-movil" aria-label="Menú">
+  <div class="menu-cuerpo">
+    <div class="menu-arriba">
+      <Logo />
+      <button class="boton-cerrar" type="button" data-cerrar-menu aria-label="Cerrar menú">
+        <Icono nombre="X" />
+      </button>
+    </div>
+    <nav aria-label="Menú móvil">
+      <ul role="list" class="menu-lista">
+        <li><a href={url('/')}>Inicio</a></li>
+        {
+          navegacion.map((n) => (
+            <li>
+              <a href={url(n.ruta)} aria-current={activo(n.ruta) ? 'page' : undefined}>
+                {n.texto}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="menu-acciones">
+      <a class="boton bloque" href={url('/pedir-cita/')}><Icono nombre="CalendarCheck" /> Pedir cita</a>
+      <a class="boton wa bloque" href={waHref(WA_SALUDO)} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> WhatsApp</a>
+      <a class="boton secundario bloque" href={telHref()}><Icono nombre="Phone" /> Llamar al {negocio.telefono}</a>
+    </div>
+    <div class="menu-horario">
+      <EstadoApertura />
+      <dl>
+        {
+          horarioAgrupado().map((g) => (
+            <div>
+              <dt>{g.dias}</dt>
+              <dd>{g.tramos.length ? g.tramos.join(' · ') : 'Cerrado'}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .aviso {
+    background: var(--tinta);
+    color: var(--papel);
+    font-weight: 700;
+    font-size: 0.98rem;
+  }
+  .aviso-dentro {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    padding-block: 8px;
+    text-align: center;
+  }
+  .aviso :global(.icono) { width: 20px; height: 20px; flex: none; color: var(--luz); }
+  .aviso a { text-underline-offset: 3px; }
+
+  .barra-superior {
+    background: var(--papel-2);
+    border-bottom: 1px solid var(--linea);
+    font-size: 0.92rem;
+  }
+  .barra-dentro {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 44px;
+  }
+  .barra-derecha { display: flex; align-items: center; gap: 22px; }
+  .barra-tel {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .barra-tel :global(.icono) { width: 16px; height: 16px; }
+  .tamano { display: flex; align-items: center; gap: 4px; }
+  .tamano-etiqueta { display: none; margin-right: 6px; color: var(--apagado); }
+  .tamano button {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    font-weight: 800;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .tamano button.t2 { font-size: 1.1rem; }
+  .tamano button.t3 { font-size: 1.32rem; }
+  .tamano button:hover { border-color: var(--linea-fuerte); }
+  .tamano button[aria-pressed='true'] { background: var(--tinta); color: var(--papel); }
+
+  .cabecera {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(248 244 238 / 0.88);
+    backdrop-filter: saturate(1.4) blur(14px);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .cabecera:global(.con-scroll) { border-color: var(--linea); box-shadow: 0 10px 30px -24px rgb(23 20 17 / 0.5); }
+  .cabecera-dentro {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 78px;
+  }
+  .nav { display: none; }
+  .nav ul { display: flex; gap: 4px; }
+  .nav a {
+    position: relative;
+    display: block;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .nav a:hover { background: var(--papel-2); }
+  .nav a[aria-current='page'] { background: var(--arena); }
+  .cabecera-acciones { display: flex; align-items: center; gap: 10px; }
+  .cita-escritorio { display: none; }
+  .boton-menu {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 16px;
+    border: 2px solid var(--tinta);
+    border-radius: 999px;
+    background: transparent;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .boton-menu :global(.icono) { width: 22px; height: 22px; }
+
+  @media (min-width: 720px) {
+    .barra-tel { display: inline-flex; }
+    .tamano-etiqueta { display: inline; }
+  }
+  @media (min-width: 1080px) {
+    .nav { display: block; }
+    .cita-escritorio { display: inline-flex; }
+    .boton-menu { display: none; }
+  }
+
+  /* Menú móvil a pantalla completa */
+  .menu-movil {
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--papel);
+    color: var(--tinta);
+  }
+  .menu-movil::backdrop { background: rgb(23 20 17 / 0.5); }
+  .menu-cuerpo {
+    display: grid;
+    gap: 28px;
+    width: min(100% - 32px, 560px);
+    margin-inline: auto;
+    padding-block: 14px 40px;
+  }
+  .menu-arriba { display: flex; align-items: center; justify-content: space-between; }
+  .boton-cerrar {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border: 2px solid var(--tinta);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+  }
+  .boton-cerrar :global(.icono) { width: 26px; height: 26px; }
+  .menu-lista { display: grid; }
+  .menu-lista a {
+    display: block;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--linea);
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+  .menu-lista a[aria-current='page'] { color: var(--roble-oscuro); }
+  .menu-acciones { display: grid; gap: 10px; }
+  .menu-horario {
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+    border-radius: var(--radio);
+    background: var(--papel-2);
+  }
+  .menu-horario dl { display: grid; gap: 6px; margin: 0; }
+  .menu-horario dl div { display: flex; justify-content: space-between; gap: 12px; }
+  .menu-horario dt { font-weight: 700; }
+  .menu-horario dd { margin: 0; text-align: right; }
+  :global(html.menu-abierto) { overflow: hidden; }
+</style>

@@ -1,0 +1,21 @@
+---
+// Iconos de Lucide incrustados como SVG en el HTML (cero JavaScript).
+import * as lucide from 'lucide-static';
+
+interface Props {
+  nombre: string;
+  class?: string;
+  etiqueta?: string;
+}
+
+const { nombre, class: clase = '', etiqueta } = Astro.props;
+const crudo = (lucide as unknown as Record<string, string>)[nombre];
+if (!crudo) throw new Error(`Icono desconocido: ${nombre}`);
+
+const accesibilidad = etiqueta ? `role="img" aria-label="${etiqueta}"` : 'aria-hidden="true" focusable="false"';
+const svg = crudo
+  .replace(/\s(width|height)="24"/g, '')
+  .replace(/class="[^"]*"/, `class="icono ${clase}" ${accesibilidad}`);
+---
+
+<Fragment set:html={svg} />

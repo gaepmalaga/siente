@@ -1,0 +1,520 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Rotulo from '../components/Rotulo.astro';
+import Icono from '../components/Icono.astro';
+import IconoMarca from '../components/IconoMarca.astro';
+import EstadoApertura from '../components/EstadoApertura.astro';
+import Simuladores from '../components/Simuladores.astro';
+import BandaPlanVeo from '../components/BandaPlanVeo.astro';
+import Resenas from '../components/Resenas.astro';
+import TarjetaPost from '../components/TarjetaPost.astro';
+import Faq from '../components/Faq.astro';
+import TablaHorario from '../components/TablaHorario.astro';
+import Mapa from '../components/Mapa.astro';
+import BandaCita from '../components/BandaCita.astro';
+import { negocio, portada, waHref, WA_SALUDO, telHref, horarioAgrupado, planVeoVigente } from '../lib/negocio';
+import { url } from '../lib/url';
+import { fotos } from '../lib/fotos';
+import { esquemaFaq } from '../lib/schema';
+
+const servicios = (await getCollection('servicios')).sort((a, b) => a.data.order - b.data.order);
+const vista = servicios.filter((s) => s.data.area === 'vista');
+const oido = servicios.filter((s) => s.data.area === 'oido');
+const posts = (await getCollection('blog', (p) => !p.data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+const promos = portada.promos.filter((p) => p.visible);
+const lineasTitulo = portada.titulo.split(/(?<=\.)\s+/);
+
+const horarioTexto = horarioAgrupado()
+  .filter((g) => g.tramos.length)
+  .map((g) => `${g.dias}: ${g.tramos.join(' y ')}`)
+  .join('. ');
+
+const preguntas = [
+  {
+    q: '¿La revisión de la vista es gratis?',
+    a: 'Sí. La revisión optométrica y la graduación son gratuitas y sin compromiso, para adultos y niños. Solo pagas si decides hacerte unas gafas o lentillas con nosotros.',
+  },
+  {
+    q: '¿Hacéis revisiones del oído y adaptáis audífonos?',
+    a: 'Sí. Hacemos audiometrías en cabina insonorizada, adaptamos audífonos de forma personalizada y nos encargamos del mantenimiento y los ajustes posteriores.',
+  },
+  ...(planVeoVigente()
+    ? [
+        {
+          q: '¿Estáis adheridos al Plan VEO?',
+          a: 'Sí. Si tu hijo o hija tiene 16 años o menos y necesita gafas o lentillas, la ayuda cubre hasta 100 € al año y la tramitamos nosotros en el momento.',
+        },
+      ]
+    : []),
+  {
+    q: '¿Necesito pedir cita?',
+    a: `Es lo más recomendable para dedicarte el tiempo necesario. Puedes pedirla por WhatsApp (${negocio.movil}), por teléfono (${negocio.telefono}) o desde la web en un minuto.`,
+  },
+  {
+    q: '¿Dónde estáis y cuál es vuestro horario?',
+    a: `Estamos en la ${negocio.direccion.calle}, en Barajas (Madrid), muy cerca del Metro Barajas (Línea 8). ${horarioTexto}.`,
+  },
+];
+---
+
+<Base
+  titulo="Óptica y Centro Auditivo en Barajas (Madrid) | Siente"
+  descripcion="Óptica y audífonos en Barajas: revisión de la vista gratis, gafas graduadas y progresivas, lentillas, audiometría en cabina y adaptación de audífonos. Plan VEO. Avenida de Logroño, 112."
+  esquemas={[esquemaFaq(preguntas)]}
+>
+  <!-- ═══ HERO ═══ -->
+  <section class="hero">
+    <div class="contenedor hero-rejilla">
+      <div class="hero-texto">
+        <h1>
+          <span class="antetitulo h1-ante">{portada.antetitulo}</span>
+          <span class="h1-grande">
+            {lineasTitulo.map((l, i) => <span class="h1-linea" style={`--i: ${i}`}>{l}</span>)}
+          </span>
+        </h1>
+        <p class="entradilla hero-entradilla">{portada.subtitulo}</p>
+        <div class="hero-acciones">
+          <a class="boton" href={url('/pedir-cita/')}><Icono nombre="CalendarCheck" /> Pedir cita</a>
+          <a class="boton wa" href={waHref(WA_SALUDO)} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> Escríbenos</a>
+        </div>
+        <ul role="list" class="hero-sellos">
+          <li><Icono nombre="CircleCheck" /> Revisión de la vista gratis</li>
+          <li><Icono nombre="CircleCheck" /> Audiometría en cabina</li>
+          <li><Icono nombre="CircleCheck" /> Óptica adherida al Plan VEO</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual">
+        <Rotulo class="hero-rotulo" />
+        <div class="chip chip-estado"><EstadoApertura /></div>
+        <a class="chip chip-tel" href={telHref()}>
+          <span class="chip-icono"><Icono nombre="Phone" /></span>
+          <span><small>Llámanos</small><strong>{negocio.telefono}</strong></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PROMOS ═══ -->
+  {
+    promos.length > 0 && (
+      <section class="promos" aria-label="Destacados">
+        <div class="contenedor">
+          <ul role="list" class="promos-lista">
+            {promos.map((p, i) => (
+              <li data-aparecer style={`--retraso: ${i * 0.08}s`}>
+                <a class="promo" href={url(p.enlace || '/pedir-cita/')}>
+                  {p.etiqueta && <span class="etiqueta">{p.etiqueta}</span>}
+                  <strong>{p.titulo}</strong>
+                  <span class="apagado">{p.texto}</span>
+                  <span class="promo-flecha" aria-hidden="true"><Icono nombre="ArrowUpRight" /></span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ═══ DOS SENTIDOS ═══ -->
+  <section class="sentidos seccion" aria-labelledby="sentidos-titulo">
+    <div class="contenedor">
+      <div class="cabecera-seccion" data-aparecer>
+        <span class="antetitulo">Un centro, dos especialidades</span>
+        <h2 id="sentidos-titulo" class="titulo-seccion">Dos sentidos. <em>Un mismo cuidado.</em></h2>
+        <p class="entradilla">
+          Vista y oído están más conectados de lo que parece: los dos cambian con los años y los dos se notan en cómo
+          trabajas, conduces y te relacionas. En Siente los cuidamos bajo el mismo techo.
+        </p>
+      </div>
+
+      <div class="sentidos-rejilla">
+        <article class="sentido" data-aparecer>
+          <div class="sentido-foto">
+            <Image src={fotos['gafas-owlet']} alt="Gafas graduadas de acetato en el expositor de madera de Siente" widths={[480, 800, 1200]} sizes="(min-width: 1000px) 600px, 100vw" />
+            <span class="sentido-num mono">01</span>
+          </div>
+          <div class="sentido-cuerpo">
+            <h3><Icono nombre="Eye" /> Óptica</h3>
+            <p>Revisión visual completa, gafas con personalidad, progresivas bien adaptadas y lentillas con seguimiento.</p>
+            <ul role="list" class="sentido-lista">
+              {
+                vista.map((s) => (
+                  <li>
+                    <a href={url(`/optica-barajas/${s.id}/`)}>
+                      <span>{s.data.title}</span>
+                      {s.data.badge && <span class="etiqueta roble">{s.data.badge}</span>}
+                      <Icono nombre="ArrowRight" class="flecha" />
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+            <a class="boton secundario" href={url('/optica-barajas/')}>Ver la óptica</a>
+          </div>
+        </article>
+
+        <article class="sentido" data-aparecer style="--retraso: 0.12s">
+          <div class="sentido-foto">
+            <Image src={fotos['audifono-cargador']} alt="Audífono recargable en su estuche cargador sobre madera en Siente" widths={[480, 800, 1200]} sizes="(min-width: 1000px) 600px, 100vw" />
+            <span class="sentido-num mono">02</span>
+          </div>
+          <div class="sentido-cuerpo">
+            <h3><Icono nombre="Ear" /> Audición</h3>
+            <p>Audiometría en cabina insonorizada, audífonos discretos y recargables, y un seguimiento que no te deja solo.</p>
+            <ul role="list" class="sentido-lista">
+              {
+                oido.map((s) => (
+                  <li>
+                    <a href={url(`/audifonos-barajas/${s.id}/`)}>
+                      <span>{s.data.title}</span>
+                      {s.data.badge && <span class="etiqueta roble">{s.data.badge}</span>}
+                      <Icono nombre="ArrowRight" class="flecha" />
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+            <a class="boton secundario" href={url('/audifonos-barajas/')}>Ver el centro auditivo</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SIMULADORES ═══ -->
+  <Simuladores />
+
+  <!-- ═══ PLAN VEO ═══ -->
+  <BandaPlanVeo />
+
+  <!-- ═══ CÓMO TRABAJAMOS ═══ -->
+  <section class="proceso seccion" aria-labelledby="proceso-titulo">
+    <div class="contenedor">
+      <div class="cabecera-seccion" data-aparecer>
+        <span class="antetitulo">Cómo trabajamos</span>
+        <h2 id="proceso-titulo" class="titulo-seccion">Sin prisas. <em>Sin letra pequeña.</em></h2>
+      </div>
+      <ol role="list" class="pasos">
+        <li data-aparecer>
+          <span class="paso-num mono">1</span>
+          <h3>Pides cita como prefieras</h3>
+          <p>Por WhatsApp, por teléfono o desde la web. Te damos hora y te dedicamos el tiempo que haga falta.</p>
+        </li>
+        <li data-aparecer style="--retraso: 0.08s">
+          <span class="paso-num mono">2</span>
+          <h3>Revisión completa</h3>
+          <p>En nuestro gabinete de optometría o en la cabina de audiometría. Te escuchamos antes de medir nada.</p>
+        </li>
+        <li data-aparecer style="--retraso: 0.16s">
+          <span class="paso-num mono">3</span>
+          <h3>Opciones claras</h3>
+          <p>Te explicamos lo que hemos visto y lo que de verdad necesitas. Si no necesitas nada, te lo decimos.</p>
+        </li>
+        <li data-aparecer style="--retraso: 0.24s">
+          <span class="paso-num mono">4</span>
+          <h3>Y seguimos contigo</h3>
+          <p>Ajustes, revisiones y mantenimiento. Tus sentidos, en las mejores manos también después.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ═══ EL CENTRO ═══ -->
+  <section class="centro seccion" aria-labelledby="centro-titulo">
+    <div class="contenedor centro-rejilla">
+      <div class="centro-texto" data-aparecer>
+        <span class="antetitulo">El centro</span>
+        <h2 id="centro-titulo" class="titulo-seccion">Madera, luz y <em>tecnología</em> en la Avenida de Logroño</h2>
+        <p class="entradilla">
+          Un espacio cálido y tranquilo, con gabinete de optometría, cabina de audiometría insonorizada y una selección de
+          monturas de marcas independientes que no vas a encontrar en cualquier sitio.
+        </p>
+        <ul role="list" class="marcas">
+          {negocio.marcas.map((m) => <li>{m}</li>)}
+        </ul>
+        <a class="enlace-flecha" href={url('/sobre-nosotros/')}>Conócenos <Icono nombre="ArrowRight" /></a>
+      </div>
+      <div class="mosaico">
+        <figure class="m1" data-aparecer>
+          <Image src={fotos['expositor-gafas']} alt="Expositor de gafas con estantes de madera en el centro Siente" widths={[400, 700]} sizes="(min-width: 1000px) 340px, 50vw" />
+        </figure>
+        <figure class="m2" data-aparecer style="--retraso: 0.08s">
+          <Image src={fotos['gabinete-optometria']} alt="Gabinete de optometría de Siente con foróptero y lámpara de hendidura" widths={[400, 700]} sizes="(min-width: 1000px) 340px, 50vw" />
+          <figcaption>Gabinete de optometría</figcaption>
+        </figure>
+        <figure class="m3" data-aparecer style="--retraso: 0.16s">
+          <Image src={fotos['cabina-audiometria']} alt="Cabina insonorizada para audiometrías en Siente" widths={[400, 700]} sizes="(min-width: 1000px) 340px, 50vw" />
+          <figcaption>Cabina de audiometría</figcaption>
+        </figure>
+        <figure class="m4" data-aparecer style="--retraso: 0.24s">
+          <Image src={fotos['gafas-sol']} alt="Gafas de sol de colores en un estante de madera" widths={[400, 800]} sizes="(min-width: 1000px) 340px, 50vw" />
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ RESEÑAS ═══ -->
+  <Resenas />
+
+  <!-- ═══ BLOG ═══ -->
+  {
+    posts.length > 0 && (
+      <section class="blog-portada seccion" aria-labelledby="blog-titulo">
+        <div class="contenedor">
+          <div class="cabecera-seccion fila" data-aparecer>
+            <div>
+              <span class="antetitulo">Consejos de vista y oído</span>
+              <h2 id="blog-titulo" class="titulo-seccion">Del blog</h2>
+            </div>
+            <a class="enlace-flecha" href={url('/blog/')}>Ver todos los artículos <Icono nombre="ArrowRight" /></a>
+          </div>
+          <div class="posts">
+            {posts.map((p, i) => (
+              <div data-aparecer style={`--retraso: ${i * 0.08}s`}>
+                <TarjetaPost post={p} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ═══ PREGUNTAS ═══ -->
+  <section class="seccion preguntas">
+    <div class="contenedor">
+      <Faq preguntas={preguntas} />
+    </div>
+  </section>
+
+  <!-- ═══ VISÍTANOS ═══ -->
+  <section class="visita seccion" aria-labelledby="visita-titulo">
+    <div class="contenedor visita-rejilla">
+      <div class="visita-info" data-aparecer>
+        <span class="antetitulo">Visítanos</span>
+        <h2 id="visita-titulo" class="titulo-seccion">En el corazón de Barajas</h2>
+        <EstadoApertura class="visita-estado" />
+        <TablaHorario />
+        <ul role="list" class="llegar">
+          {
+            negocio.comoLlegar.map((c) => (
+              <li>
+                <span class="llegar-icono">
+                  <Icono nombre={c.medio === 'metro' ? 'TrainFront' : c.medio === 'bus' ? 'Bus' : 'Car'} />
+                </span>
+                {c.texto}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div data-aparecer style="--retraso: 0.1s">
+        <Mapa />
+      </div>
+    </div>
+  </section>
+
+  <BandaCita />
+</Base>
+
+<style>
+  /* ── Hero ── */
+  .hero { padding-block: clamp(28px, 5vw, 72px) clamp(48px, 7vw, 96px); }
+  .hero-rejilla { display: grid; gap: clamp(36px, 5vw, 64px); align-items: center; }
+  .hero-texto { display: grid; gap: 26px; justify-items: start; }
+  h1 { display: grid; gap: 18px; }
+  .h1-grande {
+    display: grid;
+    font-size: var(--paso-5);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+  }
+  .h1-linea:nth-child(2) { color: var(--roble-oscuro); }
+  @media (prefers-reduced-motion: no-preference) {
+    .h1-linea {
+      animation: enfocar 1.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      animation-delay: calc(0.15s + var(--i) * 0.35s);
+    }
+  }
+  @keyframes enfocar {
+    from { filter: blur(14px); opacity: 0.25; letter-spacing: 0.02em; }
+    to { filter: blur(0); opacity: 1; }
+  }
+  .hero-entradilla { font-size: clamp(1.2rem, 1.1rem + 0.4vw, 1.4rem); }
+  .hero-acciones { display: flex; flex-wrap: wrap; gap: 12px; }
+  .hero-sellos { display: grid; gap: 10px; font-weight: 700; }
+  .hero-sellos li { display: flex; align-items: center; gap: 10px; }
+  .hero-sellos :global(.icono) { width: 22px; height: 22px; color: var(--roble-oscuro); flex: none; }
+
+  .hero-visual { position: relative; }
+  .hero-visual :global(.hero-rotulo) { min-height: clamp(380px, 52vw, 600px); }
+  .chip {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-radius: 18px;
+    background: var(--papel);
+    box-shadow: var(--sombra-2);
+    text-decoration: none;
+  }
+  .chip-estado { left: -10px; top: 26px; }
+  .chip-tel { right: -10px; bottom: 26px; }
+  .chip-tel small { display: block; color: var(--apagado); font-size: 0.85rem; }
+  .chip-tel strong { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+  .chip-icono { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: var(--tinta); color: var(--luz); }
+  .chip-icono :global(.icono) { width: 20px; height: 20px; }
+  @media (max-width: 640px) {
+    .chip-estado { left: 12px; top: 12px; }
+    .chip-tel { right: 12px; bottom: 12px; }
+  }
+  @media (min-width: 1000px) {
+    .hero-rejilla { grid-template-columns: 1.08fr 1fr; }
+  }
+
+  /* ── Promos ── */
+  .promos { padding-bottom: clamp(24px, 4vw, 48px); }
+  .promos-lista { display: grid; gap: 14px; }
+  @media (min-width: 860px) { .promos-lista { grid-template-columns: repeat(3, 1fr); } }
+  .promo {
+    position: relative;
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+    height: 100%;
+    padding: 24px 64px 24px 24px;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    box-shadow: var(--sombra-1);
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .promo:hover { transform: translateY(-3px); box-shadow: var(--sombra-2); }
+  .promo strong { font-size: var(--paso-1); line-height: 1.2; }
+  .promo-flecha {
+    position: absolute; right: 20px; top: 20px;
+    display: grid; place-items: center;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--papel-2);
+    transition: background 0.2s, color 0.2s;
+  }
+  .promo:hover .promo-flecha { background: var(--tinta); color: var(--papel); }
+  .promo-flecha :global(.icono) { width: 20px; height: 20px; }
+
+  /* ── Sentidos ── */
+  .sentidos-rejilla { display: grid; gap: 28px; }
+  @media (min-width: 1000px) { .sentidos-rejilla { grid-template-columns: 1fr 1fr; gap: 36px; } }
+  .sentido {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    border-radius: var(--radio-l);
+    background: var(--blanco);
+    box-shadow: var(--sombra-1);
+    overflow: hidden;
+  }
+  .sentido-foto { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
+  .sentido-foto :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .sentido-num {
+    position: absolute; left: 20px; bottom: 16px;
+    font-weight: 700; font-size: 3.4rem; line-height: 1;
+    color: #fff; text-shadow: 0 4px 24px rgb(0 0 0 / 0.45);
+  }
+  .sentido-cuerpo { display: grid; gap: 18px; align-content: start; justify-items: start; padding: clamp(24px, 3vw, 40px); }
+  .sentido-cuerpo h3 { display: flex; align-items: center; gap: 12px; font-size: var(--paso-3); }
+  .sentido-cuerpo h3 :global(.icono) { width: 0.9em; height: 0.9em; color: var(--roble); }
+  .sentido-cuerpo > p { font-size: 1.15rem; color: var(--tinta-2); }
+  .sentido-lista { width: 100%; border-top: 1px solid var(--linea); }
+  .sentido-lista a {
+    display: flex; align-items: center; gap: 12px;
+    padding: 15px 4px;
+    border-bottom: 1px solid var(--linea);
+    font-weight: 700; font-size: 1.1rem;
+    text-decoration: none;
+    transition: padding 0.2s, background 0.2s;
+  }
+  .sentido-lista a:hover { padding-left: 12px; background: var(--papel); }
+  .sentido-lista :global(.flecha) { width: 20px; height: 20px; margin-left: auto; color: var(--roble); }
+
+  /* ── Proceso ── */
+  .proceso { padding-top: var(--seccion); }
+  .pasos { display: grid; gap: 18px; counter-reset: paso; }
+  @media (min-width: 720px) { .pasos { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1100px) { .pasos { grid-template-columns: repeat(4, 1fr); } }
+  .pasos li {
+    display: grid; gap: 12px; align-content: start;
+    padding: 28px;
+    border-radius: var(--radio);
+    border: 1.5px solid var(--linea-fuerte);
+  }
+  .paso-num {
+    display: grid; place-items: center;
+    width: 54px; height: 54px; border-radius: 50%;
+    background: var(--tinta); color: var(--luz);
+    font-weight: 700; font-size: 1.5rem;
+  }
+  .pasos h3 { font-size: var(--paso-1); }
+  .pasos p { color: var(--tinta-2); }
+
+  /* ── El centro ── */
+  .centro { background: var(--papel-2); }
+  .centro-rejilla { display: grid; gap: 48px; align-items: center; }
+  .centro-texto { display: grid; gap: 22px; justify-items: start; }
+  .marcas { display: flex; flex-wrap: wrap; gap: 8px; }
+  .marcas li {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--linea-fuerte);
+    font-family: var(--mono);
+    font-weight: 700;
+  }
+  .mosaico {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 160px;
+    gap: 12px;
+  }
+  .mosaico figure { position: relative; margin: 0; border-radius: var(--radio); overflow: hidden; background: var(--arena); }
+  .mosaico :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .mosaico figcaption {
+    position: absolute; left: 10px; bottom: 10px;
+    padding: 6px 12px; border-radius: 999px;
+    background: rgb(23 20 17 / 0.78); color: var(--papel);
+    font-size: 0.88rem; font-weight: 700;
+  }
+  .m1 { grid-row: span 2; }
+  .m2 { grid-row: span 2; }
+  .m3 { grid-row: span 2; }
+  .m4 { grid-row: span 2; }
+  @media (min-width: 1000px) {
+    .centro-rejilla { grid-template-columns: 1fr 1.1fr; gap: 72px; }
+    .mosaico { grid-auto-rows: 120px; }
+    .m1 { grid-row: 1 / span 3; }
+    .m2 { grid-row: 1 / span 2; }
+    .m3 { grid-row: 3 / span 3; }
+    .m4 { grid-row: 4 / span 2; grid-column: 1; }
+  }
+
+  /* ── Blog ── */
+  .cabecera-seccion.fila { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 20px; }
+  .cabecera-seccion.fila > div { display: grid; gap: 14px; }
+  .posts { display: grid; gap: 32px; }
+  @media (min-width: 800px) { .posts { grid-template-columns: repeat(3, 1fr); } }
+
+  /* ── Visita ── */
+  .visita { background: var(--blanco); }
+  .visita-rejilla { display: grid; gap: 48px; align-items: start; }
+  .visita-info { display: grid; gap: 22px; }
+  .visita-info :global(.visita-estado) { font-size: 1.1rem; }
+  .llegar { display: grid; gap: 12px; }
+  .llegar li { display: flex; align-items: center; gap: 14px; }
+  .llegar-icono { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 12px; background: var(--papel-2); }
+  .llegar-icono :global(.icono) { width: 22px; height: 22px; }
+  @media (min-width: 1000px) { .visita-rejilla { grid-template-columns: 1fr 1.2fr; gap: 72px; } }
+</style>
