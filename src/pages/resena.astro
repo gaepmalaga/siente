@@ -1,0 +1,23 @@
+---
+// Dirección corta para los QR impresos: /resena/ lleva a la página de reseñas
+// de Google. Así, si cambia el enlace de Google, se cambia en /admin y los
+// carteles ya impresos siguen funcionando.
+import { negocio, mapas } from '../lib/negocio';
+
+const destino = negocio.redes.resenasGoogle || mapas.google;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Déjanos tu reseña · Siente</title>
+    <meta http-equiv="refresh" content={`0;url=${destino}`} />
+    <script is:inline define:vars={{ destino }}>location.replace(destino);</script>
+  </head>
+  <body style="font-family: system-ui, sans-serif; padding: 24px;">
+    <p>Te llevamos a Google para que puedas dejar tu reseña… <a href={destino}>Pulsa aquí si no se abre</a>.</p>
+  </body>
+</html>

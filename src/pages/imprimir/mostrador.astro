@@ -1,0 +1,36 @@
+---
+// Cartel A5 para el mostrador: QR a la página de reseñas de Google.
+import Impresion from '../../layouts/Impresion.astro';
+import CabeceraCartel from '../../components/CabeceraCartel.astro';
+import { qrSvg } from '../../lib/qr';
+import { urlAbsoluta } from '../../lib/url';
+import { negocio } from '../../lib/negocio';
+
+const qr = await qrSvg(urlAbsoluta('/resena/'));
+---
+
+<Impresion titulo="Cartel de reseñas (mostrador)" hoja="A5">
+  <div class="hoja">
+    <CabeceraCartel alto="64mm" />
+    <div class="cuerpo">
+      <p class="ante">Tu opinión cuenta</p>
+      <h1>¿Te hemos cuidado bien?</h1>
+      <p class="texto">Cuéntalo en Google. Te lleva un minuto y ayuda a otros vecinos de Barajas a encontrarnos.</p>
+      <div class="qr-caja" set:html={qr} />
+      <p class="estrellas" aria-hidden="true">★★★★★</p>
+      <p class="pista">Abre la cámara del móvil y apunta al código</p>
+    </div>
+    <p class="pie">{negocio.nombre} · {negocio.direccion.calle}</p>
+  </div>
+</Impresion>
+
+<style>
+  .cuerpo { display: grid; justify-items: center; gap: 3mm; padding: 7mm 12mm 0; text-align: center; }
+  .ante { font-family: var(--mono); font-weight: 700; font-size: 3.6mm; letter-spacing: 0.16em; text-transform: uppercase; color: var(--roble-oscuro); }
+  h1 { font-size: 10.5mm; line-height: 1.02; letter-spacing: -0.03em; }
+  .texto { font-size: 4.2mm; line-height: 1.4; color: var(--tinta-2); max-width: 105mm; }
+  .qr-caja { width: 46mm; padding: 4mm; margin-top: 2mm; border-radius: 5mm; background: #fff; box-shadow: 0 0 0 0.4mm var(--linea-fuerte); }
+  .estrellas { font-size: 7mm; letter-spacing: 1.5mm; color: #e1a03c; line-height: 1; }
+  .pista { font-size: 3.6mm; font-weight: 700; color: var(--apagado); }
+  .pie { position: absolute; left: 0; right: 0; bottom: 6mm; text-align: center; font-size: 3.2mm; color: var(--apagado); }
+</style>

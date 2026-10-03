@@ -1,0 +1,50 @@
+---
+// Banda superior de los carteles: el rótulo luminoso sobre la madera.
+import LogoMarca from './LogoMarca.astro';
+
+interface Props {
+  alto?: string;
+}
+const { alto = '62mm' } = Astro.props;
+---
+
+<div class="banda madera" style={`height: ${alto}`}>
+  <div class="luz">
+    <LogoMarca class="gafas" />
+    <span class="nombre">SIENTE</span>
+    <span class="sub">Centro óptico &amp; auditivo · Barajas</span>
+  </div>
+</div>
+
+<style>
+  .banda { display: grid; place-items: center; }
+  .banda::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 90% at 50% 40%, transparent 45%, rgb(30 16 6 / 0.45));
+  }
+  .luz { position: relative; display: grid; justify-items: center; width: 62%; color: #f6e2c0; }
+  .luz :global(.gafas) {
+    width: 100%;
+    filter: drop-shadow(0 0 1.2mm rgb(255 222 165 / 0.95)) drop-shadow(0 0 5mm rgb(255 196 120 / 0.6));
+  }
+  .nombre {
+    margin-top: 2.5mm;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 15mm;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 1.2mm rgb(255 222 165 / 0.95), 0 0 5mm rgb(255 190 110 / 0.7);
+  }
+  .sub {
+    margin-top: 2.5mm;
+    font-size: 3.4mm;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #fff3df;
+    text-shadow: 0 0.5mm 2mm rgb(0 0 0 / 0.5);
+  }
+</style>

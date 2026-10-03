@@ -1,0 +1,52 @@
+---
+// Cartel A4 del Plan VEO (para escaparate, colegios y asociaciones de padres).
+import Impresion from '../../layouts/Impresion.astro';
+import CabeceraCartel from '../../components/CabeceraCartel.astro';
+import { qrSvg } from '../../lib/qr';
+import { urlAbsoluta } from '../../lib/url';
+import { negocio, planVeoFin } from '../../lib/negocio';
+
+const qr = await qrSvg(urlAbsoluta('/plan-veo/'));
+const fin = planVeoFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Madrid' });
+---
+
+<Impresion titulo="Cartel Plan VEO" hoja="A4">
+  <div class="hoja rosa">
+    <CabeceraCartel alto="76mm" />
+    <div class="cuerpo">
+      <span class="etiqueta">Plan VEO · Ministerio de Sanidad</span>
+      <h1>Gafas o lentillas para menores de 16 años</h1>
+      <p class="cifra">con <strong>hasta 100 €</strong> de ayuda</p>
+      <ul>
+        <li>Somos óptica adherida: <strong>lo tramitamos nosotros</strong>, sin papeleo.</li>
+        <li>Si cuestan menos de 100 €, <strong>no pagas nada</strong>.</li>
+        <li>Ven con el menor, su tarjeta sanitaria y el DNI del padre, madre o tutor.</li>
+      </ul>
+      <div class="fila">
+        <div class="qr-caja" set:html={qr} />
+        <div class="datos">
+          <p class="hasta">Hasta el {fin}</p>
+          <p class="pista">Escanea para ver requisitos y pedir cita</p>
+          <p><strong>{negocio.movil}</strong> · WhatsApp</p>
+        </div>
+      </div>
+    </div>
+    <p class="pie">{negocio.nombre} · {negocio.direccion.calle} · {negocio.direccion.barrio}</p>
+  </div>
+</Impresion>
+
+<style>
+  .rosa { background: #f6d9d3; }
+  .cuerpo { display: grid; justify-items: center; gap: 4.5mm; padding: 11mm 16mm 0; text-align: center; }
+  .etiqueta { font-size: 4mm; padding: 1.6mm 4.5mm; }
+  h1 { font-size: 13.5mm; line-height: 1; letter-spacing: -0.035em; max-width: 170mm; }
+  .cifra { font-size: 8mm; font-weight: 700; }
+  .cifra strong { background: linear-gradient(180deg, transparent 58%, rgb(255 255 255 / 0.9) 58%); padding-inline: 1mm; }
+  ul { display: grid; gap: 2mm; margin: 1mm 0 0; padding: 0; list-style: none; font-size: 5mm; line-height: 1.35; color: var(--tinta-2); }
+  .fila { display: flex; align-items: center; gap: 9mm; margin-top: 3mm; text-align: left; }
+  .qr-caja { width: 62mm; flex: none; padding: 5mm; border-radius: 6mm; background: #fff; }
+  .datos { display: grid; gap: 3mm; font-size: 5mm; }
+  .hasta { display: inline-block; justify-self: start; padding: 2mm 4mm; border-radius: 3mm; background: var(--tinta); color: var(--luz); font-family: var(--mono); font-weight: 700; font-size: 5mm; }
+  .pista { font-weight: 700; color: var(--tinta-2); max-width: 70mm; }
+  .pie { position: absolute; left: 0; right: 0; bottom: 9mm; text-align: center; font-size: 4mm; color: var(--tinta-2); }
+</style>

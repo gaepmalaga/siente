@@ -1,0 +1,59 @@
+---
+// Cartel A4 para el escaparate: pedir cita desde el móvil.
+import Impresion from '../../layouts/Impresion.astro';
+import CabeceraCartel from '../../components/CabeceraCartel.astro';
+import { qrSvg } from '../../lib/qr';
+import { urlAbsoluta } from '../../lib/url';
+import { negocio, horarioAgrupado } from '../../lib/negocio';
+
+const qr = await qrSvg(urlAbsoluta('/pedir-cita/'));
+const horario = horarioAgrupado();
+---
+
+<Impresion titulo="Cartel de cita (escaparate)" hoja="A4">
+  <div class="hoja">
+    <CabeceraCartel alto="88mm" />
+    <div class="cuerpo">
+      <span class="etiqueta">Revisión de la vista gratis</span>
+      <h1>Pide tu cita<br />desde el móvil</h1>
+      <p class="texto">Elige qué necesitas y qué día te viene bien. Te contestamos por WhatsApp.</p>
+      <div class="fila">
+        <div class="qr-caja" set:html={qr} />
+        <div class="datos">
+          <p class="pista">Escanea con la cámara</p>
+          <p><small>WhatsApp</small><strong>{negocio.movil}</strong></p>
+          <p><small>Teléfono</small><strong>{negocio.telefono}</strong></p>
+          <dl>
+            {
+              horario.map((g) => (
+                <div>
+                  <dt>{g.dias}</dt>
+                  <dd>{g.tramos.length ? g.tramos.join(' · ') : 'Cerrado'}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+    </div>
+    <p class="pie">Óptica y audífonos · {negocio.direccion.calle} · {negocio.direccion.barrio}</p>
+  </div>
+</Impresion>
+
+<style>
+  .cuerpo { display: grid; justify-items: center; gap: 5mm; padding: 12mm 16mm 0; text-align: center; }
+  .etiqueta { font-size: 4.2mm; padding: 1.6mm 4.5mm; }
+  h1 { font-size: 17mm; line-height: 0.98; letter-spacing: -0.04em; }
+  .texto { font-size: 5.6mm; line-height: 1.4; color: var(--tinta-2); max-width: 150mm; }
+  .fila { display: flex; align-items: center; gap: 10mm; margin-top: 4mm; text-align: left; }
+  .qr-caja { width: 72mm; flex: none; padding: 5mm; border-radius: 6mm; background: #fff; box-shadow: 0 0 0 0.5mm var(--linea-fuerte); }
+  .datos { display: grid; gap: 3mm; }
+  .datos p { display: grid; }
+  .datos small { font-family: var(--mono); font-weight: 700; font-size: 3.4mm; letter-spacing: 0.14em; text-transform: uppercase; color: var(--roble-oscuro); }
+  .datos strong { font-size: 8mm; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .pista { font-size: 4.2mm; font-weight: 700; color: var(--apagado); }
+  dl { display: grid; gap: 1.5mm; margin: 2mm 0 0; font-size: 4mm; }
+  dt { font-weight: 700; }
+  dd { margin: 0; color: var(--tinta-2); }
+  .pie { position: absolute; left: 0; right: 0; bottom: 9mm; text-align: center; font-size: 4mm; color: var(--apagado); }
+</style>

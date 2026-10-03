@@ -1,0 +1,45 @@
+---
+// Plantilla para piezas impresas (carteles con QR y tarjetas). Cada página es
+// exactamente una hoja: se imprime desde el navegador o se exporta a PDF.
+import '../styles/global.css';
+
+interface Props {
+  titulo: string;
+  hoja: 'A5' | 'A4';
+}
+const { titulo, hoja } = Astro.props;
+const [ancho, alto] = hoja === 'A5' ? ['148mm', '210mm'] : ['210mm', '297mm'];
+// @page no admite variables CSS: el tamaño va escrito tal cual.
+const reglaPagina = `@page { size: ${ancho} ${alto}; margin: 0; } .hoja { width: ${ancho}; height: ${alto}; }`;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{titulo} · Siente</title>
+    <Fragment set:html={`<style>${reglaPagina}</style>`} />
+    <style is:global>
+      html, body { margin: 0; padding: 0; background: #d9d4cc; }
+      body { padding-bottom: 0 !important; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .hoja {
+        position: relative;
+        margin: 10mm auto;
+        overflow: hidden;
+        background: var(--papel);
+        box-shadow: 0 8px 30px rgb(0 0 0 / 0.25);
+      }
+      .qr { display: block; width: 100%; height: auto; }
+      @media print {
+        html, body { background: none; }
+        .hoja { margin: 0; box-shadow: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,105 @@
+---
+// Kit de reseñas y cartelería para el centro: piezas imprimibles con QR y
+// mensajes de WhatsApp listos para copiar. Página interna (no indexada).
+import Base from '../../layouts/Base.astro';
+import Icono from '../../components/Icono.astro';
+import { mensajes } from '../../lib/mensajes';
+import { url, urlAbsoluta } from '../../lib/url';
+
+const piezas = [
+  { ruta: '/imprimir/mostrador/', titulo: 'Cartel de mostrador', detalle: 'A5 · QR para dejar reseña en Google', icono: 'Star' },
+  { ruta: '/imprimir/tarjetas/', titulo: 'Tarjetas para la bolsa', detalle: '10 por A4 · 85 × 55 mm · QR de reseña', icono: 'IdCard' },
+  { ruta: '/imprimir/escaparate/', titulo: 'Cartel de escaparate', detalle: 'A4 · QR para pedir cita', icono: 'CalendarCheck' },
+  { ruta: '/imprimir/plan-veo/', titulo: 'Cartel Plan VEO', detalle: 'A4 · para escaparate y colegios', icono: 'Gift' },
+];
+---
+
+<Base titulo="Kit de reseñas y cartelería · Siente" descripcion="Material imprimible y mensajes de WhatsApp para el centro." noindex>
+  <section class="kit">
+    <div class="contenedor">
+      <header class="kit-cab">
+        <span class="antetitulo">Uso interno del centro</span>
+        <h1>Kit de reseñas y cartelería</h1>
+        <p class="entradilla">
+          Abre cada pieza y pulsa <strong>Ctrl + P</strong> (o «Imprimir» en el móvil). Los QR llevan a esta web, así que si
+          cambia algo se actualiza aquí sin reimprimir. El QR de reseñas apunta a <code>{urlAbsoluta('/resena/')}</code>.
+        </p>
+      </header>
+
+      <ul role="list" class="piezas">
+        {
+          piezas.map((p) => (
+            <li>
+              <a class="pieza tarjeta" href={url(p.ruta)} target="_blank" rel="noopener">
+                <Icono nombre={p.icono} />
+                <strong>{p.titulo}</strong>
+                <span class="apagado">{p.detalle}</span>
+                <span class="enlace-flecha">Abrir para imprimir <Icono nombre="ArrowUpRight" /></span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2 class="titulo-seccion">Mensajes de WhatsApp</h2>
+      <p class="entradilla">
+        Guárdalos como <strong>respuestas rápidas</strong> en WhatsApp Business (Ajustes → Herramientas para la empresa →
+        Respuestas rápidas) con el atajo indicado. Envía recordatorios solo a clientes que hayan aceptado recibirlos.
+      </p>
+      <ul role="list" class="mensajes">
+        {
+          mensajes.map((m) => (
+            <li class="tarjeta mensaje">
+              <div class="mensaje-cab">
+                <code>{m.atajo}</code>
+                <span class="apagado">{m.cuando}</span>
+              </div>
+              <p class="burbuja">{m.texto}</p>
+              <button type="button" class="boton pequeno secundario" data-copiar-texto={m.texto}>
+                <Icono nombre="Copy" /> <span>Copiar</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .kit { padding-block: 40px var(--seccion); }
+  .kit-cab { display: grid; gap: 16px; margin-bottom: 36px; }
+  .kit-cab h1 { font-size: var(--paso-4); }
+  .kit-cab code { font-size: 0.9em; overflow-wrap: anywhere; }
+  .piezas { display: grid; gap: 14px; margin-bottom: 64px; }
+  @media (min-width: 760px) { .piezas { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .piezas { grid-template-columns: repeat(4, 1fr); } }
+  .pieza { display: grid; gap: 8px; height: 100%; padding: 24px; text-decoration: none; }
+  .pieza > :global(.icono) { width: 32px; height: 32px; color: var(--roble-oscuro); }
+  .pieza strong { font-size: var(--paso-1); }
+  .pieza .enlace-flecha { justify-self: start; margin-top: 6px; }
+  .mensajes { display: grid; gap: 14px; margin-top: 28px; }
+  @media (min-width: 900px) { .mensajes { grid-template-columns: 1fr 1fr; } }
+  .mensaje { display: grid; gap: 12px; align-content: start; padding: 22px; }
+  .mensaje-cab { display: grid; gap: 4px; }
+  .mensaje-cab code { font-family: var(--mono); font-weight: 700; font-size: 1.05rem; }
+  .burbuja { padding: 12px 14px; border-radius: 14px 14px 14px 4px; background: #e7f8ea; font-size: 1.02rem; line-height: 1.5; overflow-wrap: anywhere; }
+  .mensaje .boton { justify-self: start; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copiar-texto]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(b.dataset.copiarTexto ?? '');
+        const t = b.querySelector('span');
+        if (t) {
+          t.textContent = '¡Copiado!';
+          setTimeout(() => (t.textContent = 'Copiar'), 2000);
+        }
+      } catch {
+        /* sin permiso de portapapeles */
+      }
+    }),
+  );
+</script>

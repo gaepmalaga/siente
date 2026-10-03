@@ -1,0 +1,58 @@
+---
+// Tarjetas de 85 × 55 mm (10 por A4) para meter en la bolsa con cada venta.
+import Impresion from '../../layouts/Impresion.astro';
+import LogoMarca from '../../components/LogoMarca.astro';
+import { qrSvg } from '../../lib/qr';
+import { urlAbsoluta } from '../../lib/url';
+
+const qr = await qrSvg(urlAbsoluta('/resena/'));
+const tarjetas = Array.from({ length: 10 });
+---
+
+<Impresion titulo="Tarjetas de reseña" hoja="A4">
+  <div class="hoja pliego">
+    {
+      tarjetas.map(() => (
+        <div class="tarjeta-r">
+          <div class="izq">
+            <div class="marca">
+              <LogoMarca class="gafas" ondas={false} />
+              <span>SIENTE</span>
+            </div>
+            <p class="t1">¿Qué tal tus gafas?</p>
+            <p class="t2">Déjanos tu reseña en Google. Nos ayuda muchísimo.</p>
+            <p class="estrellas" aria-hidden="true">★★★★★</p>
+          </div>
+          <div class="qr-caja" set:html={qr} />
+        </div>
+      ))
+    }
+  </div>
+</Impresion>
+
+<style>
+  .pliego {
+    display: grid;
+    grid-template-columns: repeat(2, 85mm);
+    grid-auto-rows: 55mm;
+    justify-content: center;
+    align-content: center;
+    background: #fff;
+  }
+  .tarjeta-r {
+    display: flex;
+    align-items: center;
+    gap: 4mm;
+    padding: 5mm;
+    border: 0.2mm dashed #b9b2a8;
+    background: var(--papel);
+  }
+  .izq { display: grid; gap: 1.6mm; flex: 1; }
+  .marca { display: flex; align-items: center; gap: 2mm; }
+  .marca :global(.gafas) { width: 12mm; color: var(--tinta); }
+  .marca span { font-family: var(--mono); font-weight: 700; font-size: 4.2mm; letter-spacing: 0.05em; }
+  .t1 { font-weight: 800; font-size: 4.6mm; line-height: 1.1; letter-spacing: -0.02em; }
+  .t2 { font-size: 3.1mm; line-height: 1.35; color: var(--tinta-2); }
+  .estrellas { font-size: 3.8mm; letter-spacing: 0.6mm; color: #e1a03c; line-height: 1; }
+  .qr-caja { width: 30mm; flex: none; padding: 2mm; border-radius: 2.5mm; background: #fff; }
+</style>
