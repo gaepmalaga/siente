@@ -15,7 +15,7 @@ Web nueva de **Siente**, óptica y centro auditivo en la Avenida de Logroño, 11
 | [Sveltia CMS](https://github.com/sveltia/sveltia-cms) en `/admin` | Panel de edición visual | Guarda los cambios en este repositorio, sin base de datos |
 | GitHub Pages + Actions | Hosting gratuito | Cada cambio se publica solo en 1-2 minutos |
 
-No hay servidor, base de datos, cookies de seguimiento ni formularios que guarden datos: **las citas se piden por WhatsApp** (la web compone el mensaje) o por teléfono.
+No hay servidor, base de datos ni formularios que guarden datos: **las citas se piden por WhatsApp** (la web compone el mensaje) o por teléfono. Google Analytics es opcional y solo se carga si el visitante acepta las cookies.
 
 ## Lo que incluye
 
@@ -73,6 +73,27 @@ $env:SITE_URL='https://gaepmalaga.github.io'; $env:BASE_PATH='/siente'; $env:PUB
    - **Blog** y **Servicios**: crear y editar artículos y páginas.
 
 Al guardar, el panel hace un commit y la web se republica sola.
+
+## Activar Google Analytics (opcional)
+
+1. Crear una propiedad de **Google Analytics 4** y copiar el **ID de medición** (`G-XXXXXXXXXX`).
+2. En `/admin` → Configuración → Datos del centro → **Analítica**, pegar el ID y guardar.
+
+Con eso aparece el aviso de cookies (Aceptar / Rechazar al mismo nivel, como pide la AEPD) y la política de cookies se actualiza sola. Nada de Google se carga hasta que el visitante acepta.
+
+Eventos que se envían, con el parámetro `zona` (cabecera, barra-movil, bio-instagram, portada, ficha-lateral, pie…):
+
+| Evento | Cuándo |
+| --- | --- |
+| `generate_lead` | Se envía una cita desde /pedir-cita/ (parámetros `canal` y `servicio`) |
+| `clic_whatsapp` | Clic en cualquier botón de WhatsApp |
+| `clic_llamar` | Clic en un teléfono |
+| `clic_pedir_cita` | Clic en un botón «Pedir cita» |
+| `clic_como_llegar` | Clic en Google Maps, Apple Maps o Waze |
+| `guardar_contacto` | Descarga de la ficha de contacto |
+| `clic_enlace_bio` | Otros clics en la página de enlaces |
+
+En GA4 conviene marcar `generate_lead`, `clic_whatsapp` y `clic_llamar` como **eventos clave**.
 
 ## Pasar al dominio definitivo (sienteyve.es)
 
