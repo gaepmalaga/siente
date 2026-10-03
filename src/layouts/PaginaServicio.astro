@@ -1,0 +1,200 @@
+---
+// Plantilla de cada servicio (óptica y audición). El contenido viene de
+// src/content/servicios/*.md, editable desde /admin.
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from './Base.astro';
+import Migas from '../components/Migas.astro';
+import Icono from '../components/Icono.astro';
+import IconoMarca from '../components/IconoMarca.astro';
+import FichaContacto from '../components/FichaContacto.astro';
+import Faq from '../components/Faq.astro';
+import TarjetaServicio from '../components/TarjetaServicio.astro';
+import BandaCita from '../components/BandaCita.astro';
+import { foto } from '../lib/fotos';
+import { url, rutasEnHtml } from '../lib/url';
+import { waHref } from '../lib/negocio';
+import { esquemaFaq, esquemaServicio } from '../lib/schema';
+
+interface Props {
+  servicio: CollectionEntry<'servicios'>;
+}
+const { servicio } = Astro.props;
+const d = servicio.data;
+const esVista = d.area === 'vista';
+const hub = esVista
+  ? { nombre: 'Óptica', ruta: '/optica-barajas/' }
+  : { nombre: 'Audífonos', ruta: '/audifonos-barajas/' };
+const ruta = `${hub.ruta}${servicio.id}/`;
+const migas = [{ nombre: 'Inicio', ruta: '/' }, hub, { nombre: d.title, ruta }];
+
+const relacionados = (await getCollection('servicios', (s) => s.data.area === d.area && s.id !== servicio.id))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+
+const html = rutasEnHtml(servicio.rendered?.html ?? '');
+const mensajeWa = `Hola, os escribo desde la web. Me gustaría pedir cita para: ${d.title.toLowerCase()}.`;
+---
+
+<Base
+  titulo={d.seoTitle}
+  descripcion={d.description}
+  migas={migas}
+  imagen={`/og/servicio-${servicio.id}.png`}
+  esquemas={[
+    esquemaServicio({ nombre: d.h1, descripcion: d.description, ruta, tipo: d.title }),
+    ...(d.faqs.length ? [esquemaFaq(d.faqs)] : []),
+  ]}
+>
+  <section class="sv-hero">
+    <div class="contenedor">
+      <Migas migas={migas} />
+      <div class="sv-hero-rejilla">
+        <div class="sv-hero-texto">
+          <span class="antetitulo">{esVista ? 'Óptica' : 'Centro auditivo'} · Barajas</span>
+          <h1>{d.h1}</h1>
+          <p class="entradilla">{d.summary}</p>
+          {d.badge && <span class="etiqueta sv-badge">{d.badge}</span>}
+          <div class="sv-acciones">
+            <a class="boton" href={url(`/pedir-cita/?servicio=${d.cita ?? servicio.id}`)}><Icono nombre="CalendarCheck" /> Pedir cita</a>
+            <a class="boton wa" href={waHref(mensajeWa)} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> Preguntar por WhatsApp</a>
+          </div>
+          {
+            d.highlights.length > 0 && (
+              <ul role="list" class="sv-puntos">
+                {d.highlights.map((h) => (
+                  <li><Icono nombre="CircleCheck" /> {h}</li>
+                ))}
+              </ul>
+            )
+          }
+        </div>
+        <figure class="sv-foto madera">
+          <Image
+            src={foto(d.image)}
+            alt={d.imageAlt ?? d.h1}
+            widths={[480, 800, 1100]}
+            sizes="(min-width: 1000px) 520px, 100vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="sv-cuerpo seccion-s">
+    <div class="contenedor sv-cuerpo-rejilla">
+      <article class="prosa" set:html={html} />
+      <div class="sv-lateral">
+        <FichaContacto servicio={d.cita ?? servicio.id} mensaje={mensajeWa} />
+      </div>
+    </div>
+  </section>
+
+  {
+    d.steps.length > 0 && (
+      <section class="sv-pasos seccion">
+        <div class="contenedor">
+          <div class="cabecera-seccion">
+            <span class="antetitulo">Paso a paso</span>
+            <h2 class="titulo-seccion">Así lo hacemos</h2>
+          </div>
+          <ol role="list" class="pasos">
+            {d.steps.map((p, i) => (
+              <li data-aparecer style={`--retraso: ${i * 0.08}s`}>
+                <span class="paso-num mono">{i + 1}</span>
+                <h3>{p.title}</h3>
+                <p>{p.text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    d.faqs.length > 0 && (
+      <section class="seccion">
+        <div class="contenedor">
+          <Faq preguntas={d.faqs} titulo={`Dudas sobre ${d.title.toLowerCase()}`} />
+        </div>
+      </section>
+    )
+  }
+
+  {
+    relacionados.length > 0 && (
+      <section class="seccion relacionados">
+        <div class="contenedor">
+          <div class="cabecera-seccion">
+            <span class="antetitulo">También te puede interesar</span>
+            <h2 class="titulo-seccion">Más en {esVista ? 'la óptica' : 'el centro auditivo'}</h2>
+          </div>
+          <div class="rejilla-servicios">
+            {relacionados.map((s) => <TarjetaServicio servicio={s} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <BandaCita servicio={d.cita ?? servicio.id} />
+</Base>
+
+<style>
+  .sv-hero { padding-block: 28px clamp(40px, 6vw, 80px); }
+  .sv-hero-rejilla { display: grid; gap: 40px; align-items: center; margin-top: 28px; }
+  .sv-hero-texto { display: grid; gap: 22px; justify-items: start; }
+  .sv-hero-texto h1 { font-size: var(--paso-4); max-width: 16ch; }
+  .sv-acciones { display: flex; flex-wrap: wrap; gap: 12px; }
+  .sv-puntos { display: grid; gap: 10px; font-weight: 700; }
+  .sv-puntos li { display: flex; gap: 10px; align-items: flex-start; }
+  .sv-puntos :global(.icono) { width: 22px; height: 22px; flex: none; margin-top: 2px; color: var(--roble-oscuro); }
+  .sv-foto {
+    margin: 0;
+    padding: 14px;
+    border-radius: var(--radio-l);
+  }
+  .sv-foto :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: calc(var(--radio-l) - 10px);
+  }
+  @media (min-width: 1000px) {
+    .sv-hero-rejilla { grid-template-columns: 1.15fr 1fr; gap: 64px; }
+    .sv-foto { max-width: 520px; justify-self: end; }
+  }
+
+  .sv-cuerpo-rejilla { display: grid; gap: 40px; }
+  .sv-cuerpo .prosa { max-width: 70ch; }
+  @media (min-width: 1000px) {
+    .sv-cuerpo-rejilla { grid-template-columns: 1fr 340px; gap: 72px; align-items: start; }
+    .sv-lateral { position: sticky; top: 110px; }
+  }
+
+  .sv-pasos { background: var(--papel-2); }
+  .pasos { display: grid; gap: 18px; }
+  @media (min-width: 860px) { .pasos { grid-template-columns: repeat(3, 1fr); } }
+  .pasos li {
+    display: grid; gap: 12px; align-content: start;
+    padding: 28px;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    box-shadow: var(--sombra-1);
+  }
+  .paso-num {
+    display: grid; place-items: center;
+    width: 54px; height: 54px; border-radius: 50%;
+    background: var(--tinta); color: var(--luz);
+    font-weight: 700; font-size: 1.5rem;
+  }
+  .pasos h3 { font-size: var(--paso-1); }
+  .pasos p { color: var(--tinta-2); }
+
+  .relacionados { background: var(--papel-2); }
+  .rejilla-servicios { display: grid; gap: 18px; }
+  @media (min-width: 760px) { .rejilla-servicios { grid-template-columns: repeat(3, 1fr); } }
+</style>

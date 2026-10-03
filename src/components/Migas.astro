@@ -1,0 +1,37 @@
+---
+import Icono from './Icono.astro';
+import { url } from '../lib/url';
+
+interface Props {
+  migas: { nombre: string; ruta: string }[];
+}
+const { migas } = Astro.props;
+---
+
+<nav class="migas" aria-label="Estás aquí">
+  <ol role="list">
+    {
+      migas.map((m, i) => (
+        <li>
+          {i < migas.length - 1 ? (
+            <>
+              <a href={url(m.ruta)}>{m.nombre}</a>
+              <Icono nombre="ChevronRight" />
+            </>
+          ) : (
+            <span aria-current="page">{m.nombre}</span>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .migas ol { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 0.95rem; }
+  .migas li { display: inline-flex; align-items: center; gap: 6px; }
+  .migas a { color: var(--apagado); text-decoration: none; font-weight: 700; }
+  .migas a:hover { color: var(--tinta); text-decoration: underline; }
+  .migas :global(.icono) { width: 16px; height: 16px; color: var(--apagado); }
+  .migas [aria-current] { color: var(--tinta); font-weight: 700; }
+</style>

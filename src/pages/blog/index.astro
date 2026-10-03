@@ -1,0 +1,101 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Migas from '../../components/Migas.astro';
+import TarjetaPost from '../../components/TarjetaPost.astro';
+import BandaCita from '../../components/BandaCita.astro';
+
+const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const [destacado, ...resto] = posts;
+const migas = [
+  { nombre: 'Inicio', ruta: '/' },
+  { nombre: 'Blog', ruta: '/blog/' },
+];
+const filtros = [
+  { valor: 'todos', texto: 'Todo' },
+  { valor: 'vista', texto: 'Vista' },
+  { valor: 'oido', texto: 'Oído' },
+  { valor: 'general', texto: 'Consejos' },
+].filter((f) => f.valor === 'todos' || posts.some((p) => p.data.category === f.valor));
+---
+
+<Base
+  titulo="Blog de salud visual y auditiva · Óptica Siente Barajas"
+  descripcion="Consejos sobre vista y audición del equipo de Siente, óptica y centro auditivo en Barajas: revisiones, gafas, lentillas, miopía infantil, audífonos y cuidado del oído."
+  migas={migas}
+>
+  <section class="blog">
+    <div class="contenedor">
+      <Migas migas={migas} />
+      <header class="blog-cab">
+        <span class="antetitulo">Blog</span>
+        <h1>Consejos para ver y oír mejor</h1>
+        <p class="entradilla">Lo que nos preguntáis en el centro, explicado con calma y sin tecnicismos.</p>
+      </header>
+
+      {
+        destacado && (
+          <div class="destacado">
+            <TarjetaPost post={destacado} destacado />
+          </div>
+        )
+      }
+
+      {
+        filtros.length > 2 && (
+          <div class="filtros" role="group" aria-label="Filtrar artículos">
+            {filtros.map((f, i) => (
+              <button type="button" data-filtro={f.valor} aria-pressed={i === 0 ? 'true' : 'false'}>
+                {f.texto}
+              </button>
+            ))}
+          </div>
+        )
+      }
+
+      <div class="rejilla" data-rejilla>
+        {resto.map((p) => <TarjetaPost post={p} />)}
+      </div>
+    </div>
+  </section>
+  <BandaCita />
+</Base>
+
+<style>
+  .blog { padding-block: 28px var(--seccion); }
+  .blog-cab { display: grid; gap: 16px; margin: 28px 0 40px; }
+  .blog-cab h1 { font-size: var(--paso-5); line-height: 0.98; letter-spacing: -0.045em; max-width: 14ch; }
+  .destacado { margin-bottom: 48px; }
+  .destacado :global(.post-enlace) { gap: 24px; }
+  @media (min-width: 900px) {
+    .destacado :global(.post-enlace) { grid-template-columns: 1.2fr 1fr; align-items: center; gap: 48px; }
+  }
+  .filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+  .filtros button {
+    min-height: 46px;
+    padding: 0 20px;
+    border-radius: 999px;
+    border: 2px solid var(--linea-fuerte);
+    background: transparent;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .filtros button[aria-pressed='true'] { background: var(--tinta); color: var(--papel); border-color: var(--tinta); }
+  .rejilla { display: grid; gap: 40px 28px; }
+  @media (min-width: 680px) { .rejilla { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1040px) { .rejilla { grid-template-columns: repeat(3, 1fr); } }
+  .rejilla :global([hidden]) { display: none; }
+</style>
+
+<script>
+  const botones = document.querySelectorAll<HTMLButtonElement>('[data-filtro]');
+  botones.forEach((b) =>
+    b.addEventListener('click', () => {
+      const filtro = b.dataset.filtro;
+      botones.forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+      document.querySelectorAll<HTMLElement>('[data-rejilla] [data-categoria]').forEach((post) => {
+        post.hidden = filtro !== 'todos' && post.dataset.categoria !== filtro;
+      });
+    }),
+  );
+</script>

@@ -1,0 +1,106 @@
+---
+// Mini test orientativo: si marcas dos o más situaciones, te sugerimos una
+// revisión. No guarda nada; todo ocurre en el navegador.
+import Icono from './Icono.astro';
+import IconoMarca from './IconoMarca.astro';
+import { waHref } from '../lib/negocio';
+import { url } from '../lib/url';
+
+const situaciones = [
+  'Subo el volumen de la tele más que los demás.',
+  'Pido que me repitan las cosas a menudo.',
+  'En restaurantes o reuniones me cuesta seguir la conversación.',
+  'Entiendo mejor a los hombres que a las mujeres o a los niños.',
+  'Me cuesta oír bien por teléfono.',
+  'Oigo pitidos o zumbidos en los oídos.',
+  'Mi familia me dice que no oigo bien.',
+];
+---
+
+<div class="test tarjeta" data-test>
+  <div class="test-cab">
+    <span class="antetitulo sin-raya">Test rápido · 30 segundos</span>
+    <h2 class="test-titulo">¿Te pasa alguna de estas cosas?</h2>
+    <p class="apagado">Marca las que te ocurren a ti (o a tu padre, tu madre…).</p>
+  </div>
+  <ul role="list" class="test-lista">
+    {
+      situaciones.map((s, i) => (
+        <li>
+          <label>
+            <input type="checkbox" data-test-opcion />
+            <span class="test-caja" aria-hidden="true"><Icono nombre="Check" /></span>
+            <span>{s}</span>
+          </label>
+        </li>
+      ))
+    }
+  </ul>
+  <div class="test-resultado" data-test-resultado aria-live="polite">
+    <p data-nivel="0">Marca las situaciones que te resulten familiares.</p>
+    <p data-nivel="1" hidden><strong>Puede ser algo puntual,</strong> pero si se repite, merece la pena una revisión.</p>
+    <p data-nivel="2" hidden><strong>Te recomendamos una revisión auditiva.</strong> Son señales típicas de una pérdida de audición que se puede tratar.</p>
+    <div class="test-acciones" data-test-acciones hidden>
+      <a class="boton" href={url('/pedir-cita/?servicio=revision-oido')}><Icono nombre="CalendarCheck" /> Pedir revisión auditiva</a>
+      <a class="boton wa" href={waHref('Hola, he hecho el test de audición de vuestra web y me gustaría pedir una revisión auditiva.')} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> WhatsApp</a>
+    </div>
+  </div>
+  <p class="test-aviso">Test orientativo. No sustituye a una audiometría.</p>
+</div>
+
+<style>
+  .test { display: grid; gap: 24px; padding: clamp(24px, 4vw, 44px); }
+  .test-cab { display: grid; gap: 10px; }
+  .test-titulo { font-size: var(--paso-3); }
+  .test-lista { display: grid; gap: 10px; }
+  .test-lista label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 60px;
+    padding: 12px 16px;
+    border-radius: var(--radio-s);
+    border: 1.5px solid var(--linea-fuerte);
+    font-weight: 700;
+    font-size: 1.08rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .test-lista label:hover { background: var(--papel); }
+  .test-lista input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .test-caja {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: none;
+    border-radius: 8px;
+    border: 2px solid var(--tinta);
+    color: transparent;
+    transition: background 0.15s, color 0.15s;
+  }
+  .test-caja :global(.icono) { width: 20px; height: 20px; stroke-width: 3; }
+  .test-lista input:checked + .test-caja { background: var(--tinta); color: var(--luz); }
+  .test-lista label:has(input:checked) { background: var(--papel-2); border-color: var(--tinta); }
+  .test-lista input:focus-visible + .test-caja { outline: 3px solid var(--roble-oscuro); outline-offset: 3px; }
+  .test-resultado { display: grid; gap: 16px; padding: 20px; border-radius: var(--radio-s); background: var(--papel-2); font-size: 1.12rem; }
+  .test-resultado [hidden] { display: none; }
+  .test-acciones { display: flex; flex-wrap: wrap; gap: 10px; }
+  .test-aviso { font-size: 0.92rem; color: var(--apagado); }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-test]').forEach((test) => {
+    const opciones = [...test.querySelectorAll<HTMLInputElement>('[data-test-opcion]')];
+    const actualizar = () => {
+      const marcadas = opciones.filter((o) => o.checked).length;
+      const nivel = marcadas === 0 ? '0' : marcadas === 1 ? '1' : '2';
+      test.querySelectorAll<HTMLElement>('[data-test-resultado] [data-nivel]').forEach((p) => {
+        p.hidden = p.dataset.nivel !== nivel;
+      });
+      const acciones = test.querySelector<HTMLElement>('[data-test-acciones]');
+      if (acciones) acciones.hidden = marcadas === 0;
+    };
+    opciones.forEach((o) => o.addEventListener('change', actualizar));
+  });
+</script>

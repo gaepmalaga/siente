@@ -1,0 +1,159 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Migas from '../../components/Migas.astro';
+import Icono from '../../components/Icono.astro';
+import IconoMarca from '../../components/IconoMarca.astro';
+import FichaContacto from '../../components/FichaContacto.astro';
+import TarjetaPost from '../../components/TarjetaPost.astro';
+import BandaCita from '../../components/BandaCita.astro';
+import { url, urlAbsoluta, rutasEnHtml } from '../../lib/url';
+import { esquemaArticulo } from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', (p) => !p.data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const d = post.data;
+const ruta = `/blog/${post.id}/`;
+const migas = [
+  { nombre: 'Inicio', ruta: '/' },
+  { nombre: 'Blog', ruta: '/blog/' },
+  { nombre: d.title, ruta },
+];
+const CATEGORIA = { vista: 'Vista', oido: 'Oído', general: 'Consejos' } as const;
+const html = rutasEnHtml(post.rendered?.html ?? '');
+const palabras = (post.body ?? '').split(/\s+/).filter(Boolean).length;
+const minutos = Math.max(2, Math.round(palabras / 200));
+const fecha = d.date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const relacionados = (await getCollection('blog', (p) => !p.data.draft && p.id !== post.id))
+  .sort((a, b) => Number(b.data.category === d.category) - Number(a.data.category === d.category) || b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+
+const ficha =
+  d.category === 'oido'
+    ? { titulo: '¿Revisamos tu audición?', servicio: 'revision-oido' }
+    : { titulo: '¿Revisamos tu vista? Es gratis', servicio: 'revision-vista' };
+const compartir = `https://wa.me/?text=${encodeURIComponent(`${d.title} ${urlAbsoluta(ruta)}`)}`;
+---
+
+<Base
+  titulo={`${d.title} | Blog Siente`}
+  descripcion={d.description}
+  tipo="article"
+  migas={migas}
+  imagen={`/og/blog-${post.id}.png`}
+  publicado={d.date}
+  modificado={d.updated}
+  esquemas={[esquemaArticulo({ titulo: d.title, descripcion: d.description, ruta, fecha: d.date, actualizado: d.updated, imagen: d.cover })]}
+>
+  <article class="articulo">
+    <header class="art-cab">
+      <div class="contenedor">
+        <Migas migas={migas} />
+        <div class="art-cab-rejilla">
+          <div class="art-cab-texto">
+            <span class="etiqueta roble">{CATEGORIA[d.category]}</span>
+            <h1>{d.title}</h1>
+            <p class="entradilla">{d.description}</p>
+            <p class="art-meta">
+              <span>Por el equipo de Siente</span>
+              <span aria-hidden="true">·</span>
+              <time datetime={d.date.toISOString()}>{fecha}</time>
+              <span aria-hidden="true">·</span>
+              <span>{minutos} min de lectura</span>
+            </p>
+          </div>
+          {
+            d.cover && (
+              <figure class="art-portada">
+                <img src={url(d.cover)} alt={d.coverAlt ?? ''} width="810" height="1080" fetchpriority="high" decoding="async" />
+              </figure>
+            )
+          }
+        </div>
+      </div>
+    </header>
+
+    <div class="contenedor art-cuerpo">
+      <div class="prosa" set:html={html} />
+      <aside class="art-lateral">
+        <FichaContacto titulo={ficha.titulo} servicio={ficha.servicio} />
+        <div class="compartir">
+          <p>¿Te ha sido útil? Compártelo</p>
+          <div>
+            <a class="boton wa pequeno" href={compartir} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> WhatsApp</a>
+            <button type="button" class="boton secundario pequeno" data-copiar={urlAbsoluta(ruta)}><Icono nombre="Link" /> <span>Copiar enlace</span></button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </article>
+
+  {
+    relacionados.length > 0 && (
+      <section class="seccion relacionados">
+        <div class="contenedor">
+          <div class="cabecera-seccion">
+            <span class="antetitulo">Sigue leyendo</span>
+            <h2 class="titulo-seccion">Más consejos</h2>
+          </div>
+          <div class="rejilla">
+            {relacionados.map((p) => <TarjetaPost post={p} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <BandaCita servicio={ficha.servicio} />
+</Base>
+
+<style>
+  .art-cab { padding-block: 28px clamp(32px, 5vw, 64px); }
+  .art-cab-rejilla { display: grid; gap: 36px; align-items: center; margin-top: 28px; }
+  .art-cab-texto { display: grid; gap: 20px; justify-items: start; }
+  .art-cab-texto h1 { font-size: var(--paso-4); max-width: 20ch; }
+  .art-meta { display: flex; flex-wrap: wrap; gap: 6px 10px; color: var(--apagado); font-size: 1rem; }
+  .art-portada { margin: 0; border-radius: var(--radio-l); overflow: hidden; background: var(--arena); aspect-ratio: 4 / 5; max-height: 560px; }
+  .art-portada img { width: 100%; height: 100%; object-fit: cover; }
+  @media (min-width: 1000px) {
+    .art-cab-rejilla { grid-template-columns: 1.4fr 1fr; gap: 64px; }
+    .art-portada { justify-self: end; width: 100%; max-width: 440px; }
+  }
+
+  .art-cuerpo { display: grid; gap: 48px; padding-bottom: var(--seccion); }
+  .art-cuerpo .prosa { max-width: 70ch; }
+  .art-lateral { display: grid; gap: 18px; align-content: start; }
+  @media (min-width: 1000px) {
+    .art-cuerpo { grid-template-columns: 1fr 340px; gap: 72px; }
+    .art-lateral { position: sticky; top: 110px; }
+  }
+  .compartir { display: grid; gap: 10px; padding: 22px; border-radius: var(--radio); border: 1.5px solid var(--linea-fuerte); }
+  .compartir p { font-weight: 700; }
+  .compartir div { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .relacionados { background: var(--papel-2); }
+  .rejilla { display: grid; gap: 32px; }
+  @media (min-width: 800px) { .rejilla { grid-template-columns: repeat(3, 1fr); } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copiar]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(b.dataset.copiar ?? location.href);
+        const texto = b.querySelector('span');
+        if (texto) {
+          texto.textContent = '¡Copiado!';
+          setTimeout(() => (texto.textContent = 'Copiar enlace'), 2000);
+        }
+      } catch {
+        /* sin permiso de portapapeles: no hacemos nada */
+      }
+    }),
+  );
+</script>

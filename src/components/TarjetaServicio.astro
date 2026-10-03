@@ -1,0 +1,55 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Icono from './Icono.astro';
+import { url } from '../lib/url';
+
+interface Props {
+  servicio: CollectionEntry<'servicios'>;
+}
+const { servicio } = Astro.props;
+const { title, summary, icon, badge, area } = servicio.data;
+const ruta = `/${area === 'vista' ? 'optica-barajas' : 'audifonos-barajas'}/${servicio.id}/`;
+---
+
+<a class="tarjeta-servicio" href={url(ruta)}>
+  <span class="ts-icono"><Icono nombre={icon} /></span>
+  {badge && <span class="etiqueta roble ts-badge">{badge}</span>}
+  <h3>{title}</h3>
+  <p>{summary}</p>
+  <span class="ts-mas">Saber más <Icono nombre="ArrowRight" /></span>
+</a>
+
+<style>
+  .tarjeta-servicio {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 12px;
+    height: 100%;
+    padding: 28px;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    box-shadow: var(--sombra-1);
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .tarjeta-servicio:hover { transform: translateY(-4px); box-shadow: var(--sombra-2); }
+  .ts-icono {
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: var(--papel-2);
+    color: var(--roble-oscuro);
+    transition: background 0.2s, color 0.2s;
+  }
+  .tarjeta-servicio:hover .ts-icono { background: var(--tinta); color: var(--luz); }
+  .ts-icono :global(.icono) { width: 30px; height: 30px; }
+  .ts-badge { position: absolute; top: 28px; right: 28px; }
+  h3 { font-size: var(--paso-1); line-height: 1.2; }
+  p { color: var(--tinta-2); }
+  .ts-mas { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+  .ts-mas :global(.icono) { width: 18px; height: 18px; transition: transform 0.2s; }
+  .tarjeta-servicio:hover .ts-mas :global(.icono) { transform: translateX(4px); }
+</style>

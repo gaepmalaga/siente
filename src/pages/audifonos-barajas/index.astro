@@ -1,0 +1,141 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Migas from '../../components/Migas.astro';
+import Icono from '../../components/Icono.astro';
+import IconoMarca from '../../components/IconoMarca.astro';
+import TarjetaServicio from '../../components/TarjetaServicio.astro';
+import TestAudicion from '../../components/TestAudicion.astro';
+import Faq from '../../components/Faq.astro';
+import BandaCita from '../../components/BandaCita.astro';
+import { negocio, waHref } from '../../lib/negocio';
+import { url } from '../../lib/url';
+import { fotos } from '../../lib/fotos';
+import { esquemaFaq } from '../../lib/schema';
+
+const servicios = (await getCollection('servicios', (s) => s.data.area === 'oido')).sort((a, b) => a.data.order - b.data.order);
+const migas = [
+  { nombre: 'Inicio', ruta: '/' },
+  { nombre: 'Audífonos', ruta: '/audifonos-barajas/' },
+];
+const preguntas = servicios.flatMap((s) => s.data.faqs.slice(0, 2));
+---
+
+<Base
+  titulo="Audífonos y Centro Auditivo en Barajas (Madrid) | Siente"
+  descripcion="Centro auditivo en Barajas: revisión auditiva con audiometría en cabina insonorizada, audífonos recargables y discretos, adaptación personalizada y mantenimiento. Avenida de Logroño, 112."
+  migas={migas}
+  imagen="/og/audifonos.png"
+  esquemas={[esquemaFaq(preguntas)]}
+>
+  <section class="hub-hero">
+    <div class="contenedor">
+      <Migas migas={migas} />
+      <div class="hub-rejilla">
+        <div class="hub-texto">
+          <span class="antetitulo">Centro auditivo · Barajas, Madrid</span>
+          <h1>Vuelve a oír los detalles</h1>
+          <p class="entradilla">
+            Revisión auditiva en cabina insonorizada, audífonos actuales —recargables, discretos y conectados— y un
+            seguimiento cercano. En la {negocio.direccion.calle}, en Barajas.
+          </p>
+          <div class="hub-acciones">
+            <a class="boton" href={url('/pedir-cita/?servicio=revision-oido')}><Icono nombre="CalendarCheck" /> Pedir revisión auditiva</a>
+            <a class="boton wa" href={waHref('Hola, tengo una consulta sobre audífonos.')} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> WhatsApp</a>
+          </div>
+        </div>
+        <div class="hub-fotos">
+          <figure class="hf-1"><Image src={fotos['cabina-audiometria']} alt="Cabina insonorizada de audiometría del centro auditivo Siente" widths={[400, 700]} sizes="(min-width: 1000px) 300px, 50vw" loading="eager" /></figure>
+          <figure class="hf-2"><Image src={fotos['expositor-audifonos']} alt="Expositor de audífonos y accesorios en Siente" widths={[400, 700]} sizes="(min-width: 1000px) 300px, 50vw" loading="eager" /></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion-s">
+    <div class="contenedor">
+      <div class="cabecera-seccion">
+        <span class="antetitulo">Servicios auditivos</span>
+        <h2 class="titulo-seccion">Del primer «¿qué?» a <em>oír bien</em></h2>
+      </div>
+      <div class="rejilla-servicios">
+        {servicios.map((s, i) => <div data-aparecer style={`--retraso: ${(i % 3) * 0.08}s`}><TarjetaServicio servicio={s} /></div>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion test-seccion">
+    <div class="contenedor test-rejilla">
+      <div class="test-intro" data-aparecer>
+        <span class="antetitulo">¿Oigo bien?</span>
+        <h2 class="titulo-seccion">La pérdida de audición llega <em>sin avisar</em></h2>
+        <p class="entradilla">
+          Llega tan poco a poco que casi siempre se dan cuenta antes los demás. Detectarla pronto hace que la adaptación a
+          unos audífonos sea mucho más fácil.
+        </p>
+        <figure class="test-foto">
+          <Image src={fotos['audifono-cargador']} alt="Audífono recargable en su estuche cargador" widths={[480, 800]} sizes="(min-width: 1000px) 480px, 100vw" />
+        </figure>
+      </div>
+      <div data-aparecer style="--retraso: 0.1s">
+        <TestAudicion />
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="cabecera-seccion">
+        <span class="antetitulo">Audífonos de hoy</span>
+        <h2 class="titulo-seccion">Nada que ver con los de antes</h2>
+      </div>
+      <ul role="list" class="ventajas">
+        <li data-aparecer><Icono nombre="BatteryCharging" /><h3>Recargables</h3><p>Los dejas en su estuche por la noche y listos para todo el día.</p></li>
+        <li data-aparecer style="--retraso: .08s"><Icono nombre="Bluetooth" /><h3>Conectados</h3><p>Llamadas, música y tele directamente en tus oídos.</p></li>
+        <li data-aparecer style="--retraso: .16s"><Icono nombre="Sparkles" /><h3>Discretos</h3><p>Diminutos, en tonos que se confunden con el pelo y la piel.</p></li>
+        <li data-aparecer style="--retraso: .24s"><Icono nombre="AudioLines" /><h3>Inteligentes</h3><p>Se adaptan solos al ruido de una calle o de un restaurante.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="contenedor">
+      <Faq preguntas={preguntas} titulo="Dudas sobre audición y audífonos" />
+    </div>
+  </section>
+
+  <BandaCita servicio="revision-oido" titulo="Haz tu revisión auditiva en Barajas" />
+</Base>
+
+<style>
+  .hub-hero { padding-block: 28px clamp(40px, 6vw, 72px); }
+  .hub-rejilla { display: grid; gap: 40px; align-items: center; margin-top: 28px; }
+  .hub-texto { display: grid; gap: 22px; justify-items: start; }
+  .hub-texto h1 { font-size: var(--paso-5); line-height: 0.98; letter-spacing: -0.045em; max-width: 11ch; }
+  .hub-acciones { display: flex; flex-wrap: wrap; gap: 12px; }
+  .hub-fotos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: end; }
+  .hub-fotos figure { margin: 0; border-radius: var(--radio-l); overflow: hidden; aspect-ratio: 3 / 4; }
+  .hub-fotos :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .hf-2 { transform: translateY(-36px); }
+  @media (min-width: 1000px) { .hub-rejilla { grid-template-columns: 1.1fr 1fr; gap: 64px; } }
+
+  .rejilla-servicios { display: grid; gap: 18px; }
+  .rejilla-servicios > div { height: 100%; }
+  @media (min-width: 860px) { .rejilla-servicios { grid-template-columns: repeat(3, 1fr); } }
+
+  .test-seccion { background: var(--papel-2); }
+  .test-rejilla { display: grid; gap: 44px; align-items: start; }
+  .test-intro { display: grid; gap: 22px; }
+  .test-foto { margin: 0; border-radius: var(--radio-l); overflow: hidden; }
+  .test-foto :global(img) { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+  @media (min-width: 1000px) { .test-rejilla { grid-template-columns: 1fr 1.1fr; gap: 64px; } .test-intro { position: sticky; top: 110px; } }
+
+  .ventajas { display: grid; gap: 16px; }
+  @media (min-width: 720px) { .ventajas { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .ventajas { grid-template-columns: repeat(4, 1fr); } }
+  .ventajas li { display: grid; gap: 10px; align-content: start; padding: 28px; border-radius: var(--radio); background: var(--blanco); box-shadow: var(--sombra-1); }
+  .ventajas :global(.icono) { width: 36px; height: 36px; color: var(--roble-oscuro); }
+  .ventajas h3 { font-size: var(--paso-1); }
+  .ventajas p { color: var(--tinta-2); }
+</style>

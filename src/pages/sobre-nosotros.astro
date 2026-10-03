@@ -1,0 +1,131 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Migas from '../components/Migas.astro';
+import Icono from '../components/Icono.astro';
+import Rotulo from '../components/Rotulo.astro';
+import BandaCita from '../components/BandaCita.astro';
+import { negocio } from '../lib/negocio';
+import { fotos } from '../lib/fotos';
+
+const migas = [
+  { nombre: 'Inicio', ruta: '/' },
+  { nombre: 'Sobre nosotros', ruta: '/sobre-nosotros/' },
+];
+const valores = [
+  { icono: 'Hourglass', titulo: 'Tiempo', texto: 'Una revisión bien hecha no cabe en cinco minutos. Te dedicamos el que haga falta.' },
+  { icono: 'Scale', titulo: 'Honestidad', texto: 'Si no necesitas gafas nuevas o audífonos, te lo decimos. Así de simple.' },
+  { icono: 'HeartHandshake', titulo: 'Cercanía', texto: 'Somos del barrio y para el barrio. Te conocemos por tu nombre.' },
+  { icono: 'Microscope', titulo: 'Tecnología', texto: 'Gabinete de optometría y cabina de audiometría insonorizada.' },
+];
+---
+
+<Base
+  titulo="Sobre nosotros · Siente, óptica y centro auditivo de Barajas"
+  descripcion="Conoce Siente, el centro óptico y auditivo de la Avenida de Logroño en Barajas: profesionales cualificados, tecnología y trato cercano. Tus sentidos en las mejores manos."
+  migas={migas}
+>
+  <section class="sn-hero">
+    <div class="contenedor">
+      <Migas migas={migas} />
+      <div class="sn-rejilla">
+        <div class="sn-texto">
+          <span class="antetitulo">Sobre nosotros</span>
+          <h1>{negocio.eslogan}</h1>
+          <p class="entradilla">
+            Siente nace de una idea sencilla: <strong>ver bien y oír bien no es solo una cuestión de salud, es calidad de vida.</strong>
+            Por eso juntamos óptica y audición en un mismo centro, en pleno barrio de Barajas.
+          </p>
+        </div>
+        <Rotulo class="sn-rotulo" />
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="contenedor-estrecho prosa">
+      <p>
+        Trabajamos cada día con un objetivo claro: <strong>mejorar tu calidad de vida cuidando de tu vista y de tu audición.</strong>
+        Somos un centro especializado que apuesta por la atención personalizada, el trato cercano y el asesoramiento honesto,
+        adaptándonos a las necesidades reales de cada persona.
+      </p>
+      <p>
+        Contamos con profesionales cualificados y tecnología avanzada para hacer revisiones completas de la vista y de la
+        audición, y para ofrecer soluciones a medida en gafas, lentillas y audífonos. Nos implicamos en cada caso y
+        dedicamos el tiempo necesario para que te sientas acompañado y seguro en cada decisión.
+      </p>
+      <blockquote>Porque ver bien y oír bien no es solo una cuestión de salud, sino de bienestar: en Siente ponemos a las personas en el centro de todo lo que hacemos.</blockquote>
+    </div>
+  </section>
+
+  <section class="seccion valores-seccion">
+    <div class="contenedor">
+      <div class="cabecera-seccion">
+        <span class="antetitulo">Lo que nos mueve</span>
+        <h2 class="titulo-seccion">Cuatro cosas que no negociamos</h2>
+      </div>
+      <ul role="list" class="valores">
+        {
+          valores.map((v, i) => (
+            <li data-aparecer style={`--retraso: ${i * 0.08}s`}>
+              <Icono nombre={v.icono} />
+              <h3>{v.titulo}</h3>
+              <p>{v.texto}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="cabecera-seccion">
+        <span class="antetitulo">El centro por dentro</span>
+        <h2 class="titulo-seccion">Pásate a conocernos</h2>
+      </div>
+      <div class="galeria">
+        <figure class="g1"><Image src={fotos['expositor-gafas']} alt="Expositor de gafas graduadas con estantes de madera" widths={[400, 800]} sizes="(min-width: 1000px) 400px, 50vw" /></figure>
+        <figure class="g2"><Image src={fotos['gafas-carey']} alt="Monturas carey en estante de madera" widths={[600, 1000]} sizes="(min-width: 1000px) 800px, 100vw" /></figure>
+        <figure class="g3"><Image src={fotos['gabinete-optometria']} alt="Gabinete de optometría con foróptero" widths={[400, 800]} sizes="(min-width: 1000px) 400px, 50vw" /><figcaption>Gabinete de optometría</figcaption></figure>
+        <figure class="g4"><Image src={fotos['cabina-audiometria']} alt="Cabina insonorizada de audiometría" widths={[400, 800]} sizes="(min-width: 1000px) 400px, 50vw" /><figcaption>Cabina de audiometría</figcaption></figure>
+        <figure class="g5"><Image src={fotos['expositor-audifonos']} alt="Expositor de audífonos" widths={[400, 800]} sizes="(min-width: 1000px) 400px, 50vw" /></figure>
+      </div>
+    </div>
+  </section>
+
+  <BandaCita />
+</Base>
+
+<style>
+  .sn-hero { padding-block: 28px clamp(40px, 6vw, 80px); }
+  .sn-rejilla { display: grid; gap: 40px; align-items: center; margin-top: 28px; }
+  .sn-texto { display: grid; gap: 22px; }
+  .sn-texto h1 { font-size: var(--paso-5); line-height: 0.98; letter-spacing: -0.045em; max-width: 12ch; }
+  .sn-rejilla :global(.sn-rotulo) { min-height: 420px; }
+  @media (min-width: 1000px) { .sn-rejilla { grid-template-columns: 1.1fr 1fr; gap: 64px; } }
+
+  .valores-seccion { background: var(--papel-2); }
+  .valores { display: grid; gap: 16px; }
+  @media (min-width: 720px) { .valores { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1100px) { .valores { grid-template-columns: repeat(4, 1fr); } }
+  .valores li { display: grid; gap: 12px; align-content: start; padding: 30px; border-radius: var(--radio); background: var(--blanco); box-shadow: var(--sombra-1); }
+  .valores :global(.icono) { width: 38px; height: 38px; color: var(--roble-oscuro); }
+  .valores h3 { font-size: var(--paso-2); }
+  .valores p { color: var(--tinta-2); }
+
+  .galeria { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .galeria figure { position: relative; margin: 0; border-radius: var(--radio); overflow: hidden; aspect-ratio: 3 / 4; }
+  .galeria :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .galeria .g2 { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+  .galeria figcaption { position: absolute; left: 10px; bottom: 10px; padding: 6px 12px; border-radius: 999px; background: rgb(23 20 17 / 0.78); color: var(--papel); font-size: 0.88rem; font-weight: 700; }
+  @media (min-width: 1000px) {
+    .galeria { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 220px; }
+    .galeria figure { aspect-ratio: auto; }
+    .galeria .g1 { grid-column: 1; grid-row: 1 / span 2; }
+    .galeria .g2 { grid-column: 2 / span 2; grid-row: 1; aspect-ratio: auto; }
+    .galeria .g3 { grid-column: 4; grid-row: 1 / span 2; }
+    .galeria .g5 { grid-column: 2; grid-row: 2; }
+    .galeria .g4 { grid-column: 3; grid-row: 2; }
+  }
+</style>

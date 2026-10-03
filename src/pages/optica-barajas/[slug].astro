@@ -1,0 +1,13 @@
+---
+import { getCollection } from 'astro:content';
+import PaginaServicio from '../../layouts/PaginaServicio.astro';
+
+export async function getStaticPaths() {
+  const servicios = await getCollection('servicios', (s) => s.data.area === 'vista');
+  return servicios.map((servicio) => ({ params: { slug: servicio.id }, props: { servicio } }));
+}
+
+const { servicio } = Astro.props;
+---
+
+<PaginaServicio servicio={servicio} />

@@ -1,0 +1,48 @@
+---
+// Ficha lateral fija en páginas de servicio y artículos: pedir cita a mano.
+import Icono from './Icono.astro';
+import IconoMarca from './IconoMarca.astro';
+import EstadoApertura from './EstadoApertura.astro';
+import { negocio, telHref, waHref, direccionCorta, mapas } from '../lib/negocio';
+import { url } from '../lib/url';
+
+interface Props {
+  titulo?: string;
+  servicio?: string;
+  mensaje?: string;
+}
+const { titulo = 'Pide tu cita', servicio, mensaje = 'Hola, os escribo desde la web. Me gustaría pedir cita.' } = Astro.props;
+---
+
+<aside class="ficha" aria-label="Pedir cita">
+  <p class="ficha-titulo">{titulo}</p>
+  <EstadoApertura class="ficha-estado" />
+  <a class="boton bloque" href={url(`/pedir-cita/${servicio ? `?servicio=${servicio}` : ''}`)}><Icono nombre="CalendarCheck" /> Pedir cita</a>
+  <a class="boton wa bloque" href={waHref(mensaje)} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> WhatsApp</a>
+  <a class="ficha-linea" href={telHref()}><Icono nombre="Phone" /> {negocio.telefono}</a>
+  <a class="ficha-linea" href={mapas.comoLlegar} target="_blank" rel="noopener"><Icono nombre="MapPin" /> {direccionCorta}</a>
+</aside>
+
+<style>
+  .ficha {
+    display: grid;
+    gap: 12px;
+    padding: 26px;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    box-shadow: var(--sombra-1);
+  }
+  .ficha-titulo { font-size: var(--paso-1); font-weight: 800; letter-spacing: -0.015em; }
+  .ficha :global(.ficha-estado) { font-size: 0.98rem; margin-bottom: 4px; }
+  .ficha-linea {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--linea);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .ficha-linea :global(.icono) { width: 20px; height: 20px; flex: none; color: var(--roble-oscuro); }
+  .ficha-linea:hover { text-decoration: underline; }
+</style>

@@ -1,0 +1,130 @@
+---
+import Base from '../layouts/Base.astro';
+import Migas from '../components/Migas.astro';
+import Icono from '../components/Icono.astro';
+import IconoMarca from '../components/IconoMarca.astro';
+import EstadoApertura from '../components/EstadoApertura.astro';
+import TablaHorario from '../components/TablaHorario.astro';
+import Mapa from '../components/Mapa.astro';
+import { negocio, telHref, waHref, WA_SALUDO, direccionCompleta } from '../lib/negocio';
+import { url } from '../lib/url';
+
+const migas = [
+  { nombre: 'Inicio', ruta: '/' },
+  { nombre: 'Contacto', ruta: '/contacto/' },
+];
+const canales = [
+  { icono: 'Phone', titulo: 'Teléfono', valor: negocio.telefono, href: telHref(), texto: 'Llámanos en horario de apertura.' },
+  { icono: 'MessageCircle', titulo: 'WhatsApp', valor: negocio.movil, href: waHref(WA_SALUDO), texto: 'Escríbenos cuando quieras.', wa: true },
+  { icono: 'Mail', titulo: 'Correo', valor: negocio.email, href: `mailto:${negocio.email}`, texto: 'Para consultas sin prisa.' },
+];
+---
+
+<Base
+  titulo="Contacto y cómo llegar · Óptica Siente, Avenida de Logroño 112 (Barajas)"
+  descripcion={`Contacta con Siente, óptica y centro auditivo en Barajas: ${negocio.telefono}, WhatsApp ${negocio.movil}. ${direccionCompleta}, muy cerca del Metro Barajas (L8).`}
+  migas={migas}
+>
+  <section class="contacto">
+    <div class="contenedor">
+      <Migas migas={migas} />
+      <header class="contacto-cab">
+        <span class="antetitulo">Contacto</span>
+        <h1>Aquí nos tienes</h1>
+        <EstadoApertura class="contacto-estado" />
+      </header>
+
+      <ul role="list" class="canales">
+        {
+          canales.map((c) => (
+            <li>
+              <a class:list={['canal', { wa: c.wa }]} href={c.href} target={c.wa ? '_blank' : undefined} rel={c.wa ? 'noopener' : undefined}>
+                <span class="canal-icono">{c.wa ? <IconoMarca nombre="whatsapp" /> : <Icono nombre={c.icono} />}</span>
+                <span class="canal-titulo">{c.titulo}</span>
+                <strong>{c.valor}</strong>
+                <span class="apagado">{c.texto}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="contacto-rejilla">
+        <div class="tarjeta bloque">
+          <h2>Horario</h2>
+          <TablaHorario />
+          <a class="boton bloque" href={url('/pedir-cita/')}><Icono nombre="CalendarCheck" /> Pedir cita</a>
+        </div>
+        <div class="tarjeta bloque">
+          <h2>Cómo llegar</h2>
+          <Mapa />
+          <ul role="list" class="llegar">
+            {
+              negocio.comoLlegar.map((c) => (
+                <li>
+                  <span class="llegar-icono">
+                    <Icono nombre={c.medio === 'metro' ? 'TrainFront' : c.medio === 'bus' ? 'Bus' : 'Car'} />
+                  </span>
+                  {c.texto}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+
+      <section class="datos tarjeta" aria-labelledby="datos-titulo">
+        <h2 id="datos-titulo">Datos del centro</h2>
+        <dl>
+          <div><dt>Nombre</dt><dd>{negocio.nombre}</dd></div>
+          <div><dt>Dirección</dt><dd>{direccionCompleta}</dd></div>
+          <div><dt>Barrio</dt><dd>{negocio.direccion.barrio} ({negocio.zonas.filter((z) => z !== 'Barajas').join(', ')})</dd></div>
+          <div><dt>Titular</dt><dd>{negocio.razonSocial} · NIF {negocio.nif}</dd></div>
+        </dl>
+      </section>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contacto { padding-block: 28px var(--seccion); }
+  .contacto-cab { display: grid; gap: 16px; margin: 28px 0 40px; }
+  .contacto-cab h1 { font-size: var(--paso-5); line-height: 0.98; letter-spacing: -0.045em; }
+  .contacto-cab :global(.contacto-estado) { font-size: 1.15rem; }
+
+  .canales { display: grid; gap: 14px; margin-bottom: 28px; }
+  @media (min-width: 860px) { .canales { grid-template-columns: repeat(3, 1fr); } }
+  .canal {
+    display: grid;
+    gap: 6px;
+    height: 100%;
+    padding: 26px;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    box-shadow: var(--sombra-1);
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .canal:hover { transform: translateY(-3px); box-shadow: var(--sombra-2); }
+  .canal strong { font-size: var(--paso-2); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+  .canal-titulo { font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.85rem; color: var(--roble-oscuro); }
+  .canal-icono { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 8px; border-radius: 16px; background: var(--tinta); color: var(--luz); }
+  .canal.wa .canal-icono { background: var(--wa); color: #fff; }
+  .canal-icono :global(.icono) { width: 26px; height: 26px; }
+
+  .contacto-rejilla { display: grid; gap: 18px; margin-bottom: 18px; }
+  @media (min-width: 1000px) { .contacto-rejilla { grid-template-columns: 1fr 1.5fr; } }
+  .bloque { display: grid; gap: 18px; align-content: start; padding: clamp(22px, 3vw, 36px); }
+  .bloque h2, .datos h2 { font-size: var(--paso-2); }
+  .llegar { display: grid; gap: 12px; }
+  .llegar li { display: flex; align-items: center; gap: 14px; }
+  .llegar-icono { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 12px; background: var(--papel-2); }
+  .llegar-icono :global(.icono) { width: 22px; height: 22px; }
+
+  .datos { display: grid; gap: 18px; padding: clamp(22px, 3vw, 36px); }
+  .datos dl { display: grid; gap: 0; margin: 0; }
+  .datos dl div { display: grid; gap: 4px; padding: 14px 0; border-bottom: 1px solid var(--linea); }
+  @media (min-width: 720px) { .datos dl div { grid-template-columns: 200px 1fr; } }
+  .datos dt { font-weight: 700; }
+  .datos dd { margin: 0; color: var(--tinta-2); }
+</style>
