@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import PaginaTexto from '../layouts/PaginaTexto.astro';
+import { url } from '../lib/url';
+import { planVeoVigente } from '../lib/negocio';
+
+const servicios = (await getCollection('servicios')).sort((a, b) => a.data.order - b.data.order);
+const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<PaginaTexto
+  titulo="Mapa web"
+  tituloSeo="Mapa web · Siente, centro óptico y auditivo"
+  descripcion="Todas las páginas de la web de Siente, óptica y centro auditivo en Barajas."
+  ruta="/mapa-web/"
+>
+  <ul>
+    <li><a href={url('/')}>Inicio</a></li>
+    <li>
+      <a href={url('/optica-barajas/')}>Óptica en Barajas</a>
+      <ul>{servicios.filter((s) => s.data.area === 'vista').map((s) => <li><a href={url(`/optica-barajas/${s.id}/`)}>{s.data.title}</a></li>)}</ul>
+    </li>
+    <li>
+      <a href={url('/audifonos-barajas/')}>Centro auditivo y audífonos</a>
+      <ul>{servicios.filter((s) => s.data.area === 'oido').map((s) => <li><a href={url(`/audifonos-barajas/${s.id}/`)}>{s.data.title}</a></li>)}</ul>
+    </li>
+    {planVeoVigente() && <li><a href={url('/plan-veo/')}>Plan VEO</a></li>}
+    <li><a href={url('/pedir-cita/')}>Pedir cita</a></li>
+    <li><a href={url('/sobre-nosotros/')}>Sobre nosotros</a></li>
+    <li><a href={url('/contacto/')}>Contacto y cómo llegar</a></li>
+    <li>
+      <a href={url('/blog/')}>Blog</a>
+      <ul>{posts.map((p) => <li><a href={url(`/blog/${p.id}/`)}>{p.data.title}</a></li>)}</ul>
+    </li>
+    <li><a href={url('/enlaces/')}>Enlaces rápidos</a></li>
+    <li><a href={url('/aviso-legal/')}>Aviso legal</a></li>
+    <li><a href={url('/politica-de-privacidad/')}>Política de privacidad</a></li>
+    <li><a href={url('/politica-de-cookies/')}>Política de cookies</a></li>
+    <li><a href={url('/accesibilidad/')}>Accesibilidad</a></li>
+  </ul>
+</PaginaTexto>

@@ -1,0 +1,40 @@
+---
+// Plantilla sencilla para páginas de texto (legales, accesibilidad, mapa web).
+import Base from './Base.astro';
+import Migas from '../components/Migas.astro';
+
+interface Props {
+  titulo: string;
+  tituloSeo: string;
+  descripcion: string;
+  ruta: string;
+  actualizado?: string;
+  noindex?: boolean;
+}
+const { titulo, tituloSeo, descripcion, ruta, actualizado, noindex } = Astro.props;
+const migas = [
+  { nombre: 'Inicio', ruta: '/' },
+  { nombre: titulo, ruta },
+];
+---
+
+<Base titulo={tituloSeo} descripcion={descripcion} migas={migas} noindex={noindex}>
+  <article class="texto">
+    <div class="contenedor-estrecho">
+      <Migas migas={migas} />
+      <header>
+        <h1>{titulo}</h1>
+        {actualizado && <p class="apagado">Última actualización: {actualizado}</p>}
+      </header>
+      <div class="prosa">
+        <slot />
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .texto { padding-block: 28px var(--seccion); }
+  header { display: grid; gap: 12px; margin: 28px 0 40px; }
+  h1 { font-size: var(--paso-4); }
+</style>

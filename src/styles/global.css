@@ -81,6 +81,8 @@ body {
   overflow-x: clip;
 }
 
+body.desnuda { padding-bottom: 0 !important; }
+
 img, svg, video { display: block; max-width: 100%; }
 img { height: auto; }
 
@@ -169,13 +171,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .titulo-seccion {
   font-size: var(--paso-4);
-  max-width: 18ch;
+  max-width: 21ch;
 }
 .titulo-seccion em,
 .destacar {
   font-style: normal;
   background: linear-gradient(180deg, transparent 62%, rgb(217 183 140 / 0.65) 62%);
   padding-inline: 0.06em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 .entradilla {
   font-size: var(--paso-1);

@@ -74,9 +74,12 @@ const Enlaces = z.object({
   ),
 });
 
+// El panel puede guardar un número vacío como "" o null: se tratan igual.
+const numeroOpcional = z.preprocess((v) => (v === '' || v == null ? null : Number(v)), z.number().nullable());
+
 const Resenas = z.object({
-  notaMedia: z.number().nullable().optional(),
-  totalResenas: z.number().nullable().optional(),
+  notaMedia: numeroOpcional.optional(),
+  totalResenas: numeroOpcional.optional(),
   resenas: z
     .array(
       z.object({

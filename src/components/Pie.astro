@@ -98,8 +98,8 @@ const anio = new Date().getFullYear();
     font-size: 1rem;
   }
   .pie-franja { height: 14px; }
-  .pie a { color: var(--papel); text-decoration: none; }
-  .pie a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .pie a:not(.boton) { color: var(--papel); text-decoration: none; }
+  .pie a:not(.boton):hover { text-decoration: underline; text-underline-offset: 3px; }
   .pie-rejilla {
     display: grid;
     gap: 44px;

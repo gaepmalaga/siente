@@ -16,7 +16,7 @@ const migas = [
 const canales = [
   { icono: 'Phone', titulo: 'Teléfono', valor: negocio.telefono, href: telHref(), texto: 'Llámanos en horario de apertura.' },
   { icono: 'MessageCircle', titulo: 'WhatsApp', valor: negocio.movil, href: waHref(WA_SALUDO), texto: 'Escríbenos cuando quieras.', wa: true },
-  { icono: 'Mail', titulo: 'Correo', valor: negocio.email, href: `mailto:${negocio.email}`, texto: 'Para consultas sin prisa.' },
+  { icono: 'Mail', titulo: 'Correo', valor: negocio.email, href: `mailto:${negocio.email}`, texto: 'Para consultas sin prisa.', largo: true },
 ];
 ---
 
@@ -41,7 +41,7 @@ const canales = [
               <a class:list={['canal', { wa: c.wa }]} href={c.href} target={c.wa ? '_blank' : undefined} rel={c.wa ? 'noopener' : undefined}>
                 <span class="canal-icono">{c.wa ? <IconoMarca nombre="whatsapp" /> : <Icono nombre={c.icono} />}</span>
                 <span class="canal-titulo">{c.titulo}</span>
-                <strong>{c.valor}</strong>
+                <strong class:list={{ largo: c.largo }}>{c.valor}</strong>
                 <span class="apagado">{c.texto}</span>
               </a>
             </li>
@@ -50,12 +50,12 @@ const canales = [
       </ul>
 
       <div class="contacto-rejilla">
-        <div class="tarjeta bloque">
+        <div class="tarjeta caja">
           <h2>Horario</h2>
           <TablaHorario />
           <a class="boton bloque" href={url('/pedir-cita/')}><Icono nombre="CalendarCheck" /> Pedir cita</a>
         </div>
-        <div class="tarjeta bloque">
+        <div class="tarjeta caja">
           <h2>Cómo llegar</h2>
           <Mapa />
           <ul role="list" class="llegar">
@@ -107,6 +107,7 @@ const canales = [
   }
   .canal:hover { transform: translateY(-3px); box-shadow: var(--sombra-2); }
   .canal strong { font-size: var(--paso-2); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+  .canal strong.largo { font-size: var(--paso-1); }
   .canal-titulo { font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.85rem; color: var(--roble-oscuro); }
   .canal-icono { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 8px; border-radius: 16px; background: var(--tinta); color: var(--luz); }
   .canal.wa .canal-icono { background: var(--wa); color: #fff; }
@@ -114,8 +115,8 @@ const canales = [
 
   .contacto-rejilla { display: grid; gap: 18px; margin-bottom: 18px; }
   @media (min-width: 1000px) { .contacto-rejilla { grid-template-columns: 1fr 1.5fr; } }
-  .bloque { display: grid; gap: 18px; align-content: start; padding: clamp(22px, 3vw, 36px); }
-  .bloque h2, .datos h2 { font-size: var(--paso-2); }
+  .caja { display: grid; gap: 18px; align-content: start; padding: clamp(22px, 3vw, 36px); }
+  .caja h2, .datos h2 { font-size: var(--paso-2); }
   .llegar { display: grid; gap: 12px; }
   .llegar li { display: flex; align-items: center; gap: 14px; }
   .llegar-icono { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 12px; background: var(--papel-2); }

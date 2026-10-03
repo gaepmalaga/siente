@@ -1,0 +1,20 @@
+---
+// Panel de administración (Sveltia CMS). Todo lo que se guarda aquí es un
+// commit al repositorio, y GitHub Actions republica la web en 1-2 minutos.
+import { url } from '../../lib/url';
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Panel · Siente</title>
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <link href={url('/admin/config.yml')} type="application/yaml" rel="cms-config-url" />
+  </head>
+  <body>
+    <script is:inline src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+  </body>
+</html>

@@ -47,4 +47,8 @@ export default defineConfig({
   build: { format: 'directory' },
   redirects,
   prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
+  devToolbar: { enabled: false },
+  // Astro 7 compacta el HTML con reglas JSX y se come espacios entre un
+  // <strong> y el texto de la línea siguiente. Volvemos al modo clásico.
+  compressHTML: true,
 });

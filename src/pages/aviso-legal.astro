@@ -1,0 +1,64 @@
+---
+import PaginaTexto from '../layouts/PaginaTexto.astro';
+import { negocio, direccionCompleta } from '../lib/negocio';
+import { url } from '../lib/url';
+---
+
+<PaginaTexto
+  titulo="Aviso legal"
+  tituloSeo="Aviso legal · Siente, centro óptico y auditivo"
+  descripcion="Aviso legal del sitio web de Siente, centro óptico y auditivo en Barajas (Madrid)."
+  ruta="/aviso-legal/"
+  actualizado="octubre de 2026"
+>
+  <p>
+    En cumplimiento de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio
+    Electrónico (LSSI-CE), se informa de los datos del titular de este sitio web:
+  </p>
+  <ul>
+    <li><strong>Titular:</strong> {negocio.razonSocial} (en adelante, «el titular»)</li>
+    <li><strong>Nombre comercial:</strong> {negocio.nombre}</li>
+    <li><strong>NIF:</strong> {negocio.nif}</li>
+    <li><strong>Domicilio:</strong> {direccionCompleta}</li>
+    <li><strong>Teléfono:</strong> {negocio.telefono}</li>
+    <li><strong>Correo electrónico:</strong> <a href={`mailto:${negocio.email}`}>{negocio.email}</a></li>
+  </ul>
+
+  <h2>Objeto</h2>
+  <p>
+    Este sitio web tiene como finalidad informar sobre los servicios ópticos y auditivos que presta el titular en su
+    centro de Barajas (Madrid) y facilitar el contacto y la petición de cita.
+  </p>
+
+  <h2>Propiedad intelectual e industrial</h2>
+  <p>
+    Los contenidos de este sitio —textos, fotografías, diseño gráfico y logotipos— pertenecen al titular o a terceros que
+    han autorizado su uso. Queda prohibida su reproducción, distribución o transformación con fines comerciales sin
+    autorización expresa. Las marcas de terceros que puedan mencionarse pertenecen a sus respectivos propietarios.
+  </p>
+
+  <h2>Responsabilidad</h2>
+  <p>
+    El titular procura que la información del sitio sea exacta y esté actualizada, pero no garantiza la ausencia de
+    errores y se reserva el derecho a modificar los contenidos en cualquier momento. La información de este sitio es de
+    carácter general y <strong>no sustituye la valoración individual</strong> de un profesional sanitario.
+  </p>
+  <p>
+    El titular no se responsabiliza del contenido de los sitios web de terceros a los que se pueda acceder mediante
+    enlaces (por ejemplo, redes sociales, mapas o WhatsApp).
+  </p>
+
+  <h2>Petición de cita</h2>
+  <p>
+    El formulario de cita de este sitio no envía ni almacena datos en ningún servidor del titular: se limita a componer un
+    mensaje que el usuario envía, si lo desea, desde su propia aplicación de WhatsApp o de correo electrónico. Consulta la
+    <a href={url('/politica-de-privacidad/')}>política de privacidad</a>.
+  </p>
+
+  <h2>Legislación aplicable</h2>
+  <p>
+    Las presentes condiciones se rigen por la legislación española. Para cualquier controversia, las partes se someten a
+    los juzgados y tribunales que correspondan conforme a la normativa vigente, sin perjuicio de los derechos que asistan
+    al usuario como consumidor.
+  </p>
+</PaginaTexto>

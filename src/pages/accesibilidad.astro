@@ -1,0 +1,35 @@
+---
+import PaginaTexto from '../layouts/PaginaTexto.astro';
+import { negocio } from '../lib/negocio';
+---
+
+<PaginaTexto
+  titulo="Accesibilidad"
+  tituloSeo="Accesibilidad · Siente, centro óptico y auditivo"
+  descripcion="Compromiso de accesibilidad de la web de Siente: tipografía para baja visión, tamaño de letra ajustable, alto contraste y navegación por teclado."
+  ruta="/accesibilidad/"
+  actualizado="octubre de 2026"
+>
+  <p>
+    Somos un centro óptico y auditivo: muchas de las personas que nos visitan ven o oyen con dificultad. Por eso esta web
+    se ha diseñado pensando primero en ellas, siguiendo las pautas WCAG 2.2.
+  </p>
+
+  <h2>Qué hemos hecho</h2>
+  <ul>
+    <li><strong>Tipografía para baja visión:</strong> usamos Atkinson Hyperlegible, creada por el Braille Institute para que cada letra se distinga con facilidad.</li>
+    <li><strong>Tamaño de letra ajustable:</strong> el botón «Tamaño de letra» de la parte superior agranda toda la web.</li>
+    <li><strong>Alto contraste</strong> entre texto y fondo, y texto base de 18 píxeles.</li>
+    <li><strong>Botones grandes</strong>, fáciles de pulsar con el dedo.</li>
+    <li><strong>Navegación con teclado</strong> y enlace para saltar directamente al contenido.</li>
+    <li><strong>Textos alternativos</strong> en las imágenes y estructura de encabezados ordenada para lectores de pantalla.</li>
+    <li><strong>Animaciones discretas</strong>, que se desactivan si tu dispositivo tiene activada la opción de reducir movimiento.</li>
+    <li><strong>Sin barreras para pedir cita:</strong> siempre puedes llamar por teléfono o escribir por WhatsApp.</li>
+  </ul>
+
+  <h2>¿Has encontrado alguna barrera?</h2>
+  <p>
+    Si algo de la web no te resulta accesible, cuéntanoslo en <a href={`mailto:${negocio.email}`}>{negocio.email}</a> o
+    llamando al {negocio.telefono}. Lo revisaremos lo antes posible.
+  </p>
+</PaginaTexto>

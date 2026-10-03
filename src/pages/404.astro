@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import Icono from '../components/Icono.astro';
+import LogoMarca from '../components/LogoMarca.astro';
+import { url } from '../lib/url';
+---
+
+<Base titulo="Página no encontrada · Siente" descripcion="Esta página no existe." noindex>
+  <section class="e404">
+    <div class="contenedor e404-dentro">
+      <LogoMarca class="e404-marca" animado />
+      <p class="antetitulo sin-raya">Error 404</p>
+      <h1>Esto se ve un poco borroso…</h1>
+      <p class="entradilla">No encontramos la página que buscas. Puede que haya cambiado de dirección con la nueva web.</p>
+      <div class="e404-acciones">
+        <a class="boton" href={url('/')}><Icono nombre="House" /> Ir al inicio</a>
+        <a class="boton secundario" href={url('/pedir-cita/')}><Icono nombre="CalendarCheck" /> Pedir cita</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .e404 { padding-block: var(--seccion); }
+  .e404-dentro { display: grid; justify-items: center; gap: 22px; text-align: center; }
+  .e404-dentro :global(.e404-marca) { width: min(360px, 80%); color: var(--roble); }
+  h1 { font-size: var(--paso-4); filter: blur(1.2px); transition: filter 0.6s; }
+  h1:hover { filter: none; }
+  .e404-acciones { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+</style>
