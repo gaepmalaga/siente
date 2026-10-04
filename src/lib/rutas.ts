@@ -1,12 +1,13 @@
 // Inventario de todas las páginas públicas: lo usan el sitemap y llms.txt.
 import { getCollection } from 'astro:content';
+import { esPublico } from './blog';
 import { planVeoVigente } from './negocio';
 
 export type Ruta = { ruta: string; titulo: string; prioridad: number; modificado?: Date };
 
 export async function rutasPublicas(): Promise<Ruta[]> {
   const servicios = (await getCollection('servicios')).sort((a, b) => a.data.order - b.data.order);
-  const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+  const posts = (await getCollection('blog', esPublico)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
   return [
     { ruta: '/', titulo: 'Inicio', prioridad: 1 },

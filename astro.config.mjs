@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import svelte from '@astrojs/svelte';
 
 // La URL pública y la subcarpeta se controlan desde fuera (variables del
 // workflow de GitHub Pages) para poder pasar de la demo en
@@ -23,6 +24,7 @@ const blogAntiguo = [
 ];
 
 // Astro no antepone la subcarpeta a los destinos de las redirecciones.
+/** @param {string} ruta */
 const conBase = (ruta) => `${BASE_PATH.replace(/\/$/, '')}${ruta}`;
 
 /** @type {Record<string, string>} */
@@ -50,6 +52,8 @@ export default defineConfig({
   trailingSlash: 'always',
   build: { format: 'directory' },
   redirects,
+  // Svelte solo se usa en el panel /admin; la web pública no carga JavaScript de framework.
+  integrations: [svelte()],
   prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   devToolbar: { enabled: false },
   // Astro 7 compacta el HTML con reglas JSX y se come espacios entre un

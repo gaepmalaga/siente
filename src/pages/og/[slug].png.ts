@@ -1,12 +1,13 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
+import { esPublico } from '../../lib/blog';
 import { generarOg } from '../../lib/og';
 
 type Datos = { antetitulo: string; titulo: string; subtitulo?: string };
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const servicios = await getCollection('servicios');
-  const posts = await getCollection('blog', (p) => !p.data.draft);
+  const posts = await getCollection('blog', esPublico);
   const fijas: { slug: string; datos: Datos }[] = [
     { slug: 'inicio', datos: { antetitulo: 'Barajas · Madrid', titulo: 'Óptica y centro auditivo en Barajas', subtitulo: 'Revisión de la vista gratis · Audífonos · Plan VEO' } },
     { slug: 'optica', datos: { antetitulo: 'Óptica', titulo: 'Tu óptica en Barajas', subtitulo: 'Revisión gratis, gafas, progresivas y lentillas' } },

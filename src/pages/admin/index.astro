@@ -1,20 +1,30 @@
 ---
-// Panel de administración (Sveltia CMS). Todo lo que se guarda aquí es un
-// commit al repositorio, y GitHub Actions republica la web en 1-2 minutos.
+// Panel de administración propio (Svelte). Usa GitHub como base de datos: cada
+// publicación es un commit y GitHub Actions republica la web.
+import Panel from '../../admin/Panel.svelte';
 import { url } from '../../lib/url';
+
+const config = {
+  repo: process.env.GITHUB_REPOSITORY || 'gaepmalaga/siente',
+  rama: 'main',
+  sitio: new URL(url('/'), Astro.site).href,
+  base: import.meta.env.BASE_URL,
+  demoUrl: url('/admin/demo.json'),
+  authUrl: import.meta.env.PUBLIC_PANEL_AUTH_URL ?? '',
+};
 ---
 
 <!doctype html>
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#171411" />
     <title>Panel · Siente</title>
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
-    <link href={url('/admin/config.yml')} type="application/yaml" rel="cms-config-url" />
   </head>
   <body>
-    <script is:inline src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+    <Panel client:only="svelte" config={config} />
   </body>
 </html>

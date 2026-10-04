@@ -3,6 +3,7 @@
 // (Configuración → Página de enlaces). Pocos botones grandes para lo
 // importante y una fila de enlaces pequeños para lo demás.
 import { getCollection } from 'astro:content';
+import { esPublico } from '../lib/blog';
 import Base from '../layouts/Base.astro';
 import LogoMarca from '../components/LogoMarca.astro';
 import Icono from '../components/Icono.astro';
@@ -17,7 +18,7 @@ const enlaces = enlacesPagina.enlaces
   .map((e) => ({ ...e, ...resolverEnlace(e) }));
 const principales = enlaces.filter((e) => !e.secundario);
 const secundarios = enlaces.filter((e) => e.secundario);
-const ultimo = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime())[0];
+const ultimo = (await getCollection('blog', esPublico)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime())[0];
 const diasPlanVeo = Math.max(0, Math.ceil((planVeoFin.getTime() - Date.now()) / 86_400_000));
 
 type Marca = 'whatsapp' | 'instagram' | 'facebook' | 'google';

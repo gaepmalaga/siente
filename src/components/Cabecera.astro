@@ -3,7 +3,8 @@ import Logo from './Logo.astro';
 import Icono from './Icono.astro';
 import IconoMarca from './IconoMarca.astro';
 import EstadoApertura from './EstadoApertura.astro';
-import { negocio, telHref, waHref, WA_SALUDO, planVeoVigente, horarioAgrupado } from '../lib/negocio';
+import { negocio, telHref, waHref, WA_SALUDO, planVeoVigente, horarioAgrupado, avisosWeb } from '../lib/negocio';
+import { ahoraEnMadrid, avisoVigente } from '../lib/horario';
 import { url } from '../lib/url';
 
 const ruta = Astro.url.pathname;
@@ -16,20 +17,21 @@ const navegacion = [
   { texto: 'Contacto', ruta: '/contacto/' },
 ];
 const activo = (r: string) => ruta.startsWith(url(r));
-const aviso = negocio.aviso;
+// Todos los avisos posibles con sus fechas; el navegador muestra los de hoy.
+const hoy = ahoraEnMadrid().iso;
+const avisos = avisosWeb();
+const algunoHoy = avisos.some((a) => avisoVigente(a, hoy));
 ---
 
 {
-  aviso.activo && aviso.texto && (
-    <div class="aviso">
-      <div class="contenedor aviso-dentro">
-        <Icono nombre="Info" />
-        {aviso.enlace ? (
-          <a href={url(aviso.enlace)}>{aviso.texto}</a>
-        ) : (
-          <span>{aviso.texto}</span>
-        )}
-      </div>
+  avisos.length > 0 && (
+    <div class="aviso" data-avisos hidden={!algunoHoy}>
+      {avisos.map((a) => (
+        <div class="contenedor aviso-dentro" data-aviso data-desde={a.desde ?? ''} data-hasta={a.hasta ?? ''} hidden={!avisoVigente(a, hoy)}>
+          <Icono nombre="Info" />
+          {a.enlace ? <a href={url(a.enlace)}>{a.texto}</a> : <span>{a.texto}</span>}
+        </div>
+      ))}
     </div>
   )
 }
@@ -127,6 +129,7 @@ const aviso = negocio.aviso;
     font-weight: 700;
     font-size: 0.98rem;
   }
+  .aviso[hidden], .aviso-dentro[hidden] { display: none; }
   .aviso-dentro {
     display: flex;
     align-items: center;

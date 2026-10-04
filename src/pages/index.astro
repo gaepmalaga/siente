@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { esPublico } from '../lib/blog';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Rotulo from '../components/Rotulo.astro';
@@ -22,7 +23,7 @@ import { esquemaFaq } from '../lib/schema';
 const servicios = (await getCollection('servicios')).sort((a, b) => a.data.order - b.data.order);
 const vista = servicios.filter((s) => s.data.area === 'vista');
 const oido = servicios.filter((s) => s.data.area === 'oido');
-const posts = (await getCollection('blog', (p) => !p.data.draft))
+const posts = (await getCollection('blog', esPublico))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .slice(0, 3);
 const promos = portada.promos.filter((p) => p.visible);

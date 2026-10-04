@@ -1,118 +1,16 @@
 // Datos del negocio que se editan desde /admin (src/data/*.json).
 // Se validan al compilar: si algo queda mal escrito, el build avisa en lugar de
 // publicar una web rota.
-import { z } from 'astro/zod';
 import negocioJson from '../data/negocio.json';
 import enlacesJson from '../data/enlaces.json';
 import resenasJson from '../data/resenas.json';
 import portadaJson from '../data/portada.json';
 import { url } from './url';
+import { Negocio, Enlaces, Resenas, Portada } from './esquemas';
+import * as H from './horario';
 
-export const DIAS = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'] as const;
-export type Dia = (typeof DIAS)[number];
-
-export const NOMBRE_DIA: Record<Dia, string> = {
-  lunes: 'Lunes',
-  martes: 'Martes',
-  miercoles: 'Miércoles',
-  jueves: 'Jueves',
-  viernes: 'Viernes',
-  sabado: 'Sábado',
-  domingo: 'Domingo',
-};
-
-const hora = z.string().regex(/^\d{1,2}:\d{2}$/, 'Usa el formato HH:MM, por ejemplo 09:30');
-
-const Negocio = z.object({
-  nombre: z.string(),
-  nombreCorto: z.string(),
-  eslogan: z.string(),
-  razonSocial: z.string(),
-  nif: z.string(),
-  direccion: z.object({
-    calle: z.string(),
-    codigoPostal: z.string(),
-    ciudad: z.string(),
-    barrio: z.string(),
-    region: z.string(),
-  }),
-  geo: z.object({ lat: z.number(), lng: z.number() }),
-  comoLlegar: z.array(z.object({ medio: z.string(), texto: z.string() })).default([]),
-  telefono: z.string(),
-  movil: z.string(),
-  whatsapp: z.string(),
-  email: z.string(),
-  horario: z.array(z.object({ dia: z.enum(DIAS), abre: hora, cierra: hora })),
-  redes: z.object({
-    instagram: z.string().optional().default(''),
-    facebook: z.string().optional().default(''),
-    googleMaps: z.string().optional().default(''),
-    resenasGoogle: z.string().optional().default(''),
-  }),
-  zonas: z.array(z.string()).default([]),
-  marcas: z.array(z.string()).default([]),
-  aviso: z.object({
-    activo: z.boolean().default(false),
-    texto: z.string().optional().default(''),
-    enlace: z.string().optional().default(''),
-  }),
-  planVeo: z.object({ activo: z.boolean().default(true), fin: z.string() }),
-  analitica: z
-    .object({ ga4: z.string().regex(/^(G-[A-Z0-9]+)?$/, 'El ID de Google Analytics empieza por G-').optional().default('') })
-    .default({ ga4: '' }),
-});
-
-const Enlaces = z.object({
-  titulo: z.string(),
-  subtitulo: z.string().optional().default(''),
-  enlaces: z.array(
-    z.object({
-      texto: z.string(),
-      detalle: z.string().optional().default(''),
-      tipo: z.enum(['whatsapp', 'cita', 'llamar', 'mapa', 'resenas', 'instagram', 'facebook', 'contacto', 'web']),
-      url: z.string().optional().default(''),
-      destacado: z.boolean().optional().default(false),
-      secundario: z.boolean().optional().default(false),
-      visible: z.boolean().optional().default(true),
-    }),
-  ),
-});
-
-// El panel puede guardar un número vacío como "" o null: se tratan igual.
-const numeroOpcional = z.preprocess((v) => (v === '' || v == null ? null : Number(v)), z.number().nullable());
-
-const Resenas = z.object({
-  notaMedia: numeroOpcional.optional(),
-  totalResenas: numeroOpcional.optional(),
-  resenas: z
-    .array(
-      z.object({
-        autor: z.string(),
-        texto: z.string(),
-        estrellas: z.number().min(1).max(5).default(5),
-        fecha: z.string().optional().default(''),
-        fuente: z.string().optional().default('Google'),
-      }),
-    )
-    .default([]),
-});
-
-const Portada = z.object({
-  antetitulo: z.string(),
-  titulo: z.string(),
-  subtitulo: z.string(),
-  promos: z
-    .array(
-      z.object({
-        etiqueta: z.string().optional().default(''),
-        titulo: z.string(),
-        texto: z.string().optional().default(''),
-        enlace: z.string().optional().default(''),
-        visible: z.boolean().optional().default(true),
-      }),
-    )
-    .default([]),
-});
+export { DIAS, NOMBRE_DIA, formatoTramo } from './horario';
+export type { Dia, Tramo } from './horario';
 
 export const negocio = Negocio.parse(negocioJson);
 export const enlacesPagina = Enlaces.parse(enlacesJson);
@@ -146,47 +44,19 @@ export const mapas = {
 
 // ── Horario ─────────────────────────────────────────────────────────────────
 
-export type Tramo = { abre: string; cierra: string };
-
-const aMinutos = (h: string) => {
-  const [hh, mm] = h.split(':').map(Number);
-  return hh * 60 + mm;
-};
-
-export function horarioPorDia(): Record<Dia, Tramo[]> {
-  const porDia = Object.fromEntries(DIAS.map((d) => [d, [] as Tramo[]])) as Record<Dia, Tramo[]>;
-  for (const { dia, abre, cierra } of negocio.horario) porDia[dia].push({ abre, cierra });
-  for (const d of DIAS) porDia[d].sort((a, b) => aMinutos(a.abre) - aMinutos(b.abre));
-  return porDia;
-}
-
-export const formatoTramo = (t: Tramo) => `${t.abre} – ${t.cierra}`;
+export const horarioPorDia = () => H.porDia(negocio.horario);
 
 /** Agrupa días consecutivos con el mismo horario: «Lunes a viernes», «Sábado»… */
-export function horarioAgrupado(): { dias: string; tramos: string[] }[] {
-  const porDia = horarioPorDia();
-  const grupos: { desde: Dia; hasta: Dia; clave: string; tramos: string[] }[] = [];
-  for (const d of DIAS) {
-    const tramos = porDia[d].map(formatoTramo);
-    const clave = tramos.join('|');
-    const ultimo = grupos.at(-1);
-    if (ultimo && ultimo.clave === clave) ultimo.hasta = d;
-    else grupos.push({ desde: d, hasta: d, clave, tramos });
-  }
-  return grupos.map((g) => {
-    const consecutivos = DIAS.indexOf(g.hasta) - DIAS.indexOf(g.desde);
-    const dias =
-      g.desde === g.hasta
-        ? NOMBRE_DIA[g.desde]
-        : consecutivos === 1
-          ? `${NOMBRE_DIA[g.desde]} y ${NOMBRE_DIA[g.hasta].toLowerCase()}`
-          : `${NOMBRE_DIA[g.desde]} a ${NOMBRE_DIA[g.hasta].toLowerCase()}`;
-    return { dias, tramos: g.tramos };
-  });
-}
+export const horarioAgrupado = () => H.agrupar(horarioPorDia()).map(({ dias, tramos }) => ({ dias, tramos }));
 
-/** Horario en formato compacto para el navegador (estado «Abierto ahora»). */
-export const horarioParaCliente = () => JSON.stringify(horarioPorDia());
+/** Horario y cierres para el navegador («Abierto ahora», días de cita, avisos). */
+export const horarioParaCliente = () => JSON.stringify({ dias: horarioPorDia(), cierres: negocio.cierres });
+
+/** Avisos de la barra superior (manual y por cierres), con sus fechas. */
+export const avisosWeb = () => H.avisosProgramados(negocio.aviso, negocio.cierres);
+
+/** Cierres que aún no han terminado (para los datos estructurados). */
+export const cierresPendientes = (hoy = H.ahoraEnMadrid().iso) => negocio.cierres.filter((c) => c.hasta >= hoy);
 
 // ── Enlaces de la página /enlaces/ ──────────────────────────────────────────
 

@@ -1,90 +1,50 @@
 import { iniciarCookies } from './analitica';
+import { estadoApertura, ahoraEnMadrid, cierreEn, formatoTramo, avisoVigente, type HorarioSemana, type Cierre } from '../lib/horario';
 
 // JavaScript común a todas las páginas. Es poco y opcional: sin él la web se
 // lee y funciona igual (enlaces a teléfono, WhatsApp y mapa son HTML normal).
 
-type Tramo = { abre: string; cierra: string };
-type Horario = Record<string, Tramo[]>;
-
-const DIAS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-const NOMBRES: Record<string, string> = {
-  lunes: 'el lunes',
-  martes: 'el martes',
-  miercoles: 'el miércoles',
-  jueves: 'el jueves',
-  viernes: 'el viernes',
-  sabado: 'el sábado',
-  domingo: 'el domingo',
-};
-
-const minutos = (h: string) => {
-  const [hh, mm] = h.split(':').map(Number);
-  return hh * 60 + mm;
-};
-
-/** Día y minuto actuales en Madrid, se mire desde donde se mire. */
-function ahoraEnMadrid() {
-  const partes = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/Madrid',
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(new Date());
-  const valor = (t: string) => partes.find((p) => p.type === t)?.value ?? '';
-  const dia = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(valor('weekday'));
-  return { dia, minuto: Number(valor('hour')) * 60 + Number(valor('minute')) };
-}
-
-export function estadoApertura(horario: Horario) {
-  const { dia, minuto } = ahoraEnMadrid();
-  const hoy = horario[DIAS[dia]] ?? [];
-  const abierto = hoy.find((t) => minuto >= minutos(t.abre) && minuto < minutos(t.cierra));
-  if (abierto) {
-    const quedan = minutos(abierto.cierra) - minuto;
-    return {
-      abierto: true,
-      texto: quedan <= 30 ? `Abierto · cierra en ${quedan} min` : `Abierto ahora · hasta las ${abierto.cierra}`,
-    };
-  }
-  const luego = hoy.find((t) => minutos(t.abre) > minuto);
-  if (luego) return { abierto: false, texto: `Cerrado · abrimos hoy a las ${luego.abre}` };
-  for (let i = 1; i <= 7; i++) {
-    const nombre = DIAS[(dia + i) % 7];
-    const tramos = horario[nombre] ?? [];
-    if (tramos.length) {
-      const cuando = i === 1 ? 'mañana' : NOMBRES[nombre];
-      return { abierto: false, texto: `Cerrado · abrimos ${cuando} a las ${tramos[0].abre}` };
-    }
-  }
-  return { abierto: false, texto: 'Cerrado' };
-}
+type DatosHorario = { dias: HorarioSemana; cierres: Cierre[] };
 
 function pintarEstado() {
   const datos = document.getElementById('horario-datos');
   if (!datos?.textContent) return;
-  const horario = JSON.parse(datos.textContent) as Horario;
+  const { dias, cierres } = JSON.parse(datos.textContent) as DatosHorario;
   const pintar = () => {
-    const { abierto, texto } = estadoApertura(horario);
+    const { abierto, texto } = estadoApertura(dias, cierres);
     document.querySelectorAll<HTMLElement>('[data-estado]').forEach((el) => {
       el.dataset.abierto = String(abierto);
       const t = el.querySelector('[data-estado-texto]');
       if (t) t.textContent = texto;
       el.hidden = false;
     });
-    // Resalta el día de hoy en las tablas de horario.
-    const { dia } = ahoraEnMadrid();
-    const hoy = horario[DIAS[dia]] ?? [];
+    // Horario de hoy y día resaltado en las tablas de horario.
+    const { iso, dia } = ahoraEnMadrid();
+    const hoy = cierreEn(cierres, iso) ? [] : dias[dia];
     document.querySelectorAll<HTMLElement>('[data-horario-hoy]').forEach((el) => {
-      el.textContent = hoy.length ? `Hoy: ${hoy.map((t) => `${t.abre} – ${t.cierra}`).join(' · ')}` : 'Hoy cerrado';
+      el.textContent = hoy.length ? `Hoy: ${hoy.map(formatoTramo).join(' · ')}` : 'Hoy cerrado';
       el.hidden = false;
     });
     document.querySelectorAll<HTMLElement>('[data-dias]').forEach((fila) => {
-      fila.classList.toggle('hoy', (fila.dataset.dias ?? '').split(',').includes(DIAS[dia]));
+      fila.classList.toggle('hoy', (fila.dataset.dias ?? '').split(',').includes(dia));
     });
   };
   pintar();
   setInterval(pintar, 60_000);
+}
+
+// Avisos programados (vacaciones, festivos, promociones): la web es estática,
+// así que es el navegador el que decide si hoy toca mostrarlos.
+function avisosProgramados() {
+  const { iso } = ahoraEnMadrid();
+  document.querySelectorAll<HTMLElement>('[data-aviso]').forEach((el) => {
+    const desde = el.dataset.desde || undefined;
+    const hasta = el.dataset.hasta || undefined;
+    el.hidden = !avisoVigente({ texto: '', desde, hasta }, iso);
+  });
+  document.querySelectorAll<HTMLElement>('[data-avisos]').forEach((barra) => {
+    barra.hidden = !barra.querySelector('[data-aviso]:not([hidden])');
+  });
 }
 
 function tamanoTexto() {
@@ -168,6 +128,7 @@ function cuentaAtras() {
 }
 
 pintarEstado();
+avisosProgramados();
 cuentaAtras();
 iniciarCookies();
 tamanoTexto();

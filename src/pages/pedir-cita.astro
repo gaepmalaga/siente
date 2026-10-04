@@ -245,7 +245,7 @@ const migas = [
 </style>
 
 <script>
-  type Tramo = { abre: string; cierra: string };
+  import { cierreEn, type HorarioSemana, type Cierre, type Dia } from '../lib/horario';
   const CLAVES = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
   const CORTO = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   const LARGO = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
@@ -253,7 +253,10 @@ const migas = [
   const MESES_LARGOS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
   const form = document.querySelector<HTMLFormElement>('[data-asistente]');
-  const horario = JSON.parse(document.getElementById('horario-datos')?.textContent || '{}') as Record<string, Tramo[]>;
+  const { dias: horario, cierres } = JSON.parse(document.getElementById('horario-datos')?.textContent || '{}') as {
+    dias: HorarioSemana;
+    cierres: Cierre[];
+  };
 
   if (form) {
     // Servicio preseleccionado desde la URL: /pedir-cita/?servicio=audifonos
@@ -267,11 +270,13 @@ const migas = [
     const contenedor = form.querySelector('[data-dias]')!;
     const hoy = new Date();
     let anadidos = 0;
-    for (let i = 0; anadidos < 6 && i < 21; i++) {
+    for (let i = 0; anadidos < 6 && i < 60; i++) {
       const fecha = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + i);
-      const clave = CLAVES[fecha.getDay()];
+      const clave = CLAVES[fecha.getDay()] as Dia;
+      const iso = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
       const tramos = horario[clave] ?? [];
-      if (!tramos.length) continue;
+      // Ni días sin horario ni días de cierre (vacaciones, festivos).
+      if (!tramos.length || cierreEn(cierres, iso)) continue;
       // Si hoy ya ha cerrado, no lo ofrecemos.
       if (i === 0) {
         const ahora = hoy.getHours() * 60 + hoy.getMinutes();

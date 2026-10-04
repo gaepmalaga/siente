@@ -1,11 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
+import { esPublico } from '../../lib/blog';
 import Base from '../../layouts/Base.astro';
 import Migas from '../../components/Migas.astro';
 import TarjetaPost from '../../components/TarjetaPost.astro';
 import BandaCita from '../../components/BandaCita.astro';
 
-const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const posts = (await getCollection('blog', esPublico)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 const [destacado, ...resto] = posts;
 const migas = [
   { nombre: 'Inicio', ruta: '/' },

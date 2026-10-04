@@ -13,6 +13,10 @@ name: Publicar en GitHub Pages
 on:
   push:
     branches: [main]
+  # Cada mañana a las 6:00 (hora de Madrid en invierno): publica los artículos
+  # programados y retira solos el Plan VEO, los avisos y los cierres pasados.
+  schedule:
+    - cron: '0 5 * * *'
   workflow_dispatch:
 
 permissions:
@@ -46,6 +50,8 @@ jobs:
           SITE_URL: ${{ vars.SITE_URL || 'https://gaepmalaga.github.io' }}
           BASE_PATH: ${{ vars.BASE_PATH || '/siente' }}
           PUBLIC_NOINDEX: ${{ vars.PUBLIC_NOINDEX || 'true' }}
+          # Opcional: dirección del autenticador OAuth para el botón «Entrar con GitHub».
+          PUBLIC_PANEL_AUTH_URL: ${{ vars.PUBLIC_PANEL_AUTH_URL || '' }}
 
       - name: Configurar Pages
         uses: actions/configure-pages@v5

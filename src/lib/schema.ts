@@ -1,6 +1,6 @@
 // Datos estructurados (schema.org) para que Google entienda qué es Siente,
 // dónde está, cuándo abre y qué ofrece.
-import { negocio, horarioPorDia, DIAS, telHref, direccionCompleta } from './negocio';
+import { negocio, horarioPorDia, DIAS, telHref, direccionCompleta, cierresPendientes } from './negocio';
 import { urlAbsoluta } from './url';
 
 const DIA_SCHEMA = {
@@ -60,6 +60,14 @@ export function esquemaNegocio() {
       const [opens, closes] = clave.split('-');
       return { '@type': 'OpeningHoursSpecification', dayOfWeek: dias, opens, closes };
     }),
+    // Vacaciones y festivos: Google los muestra como «Cerrado» esos días.
+    specialOpeningHoursSpecification: cierresPendientes().map((c) => ({
+      '@type': 'OpeningHoursSpecification',
+      opens: '00:00',
+      closes: '00:00',
+      validFrom: c.desde,
+      validThrough: c.hasta,
+    })),
     contactPoint: [
       {
         '@type': 'ContactPoint',
