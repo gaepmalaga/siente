@@ -2,7 +2,7 @@
   import Icono from '../componentes/Icono.svelte';
   import { estado } from '../lib/estado.svelte';
   import { RUTAS } from '../lib/backend';
-  import { hace, fechaHora, base64ATexto } from '../lib/texto';
+  import { hace, fechaHora } from '../lib/texto';
   import type { ArchivoCambiado, EntradaHistorial, EstadoDespliegue } from '../lib/tipos';
 
   let { sha = '' }: { sha?: string } = $props();
@@ -36,30 +36,13 @@
   });
 
   const gestionable = (r: string) => r.startsWith('src/data/') || r.startsWith(RUTAS.blog) || r.startsWith(RUTAS.servicios) || r.startsWith(RUTAS.uploads) || r.startsWith(RUTAS.fotos);
-  const esTexto = (r: string) => /\.(json|md)$/.test(r);
-  const despliegueDe = (s: string) => despliegues.find((d) => d.sha === s);
+  const despliegueDe = (s: string) => despliegues.find((d) => d.sha === s && !d.esPrevia);
 
   // Deshacer = dejar como cambios pendientes la versión anterior de cada archivo.
   async function deshacer() {
-    if (!detalle || !elegido) return;
+    if (!elegido) return;
     deshaciendo = true;
-    try {
-      for (const f of detalle.archivos.filter((x) => gestionable(x.ruta))) {
-        if (f.estado === 'added') {
-          estado.borrar(f.ruta, `Deshacer: quitar ${f.ruta.split('/').pop()}`);
-          continue;
-        }
-        const anterior = detalle.padre ? await estado.backend!.contenidoEn(f.ruta, detalle.padre) : null;
-        if (anterior == null) continue;
-        if (esTexto(f.ruta)) estado.fijarTexto(f.ruta, base64ATexto(anterior), `Deshacer «${elegido.mensaje.split('\n')[0]}»`);
-        else estado.subirMedio(f.ruta, anterior, '', 0);
-      }
-      estado.revision++;
-      estado.bandejaAbierta = true;
-      estado.aviso('Listo: revisa los cambios y pulsa Publicar para deshacerlo en la web.', 'info');
-    } catch (e) {
-      estado.aviso((e as Error).message, 'error');
-    }
+    await estado.prepararDeshacer(elegido.sha, elegido.mensaje);
     deshaciendo = false;
   }
 

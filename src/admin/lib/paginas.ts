@@ -38,5 +38,13 @@ export function paginasInternas(): Pagina[] {
   return [...FIJAS, ...servicios, ...posts];
 }
 
+/** Página de la web donde se ve el cambio de un archivo. */
+export function paginaDeArchivo(ruta: string): string {
+  if (ruta.startsWith(RUTAS.blog)) return `/blog/${slugDe(ruta)}/`;
+  if (ruta.startsWith(RUTAS.servicios)) return rutaWebServicio(ruta);
+  if (ruta === RUTAS.enlaces) return '/enlaces/';
+  return '/';
+}
+
 /** URL completa en la web publicada. */
 export const enWeb = (ruta: string) => `${estado.config.sitio.replace(/\/$/, '')}${ruta}`;

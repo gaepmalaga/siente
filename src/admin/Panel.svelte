@@ -13,6 +13,7 @@
   import EstadoPublicacion from './componentes/EstadoPublicacion.svelte';
   import Acceso from './vistas/Acceso.svelte';
   import Resumen from './vistas/Resumen.svelte';
+  import Estadisticas from './vistas/Estadisticas.svelte';
   import Horario from './vistas/Horario.svelte';
   import Centro from './vistas/Centro.svelte';
   import Portada from './vistas/Portada.svelte';
@@ -103,7 +104,10 @@
       <main class="p-contenido">
         {#key seccion + sub + estado.revision}
           <div in:fly={{ y: 8, duration: 180 }}>
+            <!-- Si una sección falla, el resto del panel sigue funcionando. -->
+            <svelte:boundary onerror={(e) => estado.registrarError(e, `sección ${actual.titulo}`)}>
             {#if seccion === '/'}<Resumen />
+            {:else if seccion === '/estadisticas'}<Estadisticas />
             {:else if seccion === '/horario'}<Horario />
             {:else if seccion === '/centro'}<Centro />
             {:else if seccion === '/portada'}<Portada />
@@ -117,6 +121,21 @@
             {:else if seccion === '/historial'}<Historial sha={sub} />
             {:else if seccion === '/accesos'}<Accesos />
             {:else}<Resumen />{/if}
+              {#snippet failed(_error, reintentar)}
+                <div class="p-vista">
+                  <div class="p-tarjeta p-vacio">
+                    <Icono nombre="Bug" />
+                    <strong>Esta sección ha tenido un problema.</strong>
+                    <p>Tus cambios sin publicar están a salvo. Puedes reintentarlo o seguir en otra sección.</p>
+                    <div class="p-acciones">
+                      <button class="p-btn primario" type="button" onclick={reintentar}><Icono nombre="RefreshCw" /> Reintentar</button>
+                      <a class="p-btn" href="#/">Ir al resumen</a>
+                      <a class="p-btn fantasma" href="#/accesos#diagnostico">Ver detalles</a>
+                    </div>
+                  </div>
+                </div>
+              {/snippet}
+            </svelte:boundary>
           </div>
         {/key}
       </main>

@@ -7,7 +7,9 @@
   import { saludo, hace } from '../lib/texto';
   import { porDia, estadoApertura, ahoraEnMadrid, fechaLarga } from '../../lib/horario';
   import type { DatosNegocio, DatosResenas, DatosEnlaces } from '../../lib/esquemas';
-  import type { EntradaHistorial } from '../lib/tipos';
+  import type { AvisoVigilancia, EntradaHistorial } from '../lib/tipos';
+  import { google } from '../lib/google.svelte';
+  import { informeAnalytics, variacion, type Cifra } from '../lib/estadisticas';
   import type { NombreIcono } from '../lib/iconos';
 
   const negocio = $derived(estado.json<DatosNegocio>(RUTAS.negocio));
@@ -31,13 +33,34 @@
       p.push({ icono: 'Gift', texto: 'Fin del Plan VEO', detalle: `${fechaLarga(negocio.planVeo.fin)} · quedan ${dias} días`, ir: '/centro#planveo' });
     }
     for (const a of posts.filter((x) => x.estadoPub === 'programado')) {
-      p.push({ icono: 'Newspaper', texto: a.title, detalle: `Se publica el ${fechaLarga(a.date)}`, ir: `/blog/${a.slug}` });
+      p.push({ icono: 'Newspaper', texto: a.title, detalle: `Se publica el ${fechaLarga(a.date)}${a.hora ? ` a las ${a.hora.replace(/^0/, '')}` : ''}`, ir: `/blog/${a.slug}` });
     }
     if (negocio.aviso.activo && negocio.aviso.desde && negocio.aviso.desde > hoy) {
       p.push({ icono: 'Megaphone', texto: 'Aviso programado', detalle: `Desde el ${fechaLarga(negocio.aviso.desde)}`, ir: '/horario#aviso' });
     }
     return p;
   });
+
+  // Alertas de la vigilancia automática (web caída, publicación fallida).
+  let alertas = $state<AvisoVigilancia[]>([]);
+  estado.backend?.avisosVigilancia().then((a) => (alertas = a)).catch(() => {});
+
+  // Cifras de las últimas 4 semanas, si las estadísticas están conectadas.
+  const conStats = $derived(estado.modo === 'demo' || (google.conectado && !!google.ajustes.propiedad));
+  let cifras = $state<{ visitas: Cifra; contactos: Cifra; citas: Cifra } | null>(null);
+  $effect(() => {
+    if (!conStats) return;
+    informeAnalytics(google.ajustes.propiedad, 28)
+      .then((r) => {
+        const suma = (k: 'actual' | 'anterior') => r.eventos.generate_lead[k] + r.eventos.clic_whatsapp[k] + r.eventos.clic_llamar[k];
+        cifras = { visitas: r.visitas, contactos: { actual: suma('actual'), anterior: suma('anterior') }, citas: r.eventos.generate_lead };
+      })
+      .catch(() => {});
+  });
+  const cambio = (c: Cifra) => {
+    const v = variacion(c);
+    return Math.abs(v) < 0.03 ? { t: 'igual', c: 'igual' } : { t: `${v > 0 ? '+' : ''}${Math.round(v * 100)} %`, c: v > 0 ? 'sube' : 'baja' };
+  };
 
   let historial = $state<EntradaHistorial[]>([]);
   $effect(() => {
@@ -64,6 +87,14 @@
       <span>{apertura.texto}</span>
     </div>
   </header>
+
+  {#each alertas as a (a.numero)}
+    <a class="alerta" href={a.url} target="_blank" rel="noopener">
+      <Icono nombre="TriangleAlert" />
+      <span><strong>{a.titulo.replace(/^\[[^\]]+\]\s*/, '')}</strong><small>Aviso de la vigilancia automática · {hace(a.fecha)}. Pulsa para ver los detalles.</small></span>
+      <Icono nombre="ExternalLink" />
+    </a>
+  {/each}
 
   <section class="rapidas" aria-label="Acciones rápidas">
     {#each acciones as a (a.texto)}
@@ -99,6 +130,25 @@
     </section>
 
     <div class="columna">
+      <section class="p-tarjeta stats">
+        <div class="p-tarjeta-cab">
+          <h2><Icono nombre="ChartLine" /> Últimas 4 semanas</h2>
+          <a class="p-btn pequeno fantasma" href="#/estadisticas">{conStats ? 'Ver más' : 'Conectar'}</a>
+        </div>
+        {#if conStats && cifras}
+          <div class="stats-cifras">
+            {#each [{ n: 'Contactos', c: cifras.contactos }, { n: 'Citas en la web', c: cifras.citas }, { n: 'Visitas', c: cifras.visitas }] as x (x.n)}
+              {@const d = cambio(x.c)}
+              <a href="#/estadisticas"><strong>{x.c.actual.toLocaleString('es-ES')}</strong><span>{x.n}</span><small class={d.c}>{d.t === 'igual' ? 'igual que antes' : d.t}</small></a>
+            {/each}
+          </div>
+        {:else if conStats}
+          <p class="p-vacio"><Icono nombre="Loader" clase="p-girar" /> Consultando…</p>
+        {:else}
+          <p class="stats-vacio">Conecta Google Analytics y Search Console para ver aquí cuántas visitas y contactos llegan desde la web.</p>
+        {/if}
+      </section>
+
       <section class="p-tarjeta">
         <div class="p-tarjeta-cab"><h2><Icono nombre="CalendarDays" /> Próximamente</h2></div>
         {#if proximos.length}
@@ -195,4 +245,18 @@
   .cifras strong { font-size: 1.7rem; font-weight: 800; }
   .cifras span { font-size: 0.82rem; color: var(--p-apagado); }
   .pie { text-align: center; }
+  .alerta { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--p-error-fondo); color: var(--p-error); text-decoration: none; border: 1px solid #f0c2b8; }
+  .alerta > span { flex: 1; display: grid; }
+  .alerta small { color: var(--p-texto-2); }
+  .stats-cifras { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .stats-cifras a { display: grid; justify-items: center; gap: 2px; padding: 16px 8px; text-decoration: none; border-right: 1px solid var(--p-borde); text-align: center; }
+  .stats-cifras a:last-child { border-right: 0; }
+  .stats-cifras a:hover { background: var(--p-superficie-2); }
+  .stats-cifras strong { font-size: 1.7rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .stats-cifras span { font-size: 0.82rem; color: var(--p-apagado); }
+  .stats-cifras small { font-size: 0.78rem; font-weight: 700; }
+  .stats-cifras small.sube { color: var(--p-ok); }
+  .stats-cifras small.baja { color: var(--p-error); }
+  .stats-cifras small.igual { color: var(--p-apagado); font-weight: 400; }
+  .stats-vacio { padding: 16px 20px; color: var(--p-texto-2); font-size: 0.92rem; }
 </style>

@@ -49,6 +49,8 @@ const redirects = Object.fromEntries(Object.entries(redirectsSinBase).map(([de, 
 export default defineConfig({
   site: SITE_URL,
   base: BASE_PATH,
+  // La vista previa del panel se compila en otra carpeta (ver deploy.yml).
+  outDir: process.env.OUT_DIR || './dist',
   trailingSlash: 'always',
   build: { format: 'directory' },
   redirects,

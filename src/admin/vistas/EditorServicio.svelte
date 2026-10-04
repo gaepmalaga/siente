@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { untrack, tick } from 'svelte';
   import Icono from '../componentes/Icono.svelte';
-  import Anillo from '../componentes/Anillo.svelte';
   import EditorMarkdown from '../componentes/EditorMarkdown.svelte';
   import SelectorImagen from '../componentes/SelectorImagen.svelte';
-  import VistaGoogle from '../componentes/VistaGoogle.svelte';
+  import PanelSeo from '../componentes/PanelSeo.svelte';
   import ListaOrdenable from '../componentes/ListaOrdenable.svelte';
   import { estado } from '../lib/estado.svelte';
   import { RUTAS } from '../lib/backend';
   import { leerMd, escribirMd } from '../lib/frontmatter';
-  import { analizar } from '../lib/seo';
+  import { analizar, proponerTitulo, sugerirClaves, type Arreglo } from '../lib/seo';
+  import { insertarBloque } from '../lib/bloques';
   import { slug as aSlug } from '../lib/texto';
   import { claveFoto } from '../lib/medios';
   import { enWeb } from '../lib/paginas';
@@ -46,6 +46,28 @@
   const ruta = $derived(slugFinal ? `${RUTAS.servicios}${slugFinal}.md` : '');
   const urlWeb = $derived(`/${d.area === 'oido' ? 'audifonos-barajas' : 'optica-barajas'}/${slugFinal}/`);
   const foto = $derived(d.image ? estado.medios.find((m) => m.ruta.startsWith(RUTAS.fotos) && claveFoto(m.ruta) === d.image)?.url : undefined);
+  let consultasGoogle = $state<string[]>([]);
+  const sugerencias = $derived(d.keyword ? [] : sugerirClaves({ titulo: `${d.title} ${d.h1}`, cuerpo, categoria: d.area, consultas: consultasGoogle }));
+
+  async function enfocar(id: string) {
+    await tick();
+    const el = document.getElementById(id) as HTMLInputElement | null;
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el?.focus({ preventScroll: true });
+  }
+
+  function arreglar(a: Arreglo) {
+    if (a.tipo === 'imagen') return (selector = true);
+    if (a.tipo === 'insertar') {
+      cuerpo = insertarBloque(cuerpo, a.bloque, d.area);
+      estado.aviso(a.bloque === 'preguntas' || a.bloque === 'subtitulo' ? 'Añadido al texto. Completa lo marcado con «[completa aquí]».' : 'Añadido al texto.', 'ok');
+      return;
+    }
+    if (a.campo === 'tituloSeo' && d.seoTitle.length > 65) d.seoTitle = proponerTitulo(d.seoTitle, '');
+    if (a.campo === 'textoImagen' && !d.imageAlt) d.imageAlt = d.h1;
+    enfocar({ tituloSeo: 'campo-titulo-seo', descripcion: 'campo-descripcion', clave: 'seo-clave', textoImagen: 'campo-alt' }[a.campo]);
+  }
+
   const analisis = $derived(
     analizar({ tipo: 'servicio', titulo: d.h1, tituloSeo: d.seoTitle, descripcion: d.description, cuerpo, slug: slugFinal, palabraClave: d.keyword, imagen: d.image, textoImagen: d.imageAlt, extra: { faqs: d.faqs.length } }),
   );
@@ -99,13 +121,13 @@
               <label class="p-campo"><span class="p-etiqueta">Nombre corto <small>menús y tarjetas</small></span><input class="p-input" bind:value={d.title} placeholder="Lentes progresivas" /></label>
               <label class="p-campo"><span class="p-etiqueta">Titular de la página</span><input class="p-input" bind:value={d.h1} placeholder="Lentes progresivas en Barajas" /></label>
             </div>
-            <label class="p-campo">
+            <label class="p-campo" for="campo-titulo-seo">
               <span class="p-etiqueta">Título para Google <small class="p-contador {d.seoTitle.length >= 30 && d.seoTitle.length <= 65 ? 'bien' : 'mejorable'}">{d.seoTitle.length}/65</small></span>
-              <input class="p-input" bind:value={d.seoTitle} />
+              <input id="campo-titulo-seo" class="p-input" bind:value={d.seoTitle} />
             </label>
-            <label class="p-campo">
+            <label class="p-campo" for="campo-descripcion">
               <span class="p-etiqueta">Descripción para Google <small class="p-contador {d.description.length >= 110 && d.description.length <= 165 ? 'bien' : 'mejorable'}">{d.description.length}/160</small></span>
-              <textarea class="p-textarea" bind:value={d.description}></textarea>
+              <textarea id="campo-descripcion" class="p-textarea" bind:value={d.description}></textarea>
             </label>
             <label class="p-campo"><span class="p-etiqueta">Resumen <small>sale en la tarjeta del servicio</small></span><input class="p-input" bind:value={d.summary} /></label>
           </div>
@@ -166,7 +188,7 @@
         </section>
       </div>
 
-      <aside class="p-lateral-fijo lateral">
+      <aside class="lateral">
         <section class="p-tarjeta">
           <div class="p-tarjeta-cab"><h2><Icono nombre="Store" /> Ajustes</h2></div>
           <div class="p-tarjeta-cuerpo">
@@ -192,24 +214,20 @@
           <div class="p-tarjeta-cuerpo">
             {#if foto}<img class="foto" src={foto} alt="" />{/if}
             <button class="p-btn pequeno" type="button" onclick={() => (selector = true)}><Icono nombre="Images" /> {d.image ? 'Cambiar foto' : 'Elegir foto'}</button>
-            <label class="p-campo"><span class="p-etiqueta">Describe la foto</span><input class="p-input" bind:value={d.imageAlt} /></label>
+            <label class="p-campo" for="campo-alt"><span class="p-etiqueta">Describe la foto</span><input id="campo-alt" class="p-input" bind:value={d.imageAlt} /></label>
           </div>
         </section>
 
-        <section class="p-tarjeta">
-          <div class="p-tarjeta-cab"><h2><Icono nombre="Wand2" /> SEO</h2><Anillo valor={analisis.puntuacion} tamano={48} etiqueta="SEO" /></div>
-          <div class="p-tarjeta-cuerpo">
-            <label class="p-campo"><span class="p-etiqueta">Palabra clave</span><input class="p-input" bind:value={d.keyword} placeholder="lentes progresivas" /></label>
-            <ul class="checks">
-              {#each analisis.comprobaciones.filter((c) => c.nivel !== 'bien') as c (c.id)}
-                <li class={c.nivel}><Icono nombre={c.nivel === 'mal' ? 'CircleAlert' : 'TriangleAlert'} /><span><strong>{c.texto}</strong>{#if c.consejo}<small>{c.consejo}</small>{/if}</span></li>
-              {:else}
-                <li class="bien"><Icono nombre="CircleCheck" /><span><strong>Todo en orden</strong></span></li>
-              {/each}
-            </ul>
-            <VistaGoogle titulo={d.seoTitle} descripcion={d.description} url={enWeb(urlWeb)} />
-          </div>
-        </section>
+        <PanelSeo
+          {analisis}
+          bind:clave={d.keyword}
+          {sugerencias}
+          onarreglo={arreglar}
+          vistaGoogle={{ titulo: d.seoTitle, descripcion: d.description, url: enWeb(urlWeb) }}
+          ruta={urlWeb}
+          publicada={publicadoAntes}
+          onconsultas={(c) => (consultasGoogle = c)}
+        />
 
         {#if publicadoAntes}<button class="p-btn pequeno peligro" type="button" onclick={eliminar}><Icono nombre="Trash2" /> Borrar servicio</button>{/if}
       </aside>
@@ -230,11 +248,4 @@
   .iconos button { display: grid; place-items: center; aspect-ratio: 1; border: 1px solid var(--p-borde); border-radius: 8px; background: var(--p-superficie); cursor: pointer; color: var(--p-texto-2); }
   .iconos button.sel { background: var(--p-tinta); color: var(--p-luz); border-color: var(--p-tinta); }
   .foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; }
-  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-  .checks li { display: flex; gap: 8px; align-items: flex-start; font-size: 0.88rem; }
-  .checks li span { display: grid; }
-  .checks small { color: var(--p-texto-2); }
-  .checks li.bien :global(.p-icono) { color: var(--p-ok); }
-  .checks li.mejorable :global(.p-icono) { color: #c98a14; }
-  .checks li.mal :global(.p-icono) { color: var(--p-error); }
 </style>

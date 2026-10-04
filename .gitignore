@@ -1,6 +1,9 @@
 # dependencias y build
 node_modules/
 dist/
+dist-previa/
+test-results/
+playwright-report/
 .astro/
 
 # entorno local

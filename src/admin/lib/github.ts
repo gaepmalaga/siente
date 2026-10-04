@@ -89,6 +89,7 @@ export class GitHub {
     base: string,
     cambios: { ruta: string; contenido?: string; binario?: boolean; borrar?: boolean }[],
     mensaje: string,
+    opciones: { forzar?: boolean; crear?: boolean } = {},
   ): Promise<string> {
     const commitBase = await this.pedir<{ tree: { sha: string } }>(this.r(`/git/commits/${base}`));
     const entradas = await Promise.all(
@@ -109,8 +110,27 @@ export class GitHub {
       method: 'POST',
       body: JSON.stringify({ message: mensaje, tree: arbol.sha, parents: [base] }),
     });
-    await this.pedir(this.r(`/git/refs/heads/${rama}`), { method: 'PATCH', body: JSON.stringify({ sha: nuevo.sha, force: false }) });
+    await this.moverRama(rama, nuevo.sha, opciones.forzar ?? false, opciones.crear ?? false);
     return nuevo.sha;
+  }
+
+  /** Apunta la rama al commit. Sin «forzar», GitHub lo rechaza si alguien publicó entretanto. */
+  async moverRama(rama: string, sha: string, forzar = false, crear = false): Promise<void> {
+    try {
+      await this.pedir(this.r(`/git/refs/heads/${rama}`), { method: 'PATCH', body: JSON.stringify({ sha, force: forzar }) });
+    } catch (e) {
+      if (!(crear && e instanceof ErrorGitHub && (e.estado === 422 || e.estado === 404))) throw e;
+      await this.pedir(this.r('/git/refs'), { method: 'POST', body: JSON.stringify({ ref: `refs/heads/${rama}`, sha }) });
+    }
+  }
+
+  /** Borra una rama (si existe). */
+  async borrarRama(rama: string): Promise<void> {
+    try {
+      await this.pedir(this.r(`/git/refs/heads/${rama}`), { method: 'DELETE' });
+    } catch (e) {
+      if (!(e instanceof ErrorGitHub && (e.estado === 404 || e.estado === 422))) throw e;
+    }
   }
 
   /** Archivos que han cambiado entre dos versiones. */

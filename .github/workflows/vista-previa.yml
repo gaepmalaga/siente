@@ -1,0 +1,22 @@
+# El panel guarda los cambios sin publicar en la rama «vista-previa». Este
+# relevo pide a «Publicar en GitHub Pages» que vuelva a compilar (desde main,
+# que es la única rama que puede desplegar) incluyendo esa copia en
+# /vista-previa/. La web pública no cambia: se compila desde main.
+name: Vista previa
+
+on:
+  push:
+    branches: [vista-previa]
+
+permissions:
+  actions: write
+
+jobs:
+  lanzar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Pedir la compilación
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main -f motivo=vista-previa
+        env:
+          GH_TOKEN: ${{ github.token }}

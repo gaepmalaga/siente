@@ -42,6 +42,8 @@ const {
 // En la demo (github.io) no queremos que Google la indexe y compita con la web
 // actual. Al pasar al dominio definitivo se pone PUBLIC_NOINDEX=false.
 const demo = import.meta.env.PUBLIC_NOINDEX === 'true';
+// Copia de la web con los cambios sin publicar del panel (/vista-previa/).
+const vistaPrevia = import.meta.env.PUBLIC_VISTA_PREVIA === 'true';
 const robots = noindex || demo ? 'noindex, nofollow' : 'index, follow, max-image-preview:large';
 const canonica = new URL(Astro.url.pathname, Astro.site).href;
 const imagenAbs = urlAbsoluta(imagen);
@@ -57,6 +59,7 @@ const todosEsquemas = [esquemaNegocio(), esquemaWeb(), ...(migas ? [esquemaMigas
     <title>{titulo}</title>
     <meta name="description" content={descripcion} />
     <meta name="robots" content={robots} />
+    {negocio.analitica.verificacion && !vistaPrevia && <meta name="google-site-verification" content={negocio.analitica.verificacion} />}
     <link rel="canonical" href={canonica} />
 
     <meta property="og:type" content={tipo} />
@@ -104,6 +107,13 @@ const todosEsquemas = [esquemaNegocio(), esquemaWeb(), ...(migas ? [esquemaMigas
   </head>
   <body class:list={{ desnuda }}>
     <a class="saltar" href="#contenido">Saltar al contenido</a>
+    {
+      vistaPrevia && (
+        <div class="vista-previa" role="note">
+          <strong>Vista previa</strong> · Así quedará la web con los cambios del panel. Todavía no es la web pública.
+        </div>
+      )
+    }
     {!desnuda && <Cabecera />}
     <main id="contenido">
       <slot />
@@ -116,7 +126,7 @@ const todosEsquemas = [esquemaNegocio(), esquemaWeb(), ...(migas ? [esquemaMigas
         </>
       )
     }
-    <AvisoCookies />
+    {!vistaPrevia && <AvisoCookies />}
     <script>
       import '../scripts/sitio.ts';
     </script>

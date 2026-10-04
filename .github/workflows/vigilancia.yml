@@ -1,0 +1,43 @@
+# Vigilancia de la web. Si una publicación falla o alguna página deja de
+# responder, abre un aviso en Issues (GitHub lo envía por correo a quien sigue
+# el repositorio) y lo cierra solo cuando se arregla.
+name: Vigilancia de la web
+
+on:
+  workflow_run:
+    workflows: [Publicar en GitHub Pages]
+    types: [completed]
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+concurrency:
+  group: vigilancia
+  cancel-in-progress: false
+
+jobs:
+  vigilar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Comprobar
+        run: node --experimental-strip-types scripts/vigilar.ts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SITIO: ${{ vars.SITE_URL || 'https://gaepmalaga.github.io' }}${{ vars.BASE_PATH || '/siente' }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_TITULO: ${{ github.event.workflow_run.display_title }}

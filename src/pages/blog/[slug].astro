@@ -28,7 +28,7 @@ const CATEGORIA = { vista: 'Vista', oido: 'Oído', general: 'Consejos' } as cons
 const html = rutasEnHtml(post.rendered?.html ?? '');
 const palabras = (post.body ?? '').split(/\s+/).filter(Boolean).length;
 const minutos = Math.max(2, Math.round(palabras / 200));
-const fecha = d.date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+const fecha = d.date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Madrid' });
 
 const relacionados = (await getCollection('blog', (p) => esPublico(p) && p.id !== post.id))
   .sort((a, b) => Number(b.data.category === d.category) - Number(a.data.category === d.category) || b.data.date.getTime() - a.data.date.getTime())
@@ -42,7 +42,7 @@ const compartir = `https://wa.me/?text=${encodeURIComponent(`${d.title} ${urlAbs
 ---
 
 <Base
-  titulo={`${d.title} | Blog Siente`}
+  titulo={d.seoTitle || `${d.title} | Blog Siente`}
   descripcion={d.description}
   tipo="article"
   migas={migas}

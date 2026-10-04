@@ -1,0 +1,35 @@
+# Cada 15 minutos mira si ha llegado la hora de algo programado desde el panel
+# (artículos con fecha y hora, avisos, vacaciones, fin del Plan VEO) y, si es
+# así, recompila la web. GitHub puede retrasar unos minutos estas ejecuciones.
+name: Publicaciones programadas
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: programados
+  cancel-in-progress: false
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Revisar lo programado
+        run: node --experimental-strip-types scripts/programados.ts
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -97,6 +97,55 @@ export function ahoraEnMadrid(fecha = new Date()) {
   };
 }
 
+const dos = (n: number) => String(n).padStart(2, '0');
+
+/** Minutos que Madrid va por delante de UTC en ese instante (60 en invierno, 120 en verano). */
+export function desfaseMadrid(fecha: Date): number {
+  const partes = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Madrid',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(fecha);
+  const v = (t: string) => Number(partes.find((p) => p.type === t)?.value);
+  const local = Date.UTC(v('year'), v('month') - 1, v('day'), v('hour'), v('minute'));
+  return Math.round((local - Math.floor(fecha.getTime() / 60_000) * 60_000) / 60_000);
+}
+
+/** «2026-10-10» y «09:30» en hora de Madrid → «2026-10-10T09:30:00+02:00». */
+export function instanteMadrid(iso: string, hora: string): string {
+  const [a, m, d] = iso.split('-').map(Number);
+  const [h, mi] = hora.split(':').map(Number);
+  const comoUtc = Date.UTC(a, m - 1, d, h, mi);
+  // Dos pasadas por si el cambio de hora cae justo entre medias.
+  let desfase = desfaseMadrid(new Date(comoUtc));
+  desfase = desfaseMadrid(new Date(comoUtc - desfase * 60_000));
+  const abs = Math.abs(desfase);
+  return `${iso}T${dos(h)}:${dos(mi)}:00${desfase < 0 ? '-' : '+'}${dos(Math.floor(abs / 60))}:${dos(abs % 60)}`;
+}
+
+/** Fecha de un artículo («2026-10-10» o con hora) → día y hora en Madrid. */
+export function partesFecha(valor: string): { fecha: string; hora: string } {
+  const v = String(valor ?? '');
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return { fecha: v, hora: '' };
+  const t = Date.parse(v);
+  if (Number.isNaN(t)) return { fecha: v.slice(0, 10), hora: '' };
+  const { iso, minuto } = ahoraEnMadrid(new Date(t));
+  return { fecha: iso, hora: `${dos(Math.floor(minuto / 60))}:${dos(minuto % 60)}` };
+}
+
+/** Día y hora (opcional) → valor que se guarda en el artículo. */
+export const valorFecha = (fecha: string, hora: string) => (hora ? instanteMadrid(fecha, hora) : fecha);
+
+/**
+ * Instante en que un artículo se hace público. Igual que la web al compilar:
+ * una fecha sin hora cuenta desde las 00:00 UTC de ese día.
+ */
+export const momentoPublicacion = (valor: string) => Date.parse(String(valor ?? ''));
+
 export function sumarDias(iso: string, n: number): string {
   const [a, m, d] = iso.split('-').map(Number);
   return new Date(Date.UTC(a, m - 1, d + n)).toISOString().slice(0, 10);

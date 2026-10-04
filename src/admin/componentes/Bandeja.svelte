@@ -5,6 +5,7 @@
   import Icono from './Icono.svelte';
   import Modal from './Modal.svelte';
   import { estado } from '../lib/estado.svelte';
+  import { paginaDeArchivo } from '../lib/paginas';
   import type { Cambio } from '../lib/tipos';
   import type { NombreIcono } from '../lib/iconos';
 
@@ -22,6 +23,10 @@
     if (c.binario || c.tipo === 'borrar') return [];
     return diffLines(estado.originales[c.ruta] ?? '', c.contenido ?? '');
   }
+
+  const previa = $derived(estado.previa && estado.previaAlDia ? estado.previa : null);
+  const pasosHechos = $derived(previa?.pasos?.filter((p) => p.estado === 'ok' || p.estado === 'saltado').length ?? 0);
+  const rutaSugerida = $derived(cambios.length ? paginaDeArchivo(cambios[0].ruta) : '/');
 
   const icono = (c: Cambio): NombreIcono => (c.tipo === 'crear' ? 'FilePlus' : c.tipo === 'borrar' ? 'FileMinus' : 'FilePen');
   const verbo = (c: Cambio) => (c.tipo === 'crear' ? 'Nuevo' : c.tipo === 'borrar' ? 'Se borra' : 'Cambiado');
@@ -61,6 +66,9 @@
               <strong>{c.descripcion}</strong>
               <span class="p-apagado ruta">{verbo(c)} · {c.ruta}</span>
             </div>
+            {#if previa?.estado === 'lista'}
+              <a class="p-btn fantasma solo-icono pequeno" href={estado.urlPrevia(paginaDeArchivo(c.ruta))} target="_blank" rel="noopener" title="Verlo en la vista previa" aria-label="Verlo en la vista previa"><Icono nombre="Monitor" /></a>
+            {/if}
             <button class="p-btn fantasma solo-icono pequeno" type="button" title="Descartar este cambio" aria-label="Descartar este cambio" onclick={() => estado.descartar(c.ruta)}>
               <Icono nombre="Undo2" />
             </button>
@@ -86,6 +94,27 @@
 
     {#if cambios.length}
       <footer>
+        <div class="previa" class:lista={previa?.estado === 'lista'} class:error={previa?.estado === 'error'}>
+          {#if previa?.estado === 'preparando'}
+            <Icono nombre="Loader" clase="p-girar" />
+            <div>
+              <strong>Preparando la vista previa…</strong>
+              <small>{previa.pasos?.length ? `Paso ${Math.min(pasosHechos + 1, previa.pasos.length)} de ${previa.pasos.length}` : 'Enviando los cambios'} · suele tardar 1 o 2 minutos. Puedes seguir trabajando.</small>
+            </div>
+          {:else if previa?.estado === 'lista'}
+            <Icono nombre="CircleCheck" />
+            <div><strong>Vista previa lista</strong><small>Una copia de la web con estos cambios. La web real no cambia hasta que publiques.</small></div>
+            <a class="p-btn pequeno" href={estado.urlPrevia(previa.ruta)} target="_blank" rel="noopener"><Icono nombre="ExternalLink" /> Abrir</a>
+          {:else if previa?.estado === 'error'}
+            <Icono nombre="CircleAlert" />
+            <div><strong>No se ha podido preparar</strong><small>{previa.mensaje}</small></div>
+            <button class="p-btn pequeno" type="button" onclick={() => { estado.previa = null; estado.vistaPrevia(rutaSugerida); }}>Reintentar</button>
+          {:else}
+            <Icono nombre="Monitor" />
+            <div><strong>¿Quieres verlo antes?</strong><small>Prepara una copia de la web con estos cambios, sin publicarlos.</small></div>
+            <button class="p-btn pequeno" type="button" disabled={errores.length > 0} onclick={() => estado.vistaPrevia(rutaSugerida)}>Vista previa</button>
+          {/if}
+        </div>
         <label class="p-campo">
           <span class="p-etiqueta">Nota para el historial <small>opcional</small></span>
           <input class="p-input" bind:value={mensaje} placeholder="Por ejemplo: horario de Navidad" maxlength="90" />
@@ -148,6 +177,13 @@
   .diff del { display: block; background: #fbe3de; color: #8e2615; }
   .igual { color: var(--p-apagado); }
   .mini { width: 120px; border-radius: 8px; }
+  .previa { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--p-borde); border-radius: 12px; background: var(--p-superficie); }
+  .previa > div { flex: 1; display: grid; min-width: 0; }
+  .previa small { color: var(--p-apagado); font-size: 0.8rem; line-height: 1.35; }
+  .previa.lista { border-color: #b9dcc6; background: #f5fbf7; }
+  .previa.lista > :global(.p-icono) { color: var(--p-ok); }
+  .previa.error { border-color: #f0c2b8; background: #fffaf9; }
+  .previa.error > :global(.p-icono) { color: var(--p-error); }
   footer { display: grid; gap: 12px; padding: 16px 20px 20px; border-top: 1px solid var(--p-borde); background: var(--p-superficie-2); }
   .botones { display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; }
   .botones .primario { flex: 1; }

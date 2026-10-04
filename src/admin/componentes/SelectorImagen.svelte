@@ -2,9 +2,10 @@
   // Elegir una foto ya subida o subir una nueva (se optimiza en el navegador).
   import Modal from './Modal.svelte';
   import Icono from './Icono.svelte';
+  import Recortador from './Recortador.svelte';
   import { estado } from '../lib/estado.svelte';
   import { RUTAS } from '../lib/backend';
-  import { prepararImagen } from '../lib/imagenes';
+  import { prepararImagen, type Giro, type Recorte } from '../lib/imagenes';
   import { nombreLibre } from '../lib/medios';
   import { tamano } from '../lib/texto';
 
@@ -22,14 +23,25 @@
     estado.medios.filter((m) => m.ruta.startsWith(prefijo) && m.ruta.toLowerCase().includes(busqueda.toLowerCase())),
   );
 
-  async function subir(e: Event) {
+  let recortando = $state(false);
+  let pendiente = $state<File | null>(null);
+
+  function elegidas(e: Event) {
     const archivos = [...((e.target as HTMLInputElement).files ?? [])];
+    (e.target as HTMLInputElement).value = '';
+    if (archivos.length === 1) {
+      pendiente = archivos[0];
+      recortando = true;
+    } else if (archivos.length) subir(archivos);
+  }
+
+  async function subir(archivos: File[], retoque: { recorte: Recorte | null; giro: Giro } = { recorte: null, giro: 0 }) {
     if (!archivos.length) return;
     subiendo = true;
     try {
       let ultima = '';
       for (const a of archivos) {
-        const img = await prepararImagen(a);
+        const img = await prepararImagen(a, retoque);
         const destino = nombreLibre(carpeta === 'fotos' ? RUTAS.fotos : `${RUTAS.uploads}blog/`, img.nombre);
         estado.subirMedio(destino, img.base64, img.vistaPrevia, img.tamano);
         ultima = destino;
@@ -42,7 +54,6 @@
       estado.aviso((err as Error).message, 'error');
     } finally {
       subiendo = false;
-      (e.target as HTMLInputElement).value = '';
     }
   }
 </script>
@@ -55,7 +66,7 @@
     </label>
     <label class="p-btn primario">
       {#if subiendo}<Icono nombre="Loader" clase="p-girar" /> Optimizando…{:else}<Icono nombre="Upload" /> Subir fotos{/if}
-      <input type="file" accept="image/*" multiple hidden onchange={subir} />
+      <input type="file" accept="image/*" multiple hidden onchange={elegidas} />
     </label>
   </div>
   <p class="p-ayuda">Las fotos se reducen y se convierten a WebP automáticamente: pesan hasta 10 veces menos y la web carga más rápido.</p>
@@ -81,6 +92,16 @@
     <div class="p-vacio"><Icono nombre="Images" /> No hay fotos {busqueda ? 'con ese nombre' : 'todavía'}.</div>
   {/if}
 </Modal>
+
+<Recortador
+  bind:abierto={recortando}
+  origen={pendiente}
+  titulo="Recortar la foto"
+  proporcionInicial={carpeta === 'fotos' ? 4 / 5 : 4 / 3}
+  textoAplicar="Recortar y subir"
+  sinRecortar={() => pendiente && subir([pendiente])}
+  onaplicar={(r) => pendiente && subir([pendiente], r)}
+/>
 
 <style>
   .barra { display: flex; gap: 10px; flex-wrap: wrap; }

@@ -1,9 +1,10 @@
 <script lang="ts">
   import Icono from '../componentes/Icono.svelte';
   import Modal from '../componentes/Modal.svelte';
+  import Recortador from '../componentes/Recortador.svelte';
   import { estado } from '../lib/estado.svelte';
   import { RUTAS } from '../lib/backend';
-  import { prepararImagen } from '../lib/imagenes';
+  import { prepararImagen, formatoDe, type Giro, type Recorte } from '../lib/imagenes';
   import { nombreLibre, usosDe, rutaPublica, claveFoto, type Uso } from '../lib/medios';
   import { tamano } from '../lib/texto';
   import type { Medio } from '../lib/tipos';
@@ -18,13 +19,46 @@
   const usos = $derived(detalle ? usosDe(detalle.ruta) : ([] as Uso[]));
   const pesoTotal = $derived(lista.reduce((s, m) => s + m.tamano, 0));
 
-  async function subir(archivos: File[]) {
+  // Recorte: al subir una sola foto, o para retocar una ya subida.
+  let recortando = $state(false);
+  let origenRecorte = $state<Blob | null>(null);
+  let alAplicar: (r: { recorte: Recorte | null; giro: Giro }) => void = () => {};
+  let alSaltar: (() => void) | undefined = $state();
+
+  function elegidas(archivos: File[]) {
+    const imagenes = archivos.filter((a) => a.type.startsWith('image/'));
+    if (imagenes.length !== 1) return void subir(imagenes);
+    origenRecorte = imagenes[0];
+    alAplicar = (r) => subir(imagenes, r);
+    alSaltar = () => subir(imagenes);
+    recortando = true;
+  }
+
+  async function retocar(m: Medio) {
+    try {
+      origenRecorte = await (await fetch(m.url)).blob();
+    } catch {
+      return estado.aviso('No se ha podido abrir la foto para retocarla.', 'error');
+    }
+    alSaltar = undefined;
+    alAplicar = async (r) => {
+      if (!r.recorte && !r.giro) return;
+      const nombre = m.ruta.split('/').pop()!;
+      const img = await prepararImagen(origenRecorte!, { ...r, formato: formatoDe(m.ruta), nombre, ladoMaximo: 2000 });
+      estado.subirMedio(m.ruta, img.base64, img.vistaPrevia, img.tamano);
+      detalle = estado.medios.find((x) => x.ruta === m.ruta) ?? null;
+      estado.aviso('Foto retocada. Se cambiará en toda la web al publicar.', 'ok');
+    };
+    recortando = true;
+  }
+
+  async function subir(archivos: File[], retoque: { recorte: Recorte | null; giro: Giro } = { recorte: null, giro: 0 }) {
     const imagenes = archivos.filter((a) => a.type.startsWith('image/'));
     procesando = imagenes.length;
     let ahorro = 0;
     for (const a of imagenes) {
       try {
-        const img = await prepararImagen(a);
+        const img = await prepararImagen(a, retoque);
         ahorro += Math.max(0, a.size - img.tamano);
         const destino = nombreLibre(pestana === 'fotos' ? RUTAS.fotos : `${RUTAS.uploads}blog/`, img.nombre);
         estado.subirMedio(destino, img.base64, img.vistaPrevia, img.tamano);
@@ -39,7 +73,7 @@
   function soltar(e: DragEvent) {
     e.preventDefault();
     arrastrando = false;
-    subir([...(e.dataTransfer?.files ?? [])]);
+    elegidas([...(e.dataTransfer?.files ?? [])]);
   }
 
   function borrar(m: Medio) {
@@ -65,7 +99,7 @@
     </div>
     <label class="p-btn primario grande">
       <Icono nombre="Upload" /> Subir fotos
-      <input type="file" accept="image/*" multiple hidden onchange={(e) => { subir([...((e.target as HTMLInputElement).files ?? [])]); (e.target as HTMLInputElement).value = ''; }} />
+      <input type="file" accept="image/*" multiple hidden onchange={(e) => { elegidas([...((e.target as HTMLInputElement).files ?? [])]); (e.target as HTMLInputElement).value = ''; }} />
     </label>
   </header>
 
@@ -136,9 +170,12 @@
   {/if}
   {#snippet pie()}
     <button class="p-btn peligro" type="button" onclick={() => detalle && borrar(detalle)}><Icono nombre="Trash2" /> Borrar</button>
+    <button class="p-btn" type="button" onclick={() => detalle && retocar(detalle)} disabled={detalle?.ruta.endsWith('.svg')}><Icono nombre="Crop" /> Recortar o girar</button>
     <button class="p-btn" type="button" onclick={() => (detalleAbierto = false)}>Cerrar</button>
   {/snippet}
 </Modal>
+
+<Recortador bind:abierto={recortando} origen={origenRecorte} titulo="Recortar y girar" textoAplicar={alSaltar ? 'Recortar y subir' : 'Guardar retoque'} sinRecortar={alSaltar} onaplicar={(r) => alAplicar(r)} />
 
 <style>
   label.p-btn { cursor: pointer; }

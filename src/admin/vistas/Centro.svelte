@@ -139,6 +139,12 @@
             ? 'Activa: aparece el aviso de cookies y se miden las visitas y los clics en WhatsApp, llamar y pedir cita de quien acepte.'
             : 'Sin ID no hay analítica ni aviso de cookies. Crea una propiedad en analytics.google.com y pega aquí su ID de medición.'}
         </p>
+        <label class="p-campo">
+          <span class="p-etiqueta">Verificación de Search Console <small>opcional</small></span>
+          <input class="p-input" bind:value={d.analitica.verificacion} placeholder="Código de la etiqueta google-site-verification" spellcheck="false" aria-invalid={!!errores['analitica.verificacion']} />
+          {#if errores['analitica.verificacion']}<span class="p-error-campo">{errores['analitica.verificacion']}</span>{:else}<span class="p-ayuda">Al añadir la web en Search Console, elige «Etiqueta HTML» y pega aquí solo lo que va dentro de <code>content="…"</code>.</span>{/if}
+        </label>
+        <a class="p-btn pequeno ir-estadisticas" href="#/estadisticas"><Icono nombre="ChartLine" /> Ver las estadísticas en el panel</a>
       </div>
     </section>
 
@@ -156,6 +162,7 @@
 </div>
 
 <style>
+  .ir-estadisticas { justify-self: start; }
   .secciones { display: grid; gap: 20px; }
   .llegar { display: grid; grid-template-columns: 130px 1fr auto; gap: 8px; align-items: center; }
   .consejo { display: flex; gap: 10px; padding: 12px 14px; border-radius: 10px; background: #fdf8ee; font-size: 0.9rem; }

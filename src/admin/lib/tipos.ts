@@ -52,7 +52,28 @@ export type EstadoDespliegue = {
   fin?: string;
   url: string;
   pasos?: { nombre: string; estado: 'pendiente' | 'en_curso' | 'ok' | 'error' | 'saltado' }[];
+  /** Compilación lanzada por una vista previa (no por una publicación). */
+  esPrevia?: boolean;
 };
+
+export type VistaPrevia = {
+  estado: 'preparando' | 'lista' | 'error';
+  /** Commit de la rama vista-previa. */
+  sha: string;
+  inicio: number;
+  /** Página que se quiere ver («/blog/x/»). */
+  ruta: string;
+  /** Huella de los cambios incluidos, para saber si ha quedado desfasada. */
+  firma: string;
+  mensaje?: string;
+  pasos?: EstadoDespliegue['pasos'];
+};
+
+/** Aviso abierto por la vigilancia automática (un issue con la etiqueta aviso-web). */
+export type AvisoVigilancia = { numero: number; titulo: string; url: string; fecha: string };
+export type EstadoVigilancia = { estado: 'ok' | 'error' | 'en_curso'; fecha: string; url: string } | null;
+
+export type ErrorRegistrado = { fecha: string; mensaje: string; donde: string; pila?: string };
 
 export type EntradaHistorial = {
   sha: string;

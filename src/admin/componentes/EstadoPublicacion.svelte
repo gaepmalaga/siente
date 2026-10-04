@@ -45,6 +45,10 @@
           </ol>
         {/if}
         {#if enCurso}<p class="p-ayuda">Suele tardar alrededor de un minuto.</p>{/if}
+        {#if d.estado === 'error'}
+          <p class="fallo">La web sigue mostrando la versión anterior, así que nadie ve nada roto. Lo más rápido es deshacer este cambio y volver a intentarlo.</p>
+          <button class="p-btn pequeno primario" type="button" onclick={() => { abierto = false; estado.prepararDeshacer(d.sha, d.mensaje); }}><Icono nombre="Undo2" /> Deshacer este cambio</button>
+        {/if}
         <div class="acciones">
           <a class="p-btn pequeno" href={estado.config.sitio} target="_blank" rel="noopener"><Icono nombre="Globe" /> Ver la web</a>
           {#if d.url && d.url !== '#'}<a class="p-btn pequeno fantasma" href={d.url} target="_blank" rel="noopener">Detalles técnicos <Icono nombre="ExternalLink" /></a>{/if}
@@ -91,6 +95,7 @@
     .chip .txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .pop { position: fixed; top: 64px; left: 12px; right: 12px; width: auto; }
   }
+  .fallo { font-size: 0.88rem; color: var(--p-texto-2); }
   .tit { font-family: var(--p-mono); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--p-roble-oscuro); }
   .msg { font-weight: 700; }
   ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }

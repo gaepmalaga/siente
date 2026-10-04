@@ -149,6 +149,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .saltar:focus { top: 12px; }
 
+/* Solo en /vista-previa/: la copia de la web con los cambios sin publicar. */
+.vista-previa {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  padding: 10px var(--margen);
+  background: var(--luz);
+  color: var(--tinta);
+  font-size: var(--paso--1);
+  text-align: center;
+}
+
 .antetitulo {
   display: inline-flex;
   align-items: center;

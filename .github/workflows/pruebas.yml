@@ -1,0 +1,72 @@
+# Pruebas automáticas del código de la web y del panel. Solo se lanzan cuando
+# cambia el código (no cuando se publica contenido desde el panel).
+name: Pruebas
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'src/data/**'
+      - 'src/content/**'
+      - 'public/uploads/**'
+      - 'src/assets/fotos/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  # La prueba real de publicación crea una rama temporal y la borra al terminar.
+  contents: write
+
+concurrency:
+  group: pruebas-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tipos
+        run: npx svelte-check --workspace src --threshold error
+
+      - name: Pruebas unitarias
+        run: npm test
+
+      - name: Prueba real de publicación en GitHub
+        if: github.event_name != 'pull_request'
+        run: npm run test:github
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Compilar la web
+        run: npm run build
+        env:
+          SITE_URL: https://gaepmalaga.github.io
+          BASE_PATH: /siente
+          PUBLIC_NOINDEX: 'true'
+
+      - name: Instalar el navegador de pruebas
+        run: npx playwright install --with-deps chromium
+
+      - name: Panel de principio a fin
+        run: npm run test:e2e
+
+      - name: Guardar el rastro si algo falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rastro-playwright
+          path: test-results/
+          retention-days: 7

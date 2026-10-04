@@ -11,6 +11,8 @@ import type {
   EstadoDespliegue,
   Medio,
   Usuario,
+  AvisoVigilancia,
+  EstadoVigilancia,
 } from './tipos';
 
 export const RUTAS = {
@@ -46,6 +48,8 @@ export interface Backend {
   modo: 'github' | 'demo';
   cargar(): Promise<Carga>;
   publicar(cambios: Cambio[], mensaje: string, base: string, forzar?: boolean): Promise<string>;
+  /** Sube los cambios a la rama de vista previa y devuelve su commit. */
+  vistaPrevia(cambios: Cambio[]): Promise<string>;
   despliegues(): Promise<EstadoDespliegue[]>;
   despliegue(id: number): Promise<EstadoDespliegue>;
   historial(pagina: number): Promise<EntradaHistorial[]>;
@@ -53,12 +57,19 @@ export interface Backend {
   contenidoEn(ruta: string, ref: string): Promise<string | null>;
   colaboradores(): Promise<Colaborador[]>;
   urlMedio(ruta: string, ref: string): string;
+  /** Avisos abiertos por la vigilancia automática de la web. */
+  avisosVigilancia(): Promise<AvisoVigilancia[]>;
+  /** Resultado de la última comprobación automática. */
+  vigilancia(): Promise<EstadoVigilancia>;
 }
 
 // ── GitHub ─────────────────────────────────────────────────────────────────
 
 const NOMBRE_WORKFLOW = '.github/workflows/deploy.yml';
-const PASOS_VISIBLES = ['Descargar el repositorio', 'Instalar dependencias', 'Compilar la web', 'Empaquetar el sitio', 'Desplegar'];
+const PASOS_VISIBLES = ['Descargar el repositorio', 'Instalar dependencias', 'Compilar la web', 'Compilar la vista previa', 'Empaquetar el sitio', 'Desplegar'];
+export const RAMA_PREVIA = 'vista-previa';
+/** Título de las compilaciones lanzadas por una vista previa (run-name en deploy.yml). */
+export const TITULO_PREVIA = 'Vista previa del panel';
 
 type RunApi = {
   id: number;
@@ -83,7 +94,16 @@ function aDespliegue(r: RunApi): EstadoDespliegue {
       : r.status === 'in_progress'
         ? 'en_curso'
         : 'en_cola';
-  return { id: r.id, estado, sha: r.head_sha, mensaje: r.display_title, inicio: r.created_at, fin: r.status === 'completed' ? r.updated_at : undefined, url: r.html_url };
+  return {
+    id: r.id,
+    estado,
+    sha: r.head_sha,
+    mensaje: r.display_title,
+    inicio: r.created_at,
+    fin: r.status === 'completed' ? r.updated_at : undefined,
+    url: r.html_url,
+    esPrevia: r.display_title === TITULO_PREVIA,
+  };
 }
 
 export class BackendGitHub implements Backend {
@@ -148,6 +168,18 @@ export class BackendGitHub implements Backend {
     );
   }
 
+  async vistaPrevia(cambios: Cambio[]): Promise<string> {
+    // Sobre la última versión publicada, para que la vista previa sea fiel.
+    const base = await this.gh.cabeza(this.config.rama);
+    return this.gh.commit(
+      RAMA_PREVIA,
+      base,
+      cambios.map((c) => ({ ruta: c.ruta, contenido: c.contenido, binario: c.binario, borrar: c.tipo === 'borrar' })),
+      'Vista previa desde el panel (no se publica)',
+      { forzar: true, crear: true },
+    );
+  }
+
   /** Lee con el token y, si no tiene permiso y el repositorio es público, sin él. */
   private async leer<T>(ruta: string): Promise<T> {
     try {
@@ -186,9 +218,14 @@ export class BackendGitHub implements Backend {
             : 'pendiente') as NonNullable<EstadoDespliegue['pasos']>[number]['estado'],
       }));
     // Mientras el segundo trabajo no ha empezado, «Desplegar» aún no aparece.
-    for (const nombre of PASOS_VISIBLES) if (!pasos.some((p) => p.nombre === nombre)) pasos.push({ nombre, estado: 'pendiente' });
+    const d = aDespliegue(run);
+    for (const nombre of PASOS_VISIBLES) {
+      // «Compilar la vista previa» solo existe cuando hay una vista previa.
+      if (nombre === 'Compilar la vista previa' && !d.esPrevia) continue;
+      if (!pasos.some((p) => p.nombre === nombre)) pasos.push({ nombre, estado: 'pendiente' });
+    }
     pasos.sort((a, b) => PASOS_VISIBLES.indexOf(a.nombre) - PASOS_VISIBLES.indexOf(b.nombre));
-    return { ...aDespliegue(run), pasos };
+    return { ...d, pasos: d.esPrevia ? pasos : pasos.filter((p) => p.nombre !== 'Compilar la vista previa') };
   }
 
   async historial(pagina: number): Promise<EntradaHistorial[]> {
@@ -224,6 +261,21 @@ export class BackendGitHub implements Backend {
 
   async contenidoEn(ruta: string, ref: string): Promise<string | null> {
     return (await this.gh.archivoEn(ruta, ref))?.base64 ?? null;
+  }
+
+  async avisosVigilancia(): Promise<AvisoVigilancia[]> {
+    const lista = await this.leer<{ number: number; title: string; html_url: string; created_at: string; pull_request?: unknown }[]>(
+      this.gh.r('/issues?labels=aviso-web&state=open&per_page=10'),
+    );
+    return lista.filter((i) => !i.pull_request).map((i) => ({ numero: i.number, titulo: i.title, url: i.html_url, fecha: i.created_at }));
+  }
+
+  async vigilancia(): Promise<EstadoVigilancia> {
+    const r = await this.leer<{ workflow_runs: RunApi[] }>(this.gh.r('/actions/workflows/vigilancia.yml/runs?per_page=1'));
+    const run = r.workflow_runs[0];
+    if (!run) return null;
+    const d = aDespliegue(run);
+    return { estado: d.estado === 'ok' ? 'ok' : d.estado === 'en_curso' || d.estado === 'en_cola' ? 'en_curso' : 'error', fecha: d.fin ?? d.inicio, url: d.url };
   }
 
   async colaboradores(): Promise<Colaborador[]> {
@@ -277,6 +329,16 @@ export class BackendDemo implements Backend {
     this.inicioDespliegue = Date.now();
     return sha;
   }
+
+  async vistaPrevia(): Promise<string> {
+    await new Promise((r) => setTimeout(r, 600));
+    this.inicioPrevia = Date.now();
+    return `demo-previa-${this.inicioPrevia}`;
+  }
+
+  /** En la demostración, la vista previa «tarda» unos segundos. */
+  previaLista = () => Date.now() - this.inicioPrevia > 8000;
+  private inicioPrevia = 0;
 
   private simulado(): EstadoDespliegue | null {
     const ultima = this.publicaciones[0];
@@ -341,6 +403,14 @@ export class BackendDemo implements Backend {
 
   async colaboradores(): Promise<Colaborador[]> {
     return [{ login: 'gaepmalaga', avatar: '', rol: 'admin' }];
+  }
+
+  async avisosVigilancia(): Promise<AvisoVigilancia[]> {
+    return [];
+  }
+
+  async vigilancia(): Promise<EstadoVigilancia> {
+    return { estado: 'ok', fecha: new Date(Date.now() - 2 * 3600_000).toISOString(), url: '#' };
   }
 
   urlMedio(ruta: string, _ref?: string): string {

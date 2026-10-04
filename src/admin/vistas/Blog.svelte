@@ -50,7 +50,7 @@
             <span class="txt">
               <strong>{a.title || 'Sin título'}</strong>
               <span class="meta">
-                {#if a.estadoPub === 'publicado'}<span class="p-chip ok">Publicado</span>{:else if a.estadoPub === 'programado'}<span class="p-chip info"><Icono nombre="CalendarDays" /> {fechaLarga(a.date)}</span>{:else}<span class="p-chip aviso">Borrador</span>{/if}
+                {#if a.estadoPub === 'publicado'}<span class="p-chip ok">Publicado</span>{:else if a.estadoPub === 'programado'}<span class="p-chip info"><Icono nombre="AlarmClock" /> {fechaLarga(a.date)}{a.hora ? ` · ${a.hora}` : ''}</span>{:else}<span class="p-chip aviso">Borrador</span>{/if}
                 <span class="p-chip">{CATEGORIA[a.category ?? 'general']}</span>
                 {#if estado.pendientes[a.ruta]}<span class="p-chip tinta">Sin publicar</span>{/if}
                 <span class="p-apagado fecha">{a.date ? fechaLarga(a.date, true) : ''}</span>

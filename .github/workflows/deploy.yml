@@ -3,21 +3,32 @@
 # Cada cambio hecho desde el panel /admin es un commit a main, así que la web
 # se republica sola en uno o dos minutos.
 #
+# Además, si existe la rama «vista-previa» (la crea el panel al pulsar «Vista
+# previa»), se compila también en /vista-previa/: una copia de la web con los
+# cambios aún sin publicar. Si esa copia falla, la web real se publica igual.
+#
 # Variables del repositorio (Settings → Secrets and variables → Actions →
 # Variables) para pasar de la demo al dominio definitivo sin tocar código:
 #   SITE_URL        https://gaepmalaga.github.io   →  https://www.sienteyve.es
 #   BASE_PATH       /siente                        →  /
 #   PUBLIC_NOINDEX  true (demo, Google no la indexa) → false
 name: Publicar en GitHub Pages
+# El panel reconoce las compilaciones de vista previa por este nombre.
+run-name: ${{ inputs.motivo == 'vista-previa' && 'Vista previa del panel' || inputs.motivo == 'programado' && 'Publicación programada' || '' }}
 
 on:
   push:
     branches: [main]
-  # Cada mañana a las 6:00 (hora de Madrid en invierno): publica los artículos
-  # programados y retira solos el Plan VEO, los avisos y los cierres pasados.
+  # Red de seguridad diaria (6:00 en Madrid en invierno). Lo programado con hora
+  # lo lanza «Publicaciones programadas» en su momento exacto.
   schedule:
     - cron: '0 5 * * *'
   workflow_dispatch:
+    inputs:
+      motivo:
+        description: 'Motivo: manual, vista-previa o programado'
+        required: false
+        default: manual
 
 permissions:
   contents: read
@@ -31,6 +42,9 @@ concurrency:
 jobs:
   compilar:
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ vars.SITE_URL || 'https://gaepmalaga.github.io' }}
+      BASE_WEB: ${{ vars.BASE_PATH || '/siente' }}
     steps:
       - name: Descargar el repositorio
         uses: actions/checkout@v4
@@ -47,11 +61,30 @@ jobs:
       - name: Compilar la web
         run: npm run build
         env:
-          SITE_URL: ${{ vars.SITE_URL || 'https://gaepmalaga.github.io' }}
-          BASE_PATH: ${{ vars.BASE_PATH || '/siente' }}
+          BASE_PATH: ${{ env.BASE_WEB }}
           PUBLIC_NOINDEX: ${{ vars.PUBLIC_NOINDEX || 'true' }}
           # Opcional: dirección del autenticador OAuth para el botón «Entrar con GitHub».
           PUBLIC_PANEL_AUTH_URL: ${{ vars.PUBLIC_PANEL_AUTH_URL || '' }}
+
+      - name: Compilar la vista previa
+        continue-on-error: true
+        run: |
+          if ! git ls-remote --exit-code --heads origin vista-previa > /dev/null; then
+            echo "No hay vista previa pendiente."
+            exit 0
+          fi
+          git fetch --depth=1 origin vista-previa
+          git checkout --force FETCH_HEAD
+          rm -rf .astro node_modules/.astro
+          BASE_PATH="${BASE_WEB%/}/vista-previa" OUT_DIR=./dist-previa npm run build
+          # El panel sabe que la copia está lista cuando este archivo dice su versión.
+          git rev-parse HEAD > dist-previa/version.txt
+          rm -rf dist/vista-previa
+          mv dist-previa dist/vista-previa
+          git checkout --force "$GITHUB_SHA"
+        env:
+          PUBLIC_NOINDEX: 'true'
+          PUBLIC_VISTA_PREVIA: 'true'
 
       - name: Configurar Pages
         uses: actions/configure-pages@v5

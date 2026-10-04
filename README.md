@@ -45,6 +45,8 @@ src/
   lib/horario.ts   ← cálculo de apertura, cierres y avisos (web y panel)
   admin/           ← el panel: vistas/, componentes/ y lib/ (conexión con GitHub, estado, SEO…)
 public/uploads/    ← imágenes subidas desde el panel
+scripts/           ← programados.ts y vigilar.ts (los usan los workflows)
+tests/             ← unidad/, integracion/ (GitHub real) y e2e/ (panel con Playwright)
 ```
 
 ## Desarrollo local
@@ -75,21 +77,26 @@ El panel es una aplicación propia que trabaja directamente contra la API de Git
 - Los cambios se acumulan como **pendientes** (sobreviven a recargar la página) y se publican **todos juntos en un único commit** atómico, con un mensaje que resume qué se tocó.
 - Antes de publicar se ven las **diferencias** archivo a archivo y se **validan** con las mismas reglas (`src/lib/esquemas.ts`) que usa la web al compilar: no se puede publicar algo que rompa la web.
 - Si otra persona ha publicado entretanto los mismos archivos, el panel avisa del **conflicto** en vez de pisarlo.
-- La barra superior enseña el **progreso de la publicación** paso a paso (lee GitHub Actions) y avisa cuando ya está en la web.
+- **Vista previa**: antes de publicar, el panel sube los cambios a la rama `vista-previa` y GitHub Actions compila una copia exacta de la web en `/vista-previa/` (con una franja que lo indica y sin indexar). La web pública no cambia.
+- La barra superior enseña el **progreso de la publicación** paso a paso (lee GitHub Actions) y avisa cuando ya está en la web. Si una publicación falla, la web sigue con la versión anterior y el panel ofrece **deshacer** el cambio con un clic.
 - **Historial**: cada publicación con autor, fecha y cambios; cualquiera se puede **deshacer**.
+- Si algo falla dentro del panel, la sección afectada muestra un aviso sin romper el resto y el error queda en **Accesos → Diagnóstico**, desde donde se copia un informe técnico.
 
 **Secciones:**
 
 | Sección | Qué se hace |
 | --- | --- |
-| Resumen | Estado de apertura, acciones rápidas, salud SEO de la web, lo que está programado y últimos cambios |
+| Resumen | Estado de apertura, avisos de la vigilancia, cifras de las últimas 4 semanas, salud SEO de la web, lo programado y los últimos cambios |
+| Estadísticas | Contactos (citas en la web + WhatsApp + llamadas), visitas, de dónde llegan, páginas más vistas, búsquedas de Google, posición media y «casi en la primera página» |
 | Horario y avisos | Horario semanal, **cierres y vacaciones** (la web avisa sola 14 días antes y los datos para Google se actualizan), **aviso programado** con fechas |
 | Datos del centro | Teléfonos, WhatsApp, dirección, redes, marcas, barrios, Plan VEO, Google Analytics, datos legales |
 | Portada, Reseñas, Enlaces de Instagram | Edición con vista previa (la de enlaces, en un móvil) y orden arrastrando |
-| Blog | Editor con barra de formato y vista previa, **programar artículos** (se publican solos: la web se recompila cada día), borradores, análisis SEO con palabra clave y vista de Google |
+| Blog | Editor con barra de formato y vista previa, **programar artículos con día y hora**, borradores, título distinto para Google y el análisis SEO |
 | Servicios | Todos los campos de cada página de servicio, pasos, preguntas frecuentes, icono, foto y SEO |
-| Fotos | Subida arrastrando con **conversión automática a WebP**, dónde se usa cada foto y borrado seguro |
-| Accesos | Quién tiene acceso y cómo darlo a otra persona |
+| Fotos | Subida arrastrando con **recorte y giro**, conversión automática a WebP, retoque de fotos ya subidas, dónde se usa cada una y borrado seguro |
+| Accesos | Quién tiene acceso, cómo darlo a otra persona y diagnóstico (vigilancia y errores) |
+
+**El análisis SEO** lo calcula el panel, no Google: resume las pautas públicas de Google (título, descripción, estructura, enlaces internos, imágenes, legibilidad) más dos cosas de negocio local (nombrar Barajas y enlazar a pedir cita). Cada aviso trae su arreglo: un botón que lo resuelve (añadir el enlace de cita, enlazar el servicio relacionado, proponer un título más corto…) o que lleva al campo exacto. Sugiere palabras clave y, con Search Console conectado, enseña las búsquedas reales con las que aparece cada página. Los bloques que necesitan texto propio se insertan marcados con `[completa aquí]` y el panel no deja publicar mientras quede alguno.
 
 `Ctrl + K` abre el buscador de acciones desde cualquier sitio.
 
@@ -100,6 +107,33 @@ Las claves *fine-grained* de GitHub solo sirven para repositorios de la propia c
 1. **Organización (recomendado).** Crear una organización gratuita, transferirle este repositorio e invitar a la persona como miembro. Cada una crea su clave eligiendo la organización como propietaria. La demo pasa a `https://<organización>.github.io/siente/` (no afecta al dominio definitivo).
 2. **Botón «Entrar con GitHub».** Desplegar [Sveltia CMS Authenticator](https://github.com/sveltia/sveltia-cms-auth) en Cloudflare Workers (gratis), crear una *OAuth App* en GitHub con su URL de retorno e invitar a la persona como colaboradora del repositorio. Después, añadir la variable de Actions `PUBLIC_PANEL_AUTH_URL` con la dirección del Worker: aparece el botón y ya no hacen falta claves.
 3. **Colaboradora con clave clásica.** Invitarla en *Settings → Collaborators* y que cree una clave clásica con el permiso `repo` (da acceso a todos sus repositorios, por eso es la menos recomendable).
+
+## Programado, vigilancia y pruebas
+
+| Workflow | Cuándo | Qué hace |
+| --- | --- | --- |
+| `deploy.yml` | Cada publicación, cada mañana y bajo demanda | Compila y publica la web; si existe la rama `vista-previa`, también la copia en `/vista-previa/` (si esa copia falla, la web se publica igual) |
+| `vista-previa.yml` | Al actualizar la rama `vista-previa` | Pide a `deploy.yml` que recompile desde `main` (la única rama que puede desplegar en Pages) |
+| `programados.yml` | Cada 15 minutos | Si ha llegado la hora de un artículo programado, un aviso, el preaviso o el fin de unas vacaciones o el fin del Plan VEO, recompila la web |
+| `vigilancia.yml` | Tras cada publicación y cada 6 horas | Si una publicación falla o alguna página del mapa del sitio no responde, abre un *issue* con la etiqueta `aviso-web` (GitHub lo envía por correo) y lo cierra solo al arreglarse. Además evita que GitHub desactive las tareas programadas por inactividad |
+| `pruebas.yml` | Cuando cambia el código (no el contenido) | Tipos, pruebas unitarias, una publicación real en una rama temporal y el panel de principio a fin con Playwright |
+
+```bash
+npm test               # unitarias: horario, esquemas, contenido real, SEO, GitHub simulado
+npm run test:github    # publicación real en una rama temporal (necesita GITHUB_TOKEN)
+npm run test:e2e       # panel en modo demostración (necesita la web compilada con BASE_PATH=/siente)
+```
+
+## Estadísticas en el panel (Google)
+
+El panel lee Google Analytics 4 y Search Console directamente desde el navegador, con permisos de solo lectura que caducan a la hora. Se configura una vez (el propio panel lo guía en **Estadísticas**):
+
+1. En Google Cloud, crear un proyecto y activar **Google Analytics Data API**, **Google Analytics Admin API** y **Google Search Console API**.
+2. Configurar la pantalla de consentimiento (externa, con los correos del equipo como usuarios de prueba).
+3. Crear un **cliente OAuth de tipo «Aplicación web»** con el origen de la web autorizado (`https://gaepmalaga.github.io` y, después, el dominio definitivo).
+4. Pegar el ID de cliente en el panel, pulsar **Conectar con Google** y elegir la propiedad de Analytics y la de Search Console.
+
+Para que Search Console tenga datos, la web debe estar verificada: en **Datos del centro → Analítica** se pega el código de la etiqueta `google-site-verification` (o se verifica el dominio por DNS al pasar a sienteyve.es).
 
 ## Activar Google Analytics (opcional)
 

@@ -4,7 +4,7 @@ import { RUTAS } from './backend';
 import { leerMd } from './frontmatter';
 import { analizar } from './seo';
 import { slugDe } from './paginas';
-import { ahoraEnMadrid } from '../../lib/horario';
+import { ahoraEnMadrid, partesFecha, momentoPublicacion } from '../../lib/horario';
 import type { DatosNegocio, DatosResenas } from '../../lib/esquemas';
 
 export type Revision = { id: string; nivel: 'bien' | 'mejorable' | 'mal'; titulo: string; detalle: string; ir?: string };
@@ -13,8 +13,14 @@ export type DatosArticulo = {
   ruta: string;
   slug: string;
   title: string;
+  seoTitle?: string;
   description: string;
+  /** Día (AAAA-MM-DD) en Madrid. */
   date: string;
+  /** Hora de publicación («09:30») o vacío. */
+  hora: string;
+  /** Instante de publicación (ms). */
+  momento: number;
   draft?: boolean;
   category?: string;
   cover?: string;
@@ -26,17 +32,18 @@ export type DatosArticulo = {
 };
 
 export function articulos(): DatosArticulo[] {
-  const hoy = ahoraEnMadrid().iso;
+  const ahora = Date.now();
   return estado
     .rutas(RUTAS.blog)
     .map((ruta) => {
-      const { datos, cuerpo } = leerMd<Omit<DatosArticulo, 'ruta' | 'slug' | 'cuerpo' | 'puntuacion' | 'estadoPub'>>(estado.texto(ruta) ?? '');
+      const { datos, cuerpo } = leerMd<Omit<DatosArticulo, 'ruta' | 'slug' | 'cuerpo' | 'puntuacion' | 'estadoPub' | 'hora' | 'momento'>>(estado.texto(ruta) ?? '');
       const slug = slugDe(ruta);
-      const fecha = String(datos.date ?? '').slice(0, 10);
+      const { fecha, hora } = partesFecha(String(datos.date ?? ''));
+      const momento = momentoPublicacion(String(datos.date ?? ''));
       const { puntuacion } = analizar({
         tipo: 'articulo',
         titulo: datos.title ?? '',
-        tituloSeo: datos.title ?? '',
+        tituloSeo: datos.seoTitle || `${datos.title ?? ''} | Blog Siente`,
         descripcion: datos.description ?? '',
         cuerpo,
         slug,
@@ -44,10 +51,10 @@ export function articulos(): DatosArticulo[] {
         imagen: datos.cover,
         textoImagen: datos.coverAlt,
       });
-      const estadoPub: DatosArticulo['estadoPub'] = datos.draft ? 'borrador' : fecha > hoy ? 'programado' : 'publicado';
-      return { ...datos, date: fecha, ruta, slug, cuerpo, puntuacion, estadoPub } as DatosArticulo;
+      const estadoPub: DatosArticulo['estadoPub'] = datos.draft ? 'borrador' : momento > ahora ? 'programado' : 'publicado';
+      return { ...datos, date: fecha, hora, momento, ruta, slug, cuerpo, puntuacion, estadoPub } as DatosArticulo;
     })
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .sort((a, b) => (b.momento || 0) - (a.momento || 0));
 }
 
 export function revisiones(): Revision[] {

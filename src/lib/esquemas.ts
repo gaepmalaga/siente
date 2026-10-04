@@ -52,8 +52,22 @@ export const Negocio = z.object({
   }),
   planVeo: z.object({ activo: z.boolean().default(true), fin: fechaIso }),
   analitica: z
-    .object({ ga4: z.string().regex(/^(G-[A-Z0-9]+)?$/, 'El ID de Google Analytics empieza por G-').optional().default('') })
-    .default({ ga4: '' }),
+    .object({
+      ga4: z.string().regex(/^(G-[A-Z0-9]+)?$/, 'El ID de Google Analytics empieza por G-').optional().default(''),
+      /** Número de la propiedad de Analytics (para leer las estadísticas en el panel). */
+      ga4Propiedad: z.string().regex(/^\d*$/, 'Solo números').optional().default(''),
+      /** Propiedad de Search Console: «sc-domain:sienteyve.es» o la URL de la web. */
+      searchConsole: z.string().optional().default(''),
+      /** Código de la etiqueta «google-site-verification» de Search Console. */
+      verificacion: z.string().regex(/^[\w-]*$/, 'Pega solo el código, sin la etiqueta').optional().default(''),
+      /** ID de cliente OAuth de Google Cloud para ver las estadísticas en el panel. */
+      clienteGoogle: z
+        .string()
+        .regex(/^(\S+\.apps\.googleusercontent\.com)?$/, 'Termina en .apps.googleusercontent.com')
+        .optional()
+        .default(''),
+    })
+    .default({ ga4: '', ga4Propiedad: '', searchConsole: '', verificacion: '', clienteGoogle: '' }),
 });
 export type DatosNegocio = z.infer<typeof Negocio>;
 
@@ -118,7 +132,10 @@ export const CATEGORIAS = ['vista', 'oido', 'general'] as const;
 
 export const Articulo = z.object({
   title: z.string().min(1),
+  /** Título para Google, si el del artículo es demasiado largo. */
+  seoTitle: z.string().optional(),
   description: z.string().min(1),
+  /** Día («2026-10-10») o día y hora de Madrid («2026-10-10T09:30:00+02:00»). */
   date: z.coerce.date(),
   updated: z.coerce.date().optional(),
   cover: z.string().optional(),

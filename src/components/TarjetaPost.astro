@@ -9,7 +9,7 @@ interface Props {
 const { post, destacado = false } = Astro.props;
 const { title, description, date, cover, coverAlt, category } = post.data;
 const CATEGORIA = { vista: 'Vista', oido: 'Oído', general: 'Consejos' } as const;
-const fecha = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+const fecha = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Madrid' });
 ---
 
 <article class:list={['post', { destacado }]} data-categoria={category}>

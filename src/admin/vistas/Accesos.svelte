@@ -1,7 +1,8 @@
 <script lang="ts">
   import Icono from '../componentes/Icono.svelte';
   import { estado } from '../lib/estado.svelte';
-  import type { Colaborador } from '../lib/tipos';
+  import { hace, fechaHora } from '../lib/texto';
+  import type { AvisoVigilancia, Colaborador, EstadoVigilancia } from '../lib/tipos';
 
   let colaboradores = $state<Colaborador[] | null>(null);
   let errorColab = $state('');
@@ -15,6 +16,27 @@
   const caducidad = $derived(estado.usuario?.caducidad ? new Date(estado.usuario.caducidad.replace(' UTC', 'Z').replace(' ', 'T')) : null);
   const diasCaducidad = $derived(caducidad ? Math.round((caducidad.getTime() - Date.now()) / 86_400_000) : null);
   let opcion = $state<'org' | 'clasica' | 'boton'>('org');
+
+  // Diagnóstico: vigilancia automática y errores del panel en este navegador.
+  let vigilancia = $state<EstadoVigilancia>(null);
+  let alertas = $state<AvisoVigilancia[]>([]);
+  estado.backend?.vigilancia().then((v) => (vigilancia = v)).catch(() => {});
+  estado.backend?.avisosVigilancia().then((a) => (alertas = a)).catch(() => {});
+
+  async function copiarInforme() {
+    const informe = {
+      fecha: new Date().toISOString(),
+      repositorio: estado.config.repo,
+      version: estado.cabeza,
+      modo: estado.modo,
+      navegador: navigator.userAgent,
+      pendientes: Object.values(estado.pendientes).map((c) => `${c.tipo} ${c.ruta}`),
+      despliegue: estado.despliegue ? { estado: estado.despliegue.estado, url: estado.despliegue.url } : null,
+      errores: estado.errores,
+    };
+    await navigator.clipboard.writeText(JSON.stringify(informe, null, 2));
+    estado.aviso('Informe copiado. Pégalo en un correo a quien mantiene la web.', 'ok');
+  }
 </script>
 
 <div class="p-vista">
@@ -105,11 +127,61 @@
           <p class="p-ayuda">La clave solo está guardada en este navegador. Si pierdes el móvil o el ordenador, bórrala en GitHub y crea otra.</p>
         </div>
       </section>
+
+      <section class="p-tarjeta" id="diagnostico">
+        <div class="p-tarjeta-cab"><h2><Icono nombre="Activity" /> Diagnóstico</h2></div>
+        <div class="p-tarjeta-cuerpo">
+          <div class="diag">
+            <span class="luz {alertas.length ? 'mal' : vigilancia?.estado === 'error' ? 'mal' : vigilancia ? 'bien' : ''}"></span>
+            <div>
+              <strong>Vigilancia automática</strong>
+              <p class="p-apagado">
+                {#if alertas.length}{alertas.length === 1 ? 'Hay un aviso abierto' : `Hay ${alertas.length} avisos abiertos`}
+                {:else if vigilancia}Última comprobación {hace(vigilancia.fecha)}: {vigilancia.estado === 'ok' ? 'todo bien' : vigilancia.estado === 'en_curso' ? 'en marcha' : 'con problemas'}
+                {:else}Revisa la web cada 6 horas y tras cada publicación{/if}
+              </p>
+            </div>
+          </div>
+          {#each alertas as a (a.numero)}
+            <a class="alerta" href={a.url} target="_blank" rel="noopener"><Icono nombre="TriangleAlert" /> {a.titulo}</a>
+          {/each}
+          <p class="p-ayuda">Si una publicación falla o una página deja de responder, GitHub envía un correo a quien sigue el repositorio y aparece aquí y en el Resumen.</p>
+
+          <div class="diag">
+            <span class="luz {estado.errores.length ? 'regular' : 'bien'}"></span>
+            <div>
+              <strong>Errores del panel en este navegador</strong>
+              <p class="p-apagado">{estado.errores.length ? `${estado.errores.length} registrados · el último ${hace(estado.errores[0].fecha)}` : 'Ninguno'}</p>
+            </div>
+          </div>
+          {#if estado.errores.length}
+            <ul class="errores">
+              {#each estado.errores.slice(0, 5) as e (e.fecha + e.mensaje)}
+                <li><small class="p-apagado">{fechaHora(e.fecha)} · {e.donde}</small><span>{e.mensaje}</span></li>
+              {/each}
+            </ul>
+          {/if}
+          <div class="p-acciones">
+            <button class="p-btn pequeno" type="button" onclick={copiarInforme}><Icono nombre="Copy" /> Copiar informe técnico</button>
+            {#if estado.errores.length}<button class="p-btn pequeno fantasma" type="button" onclick={() => estado.borrarErrores()}>Borrar</button>{/if}
+          </div>
+        </div>
+      </section>
     </aside>
   </div>
 </div>
 
 <style>
+  aside { display: grid; gap: 20px; align-content: start; }
+  .diag { display: flex; gap: 12px; align-items: flex-start; }
+  .diag p { font-size: 0.88rem; }
+  .luz { width: 12px; height: 12px; margin-top: 5px; flex: none; border-radius: 50%; background: var(--p-borde-fuerte); }
+  .luz.bien { background: var(--p-ok); box-shadow: 0 0 0 4px var(--p-ok-fondo); }
+  .luz.regular { background: #c98a14; box-shadow: 0 0 0 4px var(--p-aviso-fondo); }
+  .luz.mal { background: var(--p-error); box-shadow: 0 0 0 4px var(--p-error-fondo); }
+  .alerta { display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--p-error-fondo); color: var(--p-error); font-weight: 700; font-size: 0.9rem; text-decoration: none; }
+  .errores { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 220px; overflow: auto; }
+  .errores li { display: grid; padding: 8px 10px; border-radius: 8px; background: var(--p-superficie-2); font-size: 0.85rem; overflow-wrap: anywhere; }
   .principal { display: grid; gap: 20px; }
   .av { width: 34px; height: 34px; border-radius: 50%; background: var(--p-fondo); flex: none; }
   .av.grande { width: 52px; height: 52px; }

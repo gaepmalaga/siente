@@ -84,6 +84,20 @@ import {
   Heart,
   Glasses,
   Sun,
+  Crop,
+  RotateCw,
+  ChartLine,
+  ChartColumn,
+  TrendingUp,
+  TrendingDown,
+  MousePointerClick,
+  Bug,
+  Activity,
+  RefreshCw,
+  LogIn,
+  ScanSearch,
+  Maximize2,
+  AlarmClock,
 } from 'lucide-static';
 
 export const ICONOS = {
@@ -171,6 +185,20 @@ export const ICONOS = {
   Heart,
   Glasses,
   Sun,
+  Crop,
+  RotateCw,
+  ChartLine,
+  ChartColumn,
+  TrendingUp,
+  TrendingDown,
+  MousePointerClick,
+  Bug,
+  Activity,
+  RefreshCw,
+  LogIn,
+  ScanSearch,
+  Maximize2,
+  AlarmClock,
 } as const;
 
 export type NombreIcono = keyof typeof ICONOS;
