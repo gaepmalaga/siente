@@ -39,7 +39,9 @@ jobs:
         run: npm ci
 
       - name: Tipos
-        run: npx svelte-check --workspace src --threshold error
+        run: |
+          npx astro sync
+          npx svelte-check --workspace src --threshold error
 
       - name: Pruebas unitarias
         run: npm test
