@@ -5,8 +5,9 @@ import negocioJson from '../data/negocio.json';
 import enlacesJson from '../data/enlaces.json';
 import resenasJson from '../data/resenas.json';
 import portadaJson from '../data/portada.json';
+import citasJson from '../data/citas.json';
 import { url } from './url';
-import { Negocio, Enlaces, Resenas, Portada } from './esquemas';
+import { Negocio, Enlaces, Resenas, Portada, Citas } from './esquemas';
 import * as H from './horario';
 
 export { DIAS, NOMBRE_DIA, formatoTramo } from './horario';
@@ -16,6 +17,7 @@ export const negocio = Negocio.parse(negocioJson);
 export const enlacesPagina = Enlaces.parse(enlacesJson);
 export const resenas = Resenas.parse(resenasJson);
 export const portada = Portada.parse(portadaJson);
+export const citas = Citas.parse(citasJson);
 
 // ── Contacto ────────────────────────────────────────────────────────────────
 
@@ -95,3 +97,19 @@ export function planVeoVigente(hoy = new Date()): boolean {
 }
 
 export const planVeoFin = new Date(`${negocio.planVeo.fin}T23:59:59+01:00`);
+
+// ── Citas online ────────────────────────────────────────────────────────────
+
+/** Citas que se ofrecen hoy (el Plan VEO solo mientras está vigente). */
+export const tiposCitaWeb = () => citas.tipos.filter((t) => t.activo && (t.id !== 'plan-veo' || planVeoVigente()));
+
+/** ¿Se puede reservar online? (activo, con alguna cita y con Firebase configurado) */
+export const reservaOnline = () => citas.activo && !!citas.firebase && tiposCitaWeb().length > 0;
+
+/** Datos para el navegador. El correo del equipo no se publica en la web. */
+export const citasParaCliente = () =>
+  JSON.stringify({
+    citas: { ...citas, equipo: [], tipos: tiposCitaWeb() },
+    semanaCentro: horarioPorDia(),
+    cierres: negocio.cierres,
+  });

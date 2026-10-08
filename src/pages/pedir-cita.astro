@@ -1,26 +1,18 @@
 ---
-// Pedir cita sin servidor: el formulario compone un mensaje y abre WhatsApp
-// (o el correo). La web no guarda ningún dato personal.
+// Pedir cita online. Los huecos se calculan en el navegador con el horario, las
+// citas configuradas en /admin y lo que ya está ocupado en Firestore. Si la
+// reserva no está disponible, la página lleva a WhatsApp o al teléfono.
 import Base from '../layouts/Base.astro';
 import Migas from '../components/Migas.astro';
 import Icono from '../components/Icono.astro';
 import IconoMarca from '../components/IconoMarca.astro';
 import EstadoApertura from '../components/EstadoApertura.astro';
 import TablaHorario from '../components/TablaHorario.astro';
-import { negocio, telHref, planVeoVigente, direccionCompleta, mapas } from '../lib/negocio';
+import { url } from '../lib/url';
+import { negocio, telHref, waHref, WA_SALUDO, direccionCompleta, mapas, tiposCitaWeb, reservaOnline, citasParaCliente } from '../lib/negocio';
 
-const opciones = [
-  { valor: 'revision-vista', texto: 'Revisión de la vista', detalle: 'Gratis', icono: 'ScanEye' },
-  { valor: 'gafas', texto: 'Gafas graduadas o de sol', icono: 'Glasses' },
-  { valor: 'progresivas', texto: 'Lentes progresivas', icono: 'Layers' },
-  { valor: 'lentillas', texto: 'Lentillas o control de miopía', icono: 'Eye' },
-  { valor: 'infantil', texto: 'Revisión visual infantil', icono: 'Baby' },
-  ...(planVeoVigente() ? [{ valor: 'plan-veo', texto: 'Plan VEO (menores de 16)', detalle: 'Hasta 100 €', icono: 'Gift' }] : []),
-  { valor: 'revision-oido', texto: 'Revisión auditiva', icono: 'Ear' },
-  { valor: 'audifonos', texto: 'Audífonos', icono: 'AudioLines' },
-  { valor: 'mantenimiento', texto: 'Ajuste o limpieza de audífonos', icono: 'Wrench' },
-  { valor: 'otro', texto: 'Otra consulta', icono: 'MessageCircle' },
-];
+const tipos = tiposCitaWeb();
+const reserva = reservaOnline();
 const migas = [
   { nombre: 'Inicio', ruta: '/' },
   { nombre: 'Pedir cita', ruta: '/pedir-cita/' },
@@ -29,7 +21,7 @@ const migas = [
 
 <Base
   titulo="Pedir cita en la óptica y centro auditivo Siente (Barajas)"
-  descripcion="Pide cita en Siente, óptica y centro auditivo en Barajas, en menos de un minuto por WhatsApp, teléfono o correo. Revisión de la vista gratis."
+  descripcion="Reserva tu cita online en Siente, óptica y centro auditivo en Barajas: elige el día y la hora y listo. Revisión de la vista gratis."
   migas={migas}
 >
   <section class="cita-pagina">
@@ -38,81 +30,139 @@ const migas = [
       <header class="cita-cab">
         <span class="antetitulo">Menos de un minuto</span>
         <h1>Pide tu cita</h1>
-        <p class="entradilla">Elige qué necesitas y cuándo te viene bien. Te abrimos WhatsApp con el mensaje ya escrito: solo tienes que enviarlo.</p>
+        <p class="entradilla">
+          {
+            reserva
+              ? 'Elige qué necesitas, el día y la hora que te vengan bien, y tu cita queda reservada al momento.'
+              : 'Pide tu cita por WhatsApp o por teléfono y te damos hora enseguida.'
+          }
+        </p>
       </header>
 
       <div class="cita-rejilla">
-        <form class="asistente tarjeta" data-asistente data-whatsapp={negocio.whatsapp} data-email={negocio.email} novalidate>
-          <!-- 1 -->
-          <fieldset class="paso-form">
-            <legend><span class="num mono">1</span> ¿Qué necesitas?</legend>
-            <div class="opciones">
-              {
-                opciones.map((o, i) => (
-                  <label class="opcion">
-                    <input type="radio" name="servicio" value={o.valor} data-texto={o.texto} checked={i === 0} />
-                    <span class="opcion-caja">
-                      <Icono nombre={o.icono} />
-                      <span class="opcion-texto">
-                        {o.texto}
-                        {o.detalle && <span class="etiqueta roble">{o.detalle}</span>}
-                      </span>
-                    </span>
+        {
+          reserva ? (
+            <>
+              <script id="citas-datos" type="application/json" set:html={citasParaCliente()} />
+              <form class="asistente tarjeta" data-reserva data-direccion={direccionCompleta} novalidate>
+                <fieldset class="paso-form">
+                  <legend><span class="num mono">1</span> ¿Qué necesitas?</legend>
+                  <div class="opciones">
+                    {tipos.map((o, i) => (
+                      <label class="opcion">
+                        <input type="radio" name="tipo" value={o.id} checked={i === 0} />
+                        <span class="opcion-caja">
+                          <Icono nombre={o.icono} />
+                          <span class="opcion-texto">
+                            {o.nombre}
+                            {o.detalle && <span class="etiqueta roble">{o.detalle}</span>}
+                          </span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset class="paso-form">
+                  <legend><span class="num mono">2</span> ¿Qué día te viene bien?</legend>
+                  <div class="calendario" data-calendario>
+                    <div class="cal-cab">
+                      <button type="button" class="cal-nav" data-mes-anterior aria-label="Mes anterior"><Icono nombre="ChevronLeft" /></button>
+                      <strong data-mes aria-live="polite"></strong>
+                      <button type="button" class="cal-nav" data-mes-siguiente aria-label="Mes siguiente"><Icono nombre="ChevronRight" /></button>
+                    </div>
+                    <div class="cal-semana" aria-hidden="true"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+                    <div class="cal-dias" data-rejilla role="group" aria-label="Días disponibles"></div>
+                  </div>
+                  <p class="apagado" data-cargando>Buscando huecos libres…</p>
+                  <p class="apagado" data-sin-huecos hidden>Ahora mismo no quedan huecos para esta cita en los próximos días. Escríbenos y buscamos uno.</p>
+                </fieldset>
+
+                <fieldset class="paso-form" data-paso-horas hidden>
+                  <legend><span class="num mono">3</span> <span data-titulo-horas>¿A qué hora?</span></legend>
+                  <div class="horas" data-horas role="radiogroup" aria-label="Hora"></div>
+                </fieldset>
+
+                <fieldset class="paso-form" data-paso-datos hidden>
+                  <legend><span class="num mono">4</span> ¿A nombre de quién?</legend>
+                  <label class="campo">
+                    <span>Nombre</span>
+                    <input type="text" name="nombre" autocomplete="name" required maxlength="80" placeholder="Por ejemplo, Carmen García" />
+                    <span class="error" data-error="nombre" hidden>Escribe tu nombre para que sepamos quién eres.</span>
                   </label>
-                ))
-              }
-            </div>
-          </fieldset>
+                  <label class="campo">
+                    <span>Teléfono</span>
+                    <input type="tel" name="telefono" autocomplete="tel" inputmode="tel" required maxlength="20" placeholder="Para avisarte si surge algo" />
+                    <span class="error" data-error="telefono" hidden>Escribe un teléfono de 9 cifras.</span>
+                  </label>
+                  <label class="campo">
+                    <span>Correo <em class="apagado">(opcional)</em></span>
+                    <input type="email" name="email" autocomplete="email" maxlength="120" placeholder="tu@correo.com" />
+                    <span class="error" data-error="email" hidden>Revisa el correo: parece incompleto.</span>
+                  </label>
+                  <label class="campo">
+                    <span>¿Algo que debamos saber? <em class="apagado">(opcional)</em></span>
+                    <textarea name="nota" rows="3" maxlength="500" placeholder="Por ejemplo: vengo con mi madre, o mis gafas actuales tienen 3 años"></textarea>
+                  </label>
+                  <label class="campo-web" aria-hidden="true">Web <input type="text" name="web" tabindex="-1" autocomplete="off" /></label>
+                  <label class="acepto">
+                    <input type="checkbox" name="acepto" />
+                    <span>He leído la <a href={url('/politica-de-privacidad/')} target="_blank" rel="noopener">política de privacidad</a> y acepto que guardéis mis datos para gestionar la cita.</span>
+                  </label>
+                  <span class="error" data-error="acepto" hidden>Marca la casilla para poder reservar.</span>
+                </fieldset>
 
-          <!-- 2 -->
-          <fieldset class="paso-form">
-            <legend><span class="num mono">2</span> ¿Cuándo te viene bien?</legend>
-            <div class="dias" data-dias role="radiogroup" aria-label="Día">
-              <label class="dia">
-                <input type="radio" name="dia" value="" data-texto="lo antes posible" checked />
-                <span><strong>Lo antes</strong> posible</span>
-              </label>
-            </div>
-            <div class="franjas" role="radiogroup" aria-label="Franja horaria">
-              <label class="franja"><input type="radio" name="franja" value="indiferente" checked /><span><Icono nombre="Clock" /> Me da igual</span></label>
-              <label class="franja" data-franja="manana"><input type="radio" name="franja" value="mañana" /><span><Icono nombre="Sun" /> Por la mañana</span></label>
-              <label class="franja" data-franja="tarde"><input type="radio" name="franja" value="tarde" /><span><Icono nombre="Moon" /> Por la tarde</span></label>
-            </div>
-          </fieldset>
+                <div class="enviar" data-enviar hidden>
+                  <p class="resumen" data-resumen></p>
+                  <p class="error" data-aviso role="alert" hidden></p>
+                  <button type="submit" class="boton bloque grande"><Icono nombre="CalendarCheck" /> Reservar mi cita</button>
+                  <p class="privacidad"><Icono nombre="ShieldCheck" /> Solo guardamos tu nombre y teléfono para gestionar la cita. Puedes cancelarla desde aquí.</p>
+                </div>
 
-          <!-- 3 -->
-          <fieldset class="paso-form">
-            <legend><span class="num mono">3</span> ¿Cómo te llamas?</legend>
-            <label class="campo">
-              <span>Nombre</span>
-              <input type="text" name="nombre" autocomplete="given-name" required placeholder="Por ejemplo, Carmen" />
-              <span class="error" data-error hidden>Escribe tu nombre para que sepamos quién eres.</span>
-            </label>
-            <label class="campo">
-              <span>¿Algo que debamos saber? <em class="apagado">(opcional)</em></span>
-              <textarea name="nota" rows="3" placeholder="Por ejemplo: vengo con mi madre, o mis gafas actuales tienen 3 años"></textarea>
-            </label>
-          </fieldset>
+                <div class="hecho" data-hecho hidden tabindex="-1">
+                  <span class="hecho-icono"><Icono nombre="PartyPopper" /></span>
+                  <h2>¡Cita reservada!</h2>
+                  <p data-hecho-texto></p>
+                  <div class="hecho-acciones">
+                    <button type="button" class="boton secundario" data-ics><Icono nombre="CalendarPlus" /> Añadir a mi calendario</button>
+                    <button type="button" class="boton secundario" data-cancelar-ultima><Icono nombre="CalendarX" /> Cancelar esta cita</button>
+                  </div>
+                  <button type="button" class="enlace-flecha" data-otra>Reservar otra cita</button>
+                </div>
+              </form>
 
-          <div class="enviar">
-            <button type="submit" class="boton wa bloque grande"><IconoMarca nombre="whatsapp" /> Enviar por WhatsApp</button>
-            <div class="enviar-otros">
-              <a class="boton secundario" href={telHref()}><Icono nombre="Phone" /> Prefiero llamar</a>
-              <button type="button" class="boton secundario" data-email-boton><Icono nombre="Mail" /> Enviar por correo</button>
+              <div class="tarjeta mis-citas" data-mis-citas hidden>
+                <h2>Tus citas reservadas desde este dispositivo</h2>
+                <ul data-lista-citas></ul>
+              </div>
+
+              <div class="tarjeta sin-reserva" data-sin-reserva hidden>
+                <h2>La reserva online no está disponible ahora</h2>
+                <p>Puedes pedir tu cita por WhatsApp o por teléfono y te damos hora enseguida.</p>
+                <div class="sin-reserva-botones">
+                  <a class="boton wa" href={waHref(WA_SALUDO)} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> Escribir por WhatsApp</a>
+                  <a class="boton secundario" href={telHref()}><Icono nombre="Phone" /> Llamar</a>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div class="tarjeta sin-reserva">
+              <h2>Pide tu cita</h2>
+              <p>Escríbenos por WhatsApp o llámanos y te damos hora enseguida.</p>
+              <div class="sin-reserva-botones">
+                <a class="boton wa" href={waHref(WA_SALUDO)} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> Escribir por WhatsApp</a>
+                <a class="boton secundario" href={telHref()}><Icono nombre="Phone" /> Llamar</a>
+              </div>
             </div>
-            <p class="privacidad"><Icono nombre="ShieldCheck" /> No guardamos tus datos: el mensaje sale directamente de tu WhatsApp o tu correo.</p>
-          </div>
-
-          <div class="hecho" data-hecho hidden tabindex="-1">
-            <span class="hecho-icono"><Icono nombre="PartyPopper" /></span>
-            <h2>¡Ya casi está!</h2>
-            <p>Se ha abierto WhatsApp con tu mensaje. <strong>Solo tienes que darle a enviar.</strong> Te confirmaremos la cita en cuanto lo veamos.</p>
-            <p class="apagado">¿No se ha abierto? Llámanos al <a href={telHref()}>{negocio.telefono}</a>.</p>
-            <button type="button" class="boton secundario" data-otra>Pedir otra cita</button>
-          </div>
-        </form>
+          )
+        }
 
         <aside class="cita-lateral">
+          <div class="tarjeta lateral-bloque">
+            <h2>¿Tienes dudas?</h2>
+            <p>Si no sabes qué cita elegir o necesitas algo distinto, pregúntanos antes de reservar.</p>
+            <a class="boton wa" href={waHref('Hola, tengo una duda antes de pedir cita.')} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> Escribir por WhatsApp</a>
+          </div>
           <div class="tarjeta lateral-bloque">
             <h2>Horario</h2>
             <EstadoApertura />
@@ -141,13 +191,15 @@ const migas = [
   }
 
   .asistente { position: relative; display: grid; gap: 36px; padding: clamp(22px, 4vw, 44px); }
+  .asistente[hidden] { display: none; }
+  .paso-form[hidden], .enviar[hidden] { display: none; }
   .paso-form { display: grid; gap: 18px; margin: 0; padding: 0; border: 0; min-width: 0; }
   legend { display: flex; align-items: center; gap: 14px; padding: 0; margin-bottom: 18px; font-size: var(--paso-2); font-weight: 800; letter-spacing: -0.02em; }
   .num { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 50%; background: var(--tinta); color: var(--luz); font-size: 1.3rem; }
 
   .opciones { display: grid; gap: 10px; }
   @media (min-width: 640px) { .opciones { grid-template-columns: 1fr 1fr; } }
-  .opcion input, .dias :global(.dia input), .franja input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .opcion input { position: absolute; opacity: 0; width: 1px; height: 1px; }
   .opcion-caja {
     display: flex;
     align-items: center;
@@ -167,36 +219,8 @@ const migas = [
   .opcion-texto { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
   .opcion:hover .opcion-caja { border-color: var(--linea-fuerte); }
   .opcion input:checked + .opcion-caja { border-color: var(--tinta); background: var(--blanco); box-shadow: inset 0 0 0 1px var(--tinta); }
-  .opcion input:focus-visible + .opcion-caja,
-  .dias :global(.dia input:focus-visible + span),
-  .franja input:focus-visible + span { outline: 3px solid var(--roble-oscuro); outline-offset: 2px; }
+  .opcion input:focus-visible + .opcion-caja { outline: 3px solid var(--roble-oscuro); outline-offset: 2px; }
 
-  .dias { display: flex; flex-wrap: wrap; gap: 8px; }
-  /* Los días se crean desde JavaScript: sus estilos tienen que ser globales. */
-  .dias :global(.dia span) {
-    display: grid;
-    justify-items: center;
-    min-width: 84px;
-    padding: 10px 12px;
-    border-radius: var(--radio-s);
-    border: 2px solid var(--linea);
-    background: var(--papel);
-    line-height: 1.2;
-    text-align: center;
-    cursor: pointer;
-  }
-  .dias :global(.dia strong) { font-size: 1.05rem; }
-  .dias :global(.dia input:checked + span) { border-color: var(--tinta); background: var(--tinta); color: var(--papel); }
-  .franjas { display: flex; flex-wrap: wrap; gap: 8px; }
-  .franja span {
-    display: inline-flex; align-items: center; gap: 8px;
-    min-height: 50px; padding: 0 18px;
-    border-radius: 999px; border: 2px solid var(--linea); background: var(--papel);
-    font-weight: 700; cursor: pointer;
-  }
-  .franja span :global(.icono) { width: 20px; height: 20px; }
-  .franja input:checked + span { border-color: var(--tinta); background: var(--tinta); color: var(--papel); }
-  .franja input:disabled + span { opacity: 0.35; cursor: not-allowed; text-decoration: line-through; }
 
   .campo { display: grid; gap: 8px; font-weight: 700; }
   .campo input, .campo textarea {
@@ -242,125 +266,45 @@ const migas = [
   .cita-lateral { display: grid; gap: 18px; }
   .lateral-bloque { display: grid; gap: 14px; padding: 26px; }
   .lateral-bloque h2 { font-size: var(--paso-1); }
-</style>
 
-<script>
-  import { cierreEn, type HorarioSemana, type Cierre, type Dia } from '../lib/horario';
-  const CLAVES = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-  const CORTO = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  const LARGO = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-  const MESES_LARGOS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-
-  const form = document.querySelector<HTMLFormElement>('[data-asistente]');
-  const { dias: horario, cierres } = JSON.parse(document.getElementById('horario-datos')?.textContent || '{}') as {
-    dias: HorarioSemana;
-    cierres: Cierre[];
-  };
-
-  if (form) {
-    // Servicio preseleccionado desde la URL: /pedir-cita/?servicio=audifonos
-    const pedido = new URLSearchParams(location.search).get('servicio');
-    if (pedido) {
-      const radio = form.querySelector<HTMLInputElement>(`input[name="servicio"][value="${CSS.escape(pedido)}"]`);
-      if (radio) radio.checked = true;
-    }
-
-    // Próximos 6 días en los que el centro abre.
-    const contenedor = form.querySelector('[data-dias]')!;
-    const hoy = new Date();
-    let anadidos = 0;
-    for (let i = 0; anadidos < 6 && i < 60; i++) {
-      const fecha = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + i);
-      const clave = CLAVES[fecha.getDay()] as Dia;
-      const iso = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
-      const tramos = horario[clave] ?? [];
-      // Ni días sin horario ni días de cierre (vacaciones, festivos).
-      if (!tramos.length || cierreEn(cierres, iso)) continue;
-      // Si hoy ya ha cerrado, no lo ofrecemos.
-      if (i === 0) {
-        const ahora = hoy.getHours() * 60 + hoy.getMinutes();
-        const [h, m] = tramos[tramos.length - 1].cierra.split(':').map(Number);
-        if (ahora > h * 60 + m - 30) continue;
-      }
-      const manana = tramos.some((t) => Number(t.abre.split(':')[0]) < 14);
-      const tarde = tramos.some((t) => Number(t.cierra.split(':')[0]) >= 15);
-      const etiqueta = i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : CORTO[fecha.getDay()];
-      const texto = `${i === 0 ? 'hoy' : i === 1 ? 'mañana' : `el ${LARGO[fecha.getDay()]}`} ${fecha.getDate()} de ${MESES_LARGOS[fecha.getMonth()]}`;
-      const label = document.createElement('label');
-      label.className = 'dia';
-      label.innerHTML = `<input type="radio" name="dia" value="${clave}" data-texto="${texto}" data-manana="${manana}" data-tarde="${tarde}"><span><strong>${etiqueta}</strong>${fecha.getDate()} ${MESES[fecha.getMonth()]}</span>`;
-      contenedor.appendChild(label);
-      anadidos++;
-    }
-
-    // Desactiva «tarde» los días sin horario de tarde (p. ej. sábados).
-    const franjas = (valor: string) => form.querySelector<HTMLInputElement>(`input[name="franja"][value="${valor}"]`)!;
-    form.addEventListener('change', (e) => {
-      const objetivo = e.target as HTMLInputElement;
-      if (objetivo.name !== 'dia') return;
-      const tarde = franjas('tarde');
-      const manana = franjas('mañana');
-      tarde.disabled = objetivo.dataset.tarde === 'false';
-      manana.disabled = objetivo.dataset.manana === 'false';
-      if ((tarde.disabled && tarde.checked) || (manana.disabled && manana.checked)) franjas('indiferente').checked = true;
-    });
-
-    const componer = () => {
-      const datos = new FormData(form);
-      const servicio = form.querySelector<HTMLInputElement>('input[name="servicio"]:checked')?.dataset.texto ?? 'una consulta';
-      const dia = form.querySelector<HTMLInputElement>('input[name="dia"]:checked')?.dataset.texto ?? 'lo antes posible';
-      const franja = String(datos.get('franja'));
-      const nombre = String(datos.get('nombre') ?? '').trim();
-      const nota = String(datos.get('nota') ?? '').trim();
-      const cuando = franja === 'indiferente' ? dia : `${dia}, por la ${franja}`;
-      const lineas = [
-        `Hola, soy ${nombre}. Me gustaría pedir cita para: *${servicio}*.`,
-        `📅 Me vendría bien ${cuando}.`,
-        nota ? `📝 ${nota}` : '',
-        '(Enviado desde la web)',
-      ].filter(Boolean);
-      return { nombre, texto: lineas.join('\n'), servicio };
-    };
-
-    const validar = () => {
-      const campo = form.querySelector<HTMLInputElement>('input[name="nombre"]')!;
-      const error = form.querySelector<HTMLElement>('[data-error]')!;
-      const ok = campo.value.trim().length > 0;
-      campo.setAttribute('aria-invalid', String(!ok));
-      error.hidden = ok;
-      if (!ok) campo.focus();
-      return ok;
-    };
-
-    const terminado = () => {
-      const hecho = form.querySelector<HTMLElement>('[data-hecho]')!;
-      hecho.hidden = false;
-      hecho.focus();
-    };
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (!validar()) return;
-      const { texto, servicio } = componer();
-      window.sienteEvento?.('generate_lead', { canal: 'whatsapp', servicio });
-      const numero = (form.dataset.whatsapp ?? '').replace(/\D/g, '');
-      window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener');
-      terminado();
-    });
-
-    form.querySelector('[data-email-boton]')?.addEventListener('click', () => {
-      if (!validar()) return;
-      const { texto, servicio } = componer();
-      window.sienteEvento?.('generate_lead', { canal: 'email', servicio });
-      location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(`Cita: ${servicio}`)}&body=${encodeURIComponent(texto.replace(/\*/g, ''))}`;
-      terminado();
-    });
-
-    form.querySelector('[data-otra]')?.addEventListener('click', () => {
-      form.querySelector<HTMLElement>('[data-hecho]')!.hidden = true;
-      form.reset();
-      window.scrollTo({ top: form.offsetTop - 120, behavior: 'smooth' });
-    });
+  .calendario { display: grid; gap: 8px; max-width: 460px; }
+  .cal-cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-transform: capitalize; font-size: 1.15rem; }
+  .cal-nav { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--linea); background: var(--papel); cursor: pointer; }
+  .cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+  .cal-nav :global(.icono) { width: 22px; height: 22px; }
+  .cal-semana, .cal-dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-semana { text-align: center; font-weight: 700; color: var(--apagado); font-size: 0.95rem; }
+  .cal-dias :global(button), .cal-dias :global(.vacio) { aspect-ratio: 1; min-height: 44px; }
+  .cal-dias :global(button) {
+    border-radius: var(--radio-s); border: 2px solid var(--linea); background: var(--papel);
+    font: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer;
   }
+  .cal-dias :global(button:disabled) { border-color: transparent; background: transparent; color: var(--apagado); opacity: 0.45; cursor: not-allowed; font-weight: 400; }
+  .cal-dias :global(button[aria-pressed='true']) { border-color: var(--tinta); background: var(--tinta); color: var(--papel); }
+  .cal-dias :global(button:focus-visible), .horas :global(button:focus-visible), .cal-nav:focus-visible { outline: 3px solid var(--roble-oscuro); outline-offset: 2px; }
+  .horas { display: grid; gap: 14px; }
+  .horas :global(.horas-grupo) { display: flex; flex-wrap: wrap; gap: 8px; }
+  .horas :global(.horas-titulo) { flex-basis: 100%; margin: 0; font-weight: 700; color: var(--apagado); }
+  .horas :global(button) {
+    min-height: 52px; min-width: 88px; padding: 0 18px; border-radius: 999px; border: 2px solid var(--linea);
+    background: var(--papel); font: inherit; font-weight: 700; font-variant-numeric: tabular-nums; cursor: pointer;
+  }
+  .horas :global(button[aria-pressed='true']) { border-color: var(--tinta); background: var(--tinta); color: var(--papel); }
+  .campo-web { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .acepto { display: flex; gap: 12px; align-items: flex-start; font-weight: 400; line-height: 1.4; }
+  .acepto input { width: 24px; height: 24px; flex: none; margin-top: 2px; accent-color: var(--tinta); }
+  .resumen { padding: 14px 16px; border-radius: var(--radio-s); background: var(--papel); border: 2px solid var(--linea); font-weight: 700; }
+  .hecho-acciones { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .hecho .enlace-flecha { border: 0; background: none; font: inherit; cursor: pointer; text-decoration: underline; }
+  .sin-reserva { display: grid; gap: 14px; padding: clamp(22px, 4vw, 44px); align-content: start; }
+  .sin-reserva[hidden], .mis-citas[hidden] { display: none; }
+  .sin-reserva-botones { display: flex; flex-wrap: wrap; gap: 10px; }
+  .mis-citas { display: grid; gap: 12px; padding: 22px; }
+  .mis-citas h2 { font-size: var(--paso-1); }
+  .mis-citas ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .mis-citas li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border: 2px solid var(--linea); border-radius: var(--radio-s); }
+  .cita-rejilla > :global(.asistente), .cita-rejilla > :global(.sin-reserva) { min-width: 0; }
+</style>
+<script>
+  import '../scripts/reserva';
 </script>

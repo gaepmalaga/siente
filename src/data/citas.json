@@ -1,0 +1,111 @@
+{
+  "activo": true,
+  "descanso": 10,
+  "hueco": 20,
+  "simultaneas": 1,
+  "antelacionHoras": 2,
+  "maxDias": 30,
+  "horarioComun": "centro",
+  "tramosComunes": [],
+  "tipos": [
+    {
+      "id": "revision-vista",
+      "nombre": "Revisión de la vista",
+      "detalle": "Gratis",
+      "icono": "ScanEye",
+      "duracion": 30,
+      "activo": true,
+      "horarioPropio": false,
+      "tramos": []
+    },
+    {
+      "id": "gafas",
+      "nombre": "Gafas graduadas o de sol",
+      "detalle": "",
+      "icono": "Glasses",
+      "duracion": 30,
+      "activo": true,
+      "horarioPropio": false,
+      "tramos": []
+    },
+    {
+      "id": "progresivas",
+      "nombre": "Lentes progresivas",
+      "detalle": "",
+      "icono": "Layers",
+      "duracion": 40,
+      "activo": true,
+      "horarioPropio": false,
+      "tramos": []
+    },
+    {
+      "id": "lentillas",
+      "nombre": "Lentillas o control de miopía",
+      "detalle": "",
+      "icono": "Eye",
+      "duracion": 30,
+      "activo": true,
+      "horarioPropio": false,
+      "tramos": []
+    },
+    {
+      "id": "infantil",
+      "nombre": "Revisión visual infantil",
+      "detalle": "",
+      "icono": "Baby",
+      "duracion": 30,
+      "activo": true,
+      "horarioPropio": false,
+      "tramos": []
+    },
+    {
+      "id": "plan-veo",
+      "nombre": "Plan VEO (menores de 16)",
+      "detalle": "Hasta 100 €",
+      "icono": "Gift",
+      "duracion": 30,
+      "activo": true,
+      "horarioPropio": false,
+      "tramos": []
+    },
+    {
+      "id": "revision-oido",
+      "nombre": "Revisión auditiva",
+      "detalle": "Gratis",
+      "icono": "Ear",
+      "duracion": 40,
+      "activo": true,
+      "horarioPropio": false,
+      "tramos": []
+    },
+    {
+      "id": "audifonos",
+      "nombre": "Audífonos",
+      "detalle": "",
+      "icono": "AudioLines",
+      "duracion": 45,
+      "activo": true,
+      "horarioPropio": false,
+      "tramos": []
+    },
+    {
+      "id": "mantenimiento",
+      "nombre": "Ajuste o limpieza de audífonos",
+      "detalle": "",
+      "icono": "Wrench",
+      "duracion": 20,
+      "activo": true,
+      "horarioPropio": false,
+      "tramos": []
+    }
+  ],
+  "equipo": [],
+  "firebase": {
+    "apiKey": "AIzaSyAcwxFc9Yoc72xEC2_0ykCpKJ9P67-JSEE",
+    "authDomain": "sientebarajas-6c79b.firebaseapp.com",
+    "projectId": "sientebarajas-6c79b",
+    "appId": "1:281234794676:web:673b016eee9aa8ca6dcfe1",
+    "storageBucket": "sientebarajas-6c79b.firebasestorage.app",
+    "messagingSenderId": "281234794676"
+  }
+}

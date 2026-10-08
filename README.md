@@ -15,14 +15,14 @@ Web nueva de **Siente**, óptica y centro auditivo en la Avenida de Logroño, 11
 | Panel propio en `/admin` ([Svelte](https://svelte.dev)) | Panel de edición hecho a medida | Usa este repositorio como base de datos: cada publicación es un commit |
 | GitHub Pages + Actions | Hosting gratuito | Cada cambio se publica solo en 1-2 minutos |
 
-No hay servidor, base de datos ni formularios que guarden datos: **las citas se piden por WhatsApp** (la web compone el mensaje) o por teléfono. Google Analytics es opcional y solo se carga si el visitante acepta las cookies.
+No hay servidor propio: la web es estática y **las citas se reservan online** (calendario y horas libres en tiempo real, guardadas en Firebase/Firestore); WhatsApp y el teléfono quedan para dudas. Google Analytics es opcional y solo se carga si el visitante acepta las cookies.
 
 ## Lo que incluye
 
 - **Portada** con rótulo de madera retroiluminado (como el del local), estado «Abierto ahora» calculado con la hora de Madrid y dos **simuladores interactivos** (visión borrosa y pérdida auditiva).
 - **9 páginas de servicio** pensadas para posicionar búsquedas locales («revisión de la vista gratis Barajas», «audífonos Barajas», «lentes progresivas Barajas»…).
 - **Plan VEO**: página propia y franja con cuenta atrás que **se oculta sola** al pasar la fecha de fin.
-- **Pedir cita** guiada: servicio → día (solo los que abre el centro) → nombre, y se abre WhatsApp con el mensaje escrito.
+- **Reserva de cita online**: tipo de cita → día → hora libre → datos, con confirmación automática (ver «Citas online»).
 - **Test de audición** de 30 segundos en la página de audífonos.
 - **Blog** con 10 artículos (mismas URLs que el blog antiguo).
 - **Página de enlaces** que sustituye a Linktree.
@@ -88,6 +88,8 @@ El panel es una aplicación propia que trabaja directamente contra la API de Git
 | --- | --- |
 | Resumen | Estado de apertura, avisos de la vigilancia, cifras de las últimas 4 semanas, salud SEO de la web, lo programado y los últimos cambios |
 | Estadísticas | Contactos (citas en la web + WhatsApp + llamadas), visitas, de dónde llegan, páginas más vistas, búsquedas de Google, posición media y «casi en la primera página» |
+| Agenda de citas | Citas reservadas por los clientes (entrando con Google), cancelar y añadir las que llegan por teléfono |
+| Tipos de cita y huecos | Qué citas se ofrecen, su duración y horario (el del centro, uno común o uno propio), descanso entre citas, personas atendiendo a la vez, antelación y reglas de Firestore |
 | Horario y avisos | Horario semanal, **cierres y vacaciones** (la web avisa sola 14 días antes y los datos para Google se actualizan), **aviso programado** con fechas |
 | Datos del centro | Teléfonos, WhatsApp, dirección, redes, marcas, barrios, Plan VEO, Google Analytics, datos legales |
 | Portada, Reseñas, Enlaces de Instagram | Edición con vista previa (la de enlaces, en un móvil) y orden arrastrando |
@@ -107,6 +109,22 @@ Las claves *fine-grained* de GitHub solo sirven para repositorios de la propia c
 1. **Organización (recomendado).** Crear una organización gratuita, transferirle este repositorio e invitar a la persona como miembro. Cada una crea su clave eligiendo la organización como propietaria. La demo pasa a `https://<organización>.github.io/siente/` (no afecta al dominio definitivo).
 2. **Botón «Entrar con GitHub».** Desplegar [Sveltia CMS Authenticator](https://github.com/sveltia/sveltia-cms-auth) en Cloudflare Workers (gratis), crear una *OAuth App* en GitHub con su URL de retorno e invitar a la persona como colaboradora del repositorio. Después, añadir la variable de Actions `PUBLIC_PANEL_AUTH_URL` con la dirección del Worker: aparece el botón y ya no hacen falta claves.
 3. **Colaboradora con clave clásica.** Invitarla en *Settings → Collaborators* y que cree una clave clásica con el permiso `repo` (da acceso a todos sus repositorios, por eso es la menos recomendable).
+
+## Citas online
+
+La configuración (`src/data/citas.json`) se edita en **Tipos de cita y huecos** y se publica como el resto. Las reservas viven en **Firestore** (proyecto `sientebarajas-6c79b`):
+
+- `ocupadas/{día_hora_puesto}`: cada celda de agenda cogida (lectura pública, sin datos personales). Crear una celda que ya existe está prohibido por las reglas, así dos personas no pueden coger el mismo hueco.
+- `citas/{id}`: nombre, teléfono, etc. Solo el equipo (cuenta de Google) y el propio navegador que reservó pueden leerlas.
+
+**Puesta en marcha (una sola vez, en la consola de Firebase):**
+
+1. **Authentication → Método de acceso:** activar **Anónimo** (cada visitante recibe una identidad invisible para poder cancelar su cita) y **Google** (el equipo).
+2. **Authentication → Configuración → Dominios autorizados:** añadir `gaepmalaga.github.io` y, más adelante, el dominio definitivo.
+3. **Firestore Database:** crear la base de datos y pegar las reglas (`firestore.rules`, o el botón «Copiar las reglas» del panel, que ya incluye los correos del equipo) en **Reglas → Publicar**.
+4. En el panel, **Tipos de cita y huecos → Conexión**: añadir los correos del equipo.
+
+Sin las reglas publicadas la web enseña «La reserva online no está disponible» y lleva a WhatsApp. Plan gratuito (Spark): no hay correos automáticos; las reservas se ven en la **Agenda** del panel. Para frenar el spam más adelante se puede activar **Firebase App Check** (reCAPTCHA).
 
 ## Programado, vigilancia y pruebas
 

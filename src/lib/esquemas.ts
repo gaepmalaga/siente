@@ -164,3 +164,64 @@ export const Servicio = z.object({
   cita: z.string().optional(),
   keyword: z.string().optional(),
 });
+
+
+// ── Citas online ────────────────────────────────────────────────────────────
+
+const tramoCita = z.object({ dia: z.enum(DIAS), abre: hora, cierra: hora });
+
+export const TipoCita = z.object({
+  /** Identificador estable (no cambia aunque se renombre la cita). */
+  id: z.string().regex(/^[a-z0-9-]+$/, 'Solo minúsculas, números y guiones').min(1),
+  nombre: z.string().min(1),
+  /** Texto corto bajo el nombre («Gratis», «Hasta 100 €»…). */
+  detalle: z.string().optional().default(''),
+  icono: z.string().default('Eye'),
+  /** Minutos que dura la cita. */
+  duracion: z.number().int().min(5).max(240).default(30),
+  activo: z.boolean().default(true),
+  /** Horario propio de esta cita; si va vacío usa el horario común. */
+  horarioPropio: z.boolean().default(false),
+  tramos: z.array(tramoCita).default([]),
+});
+export type DatosTipoCita = z.infer<typeof TipoCita>;
+
+export const FirebaseWeb = z.object({
+  apiKey: z.string().min(1),
+  authDomain: z.string().min(1),
+  projectId: z.string().min(1),
+  appId: z.string().min(1),
+  storageBucket: z.string().optional().default(''),
+  messagingSenderId: z.string().optional().default(''),
+});
+
+export const Citas = z.object({
+  /** Interruptor general: apagado, la web vuelve a pedir cita por WhatsApp. */
+  activo: z.boolean().default(true),
+  /** Minutos de descanso tras cada cita. */
+  descanso: z.number().int().min(0).max(120).default(10),
+  /** Cada cuántos minutos puede empezar una cita. */
+  hueco: z.number().int().min(5).max(120).default(30),
+  /** Personas que atienden a la vez (citas simultáneas). */
+  simultaneas: z.number().int().min(1).max(9).default(1),
+  /** Horas mínimas de antelación para reservar. */
+  antelacionHoras: z.number().int().min(0).max(720).default(2),
+  /** Hasta cuántos días por delante se puede reservar. */
+  maxDias: z.number().int().min(1).max(365).default(30),
+  /** Horario común a todas las citas: el del centro o uno propio. */
+  horarioComun: z.enum(['centro', 'propio']).default('centro'),
+  tramosComunes: z.array(tramoCita).default([]),
+  tipos: z.array(TipoCita).default([]),
+  /** Correos del equipo que gestionan la agenda (deben coincidir con firestore.rules). */
+  equipo: z.array(z.string().email()).default([]),
+  /** Configuración pública de la app web de Firebase (no es secreta). */
+  firebase: FirebaseWeb.optional(),
+}).superRefine((c, ctx) => {
+  // Las reglas de Firestore admiten hasta 12 celdas por cita.
+  c.tipos.forEach((t, i) => {
+    const celdas = Math.ceil((t.duracion + c.descanso) / c.hueco);
+    if (celdas > 12)
+      ctx.addIssue({ code: 'custom', path: ['tipos', i, 'duracion'], message: `«${t.nombre}» ocupa ${celdas} huecos (máximo 12): sube el tamaño del hueco o acorta la cita.` });
+  });
+});
+export type DatosCitas = z.infer<typeof Citas>;

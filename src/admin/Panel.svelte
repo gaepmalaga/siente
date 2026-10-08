@@ -15,6 +15,8 @@
   import Resumen from './vistas/Resumen.svelte';
   import Estadisticas from './vistas/Estadisticas.svelte';
   import Horario from './vistas/Horario.svelte';
+  import Citas from './vistas/Citas.svelte';
+  import Agenda from './vistas/Agenda.svelte';
   import Centro from './vistas/Centro.svelte';
   import Portada from './vistas/Portada.svelte';
   import Servicios from './vistas/Servicios.svelte';
@@ -109,6 +111,8 @@
             {#if seccion === '/'}<Resumen />
             {:else if seccion === '/estadisticas'}<Estadisticas />
             {:else if seccion === '/horario'}<Horario />
+            {:else if seccion === '/citas'}<Citas />
+            {:else if seccion === '/agenda'}<Agenda />
             {:else if seccion === '/centro'}<Centro />
             {:else if seccion === '/portada'}<Portada />
             {:else if seccion === '/servicios' && sub}<EditorServicio slug={sub} />

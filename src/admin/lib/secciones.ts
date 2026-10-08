@@ -6,6 +6,8 @@ export type Seccion = { ruta: string; titulo: string; icono: NombreIcono; grupo:
 export const SECCIONES: Seccion[] = [
   { ruta: '/', titulo: 'Resumen', icono: 'LayoutDashboard', grupo: '', descripcion: 'Estado de la web y tareas pendientes' },
   { ruta: '/estadisticas', titulo: 'Estadísticas', icono: 'ChartLine', grupo: '', descripcion: 'Visitas, contactos y búsquedas en Google' },
+  { ruta: '/agenda', titulo: 'Agenda de citas', icono: 'CalendarCheck', grupo: 'Citas', descripcion: 'Citas reservadas, cancelar y añadir a mano' },
+  { ruta: '/citas', titulo: 'Tipos de cita y huecos', icono: 'CalendarClock', grupo: 'Citas', descripcion: 'Qué citas se ofrecen, sus horarios y el tiempo entre ellas' },
   { ruta: '/horario', titulo: 'Horario y avisos', icono: 'Clock', grupo: 'El centro', descripcion: 'Horario, vacaciones, festivos y avisos' },
   { ruta: '/centro', titulo: 'Datos del centro', icono: 'Store', grupo: 'El centro', descripcion: 'Contacto, redes, Plan VEO y analítica' },
   { ruta: '/portada', titulo: 'Portada', icono: 'House', grupo: 'La web', descripcion: 'Titular y destacados de la página de inicio' },

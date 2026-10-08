@@ -5,7 +5,7 @@ import { ErrorGitHub } from './github';
 import { leerMd } from './frontmatter';
 import { MARCA_COMPLETAR } from './seo';
 import { base64ATexto } from './texto';
-import { Negocio, Portada, Enlaces, Resenas, Articulo, Servicio } from '../../lib/esquemas';
+import { Negocio, Portada, Enlaces, Resenas, Citas, Articulo, Servicio } from '../../lib/esquemas';
 import type { Cambio, ConfigPanel, ErrorRegistrado, EstadoDespliegue, Medio, Usuario, VistaPrevia } from './tipos';
 
 type Fase = 'acceso' | 'cargando' | 'listo';
@@ -200,6 +200,7 @@ class Estado {
         else if (c.ruta === RUTAS.portada) r = Portada.safeParse(JSON.parse(c.contenido!));
         else if (c.ruta === RUTAS.enlaces) r = Enlaces.safeParse(JSON.parse(c.contenido!));
         else if (c.ruta === RUTAS.resenas) r = Resenas.safeParse(JSON.parse(c.contenido!));
+        else if (c.ruta === RUTAS.citas) r = Citas.safeParse(JSON.parse(c.contenido!));
         else if (c.ruta.startsWith(RUTAS.blog)) r = Articulo.safeParse(leerMd(c.contenido!).datos);
         else if (c.ruta.startsWith(RUTAS.servicios)) r = Servicio.safeParse(leerMd(c.contenido!).datos);
       } catch (e) {
@@ -536,7 +537,9 @@ function resumirCambios(cambios: Cambio[]): string {
         ? 'datos del centro'
         : c.ruta === RUTAS.portada
           ? 'portada'
-          : c.ruta === RUTAS.enlaces
+          : c.ruta === RUTAS.citas
+            ? 'citas online'
+            : c.ruta === RUTAS.enlaces
             ? 'página de enlaces'
             : c.ruta === RUTAS.resenas
               ? 'reseñas'

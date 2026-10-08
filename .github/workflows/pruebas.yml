@@ -58,6 +58,8 @@ jobs:
           SITE_URL: https://gaepmalaga.github.io
           BASE_PATH: /siente
           PUBLIC_NOINDEX: 'true'
+          # Permite probar la reserva con la agenda en memoria (?memoria); nunca se usa al publicar.
+          PUBLIC_CITAS_PRUEBAS: 'true'
 
       - name: Instalar el navegador de pruebas
         run: npx playwright install --with-deps chromium

@@ -98,6 +98,10 @@ import {
   ScanSearch,
   Maximize2,
   AlarmClock,
+  CalendarCheck,
+  CalendarPlus,
+  CalendarClock,
+  ChevronLeft,
 } from 'lucide-static';
 
 export const ICONOS = {
@@ -199,6 +203,10 @@ export const ICONOS = {
   ScanSearch,
   Maximize2,
   AlarmClock,
+  CalendarCheck,
+  CalendarPlus,
+  CalendarClock,
+  ChevronLeft,
 } as const;
 
 export type NombreIcono = keyof typeof ICONOS;

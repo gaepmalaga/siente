@@ -18,6 +18,7 @@ import type {
 export const RUTAS = {
   negocio: 'src/data/negocio.json',
   portada: 'src/data/portada.json',
+  citas: 'src/data/citas.json',
   enlaces: 'src/data/enlaces.json',
   resenas: 'src/data/resenas.json',
   blog: 'src/content/blog/',
