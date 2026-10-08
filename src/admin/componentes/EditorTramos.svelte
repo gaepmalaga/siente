@@ -44,12 +44,12 @@
 
 <style>
   .dias { display: grid; border: 1px solid var(--p-borde); border-radius: 12px; overflow: hidden; }
-  .dia { display: grid; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--p-borde); }
-  @media (min-width: 720px) { .dia { grid-template-columns: 200px 1fr; align-items: center; } }
+  .dia { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--p-borde); }
+  @media (min-width: 720px) { .dia { grid-template-columns: 200px minmax(0, 1fr); align-items: center; } }
   .dia.cerrado { background: var(--p-superficie-2); }
   .nombre { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .tramos { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-  .tramo { display: flex; align-items: center; gap: 6px; padding: 4px; border-radius: 12px; background: var(--p-superficie-2); border: 1px solid var(--p-borde); }
-  .hora { width: 112px; min-height: 36px; padding: 4px 8px; font-variant-numeric: tabular-nums; }
+  .tramo { display: flex; align-items: center; gap: 6px; max-width: 100%; flex-wrap: wrap; padding: 4px; border-radius: 12px; background: var(--p-superficie-2); border: 1px solid var(--p-borde); }
+  .hora { width: 112px; min-width: 104px; flex: 1 1 104px; min-height: 36px; padding: 4px 8px; font-variant-numeric: tabular-nums; }
   .p-error-campo { display: flex; gap: 6px; align-items: center; padding: 8px 14px; margin: 0; }
 </style>

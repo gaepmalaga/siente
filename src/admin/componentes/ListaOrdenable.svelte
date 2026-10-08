@@ -9,7 +9,8 @@
     items = $bindable(),
     fila,
     onmover,
-  }: { items: T[]; fila: Snippet<[T, number]>; onmover?: () => void } = $props();
+    apilado = false,
+  }: { items: T[]; fila: Snippet<[T, number]>; onmover?: () => void; apilado?: boolean } = $props();
 
   let agarrado = $state<number | null>(null);
   let destino = $state<number | null>(null);
@@ -53,7 +54,7 @@
 
 <ul class="ordenable" bind:this={lista}>
   {#each items as item, i (item)}
-    <li class:agarrado={agarrado === i} class:destino={destino === i && agarrado !== null && agarrado !== i} animate:flip={{ duration: 180 }}>
+    <li class:apilado class:agarrado={agarrado === i} class:destino={destino === i && agarrado !== null && agarrado !== i} animate:flip={{ duration: 180 }}>
       <button
         type="button"
         class="asa"
@@ -79,7 +80,7 @@
 </ul>
 
 <style>
-  .ordenable { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .ordenable { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
   li {
     display: flex;
     align-items: flex-start;
@@ -108,4 +109,12 @@
   .asa:active { cursor: grabbing; background: var(--p-superficie-2); }
   .contenido { flex: 1; min-width: 0; }
   .flechas { display: grid; gap: 2px; flex: none; }
+  /* En el móvil, las filas con formularios grandes llevan el asa y las flechas
+     arriba y el contenido debajo, a todo el ancho. */
+  @media (max-width: 640px) {
+    li.apilado { flex-wrap: wrap; padding: 6px; }
+    li.apilado .asa { order: 1; min-height: 32px; }
+    li.apilado .flechas { order: 2; display: flex; margin-left: auto; }
+    li.apilado .contenido { order: 3; flex: 1 1 100%; }
+  }
 </style>

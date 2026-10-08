@@ -189,7 +189,7 @@
           <button class="p-btn pequeno primario" type="button" onclick={nueva}><Icono nombre="Plus" /> Nueva cita</button>
         </div>
         <div class="p-tarjeta-cuerpo">
-          <ListaOrdenable bind:items={d.tipos}>
+          <ListaOrdenable bind:items={d.tipos} apilado>
             {#snippet fila(t: DatosTipoCita)}
               <div class="tipo" class:apagada={!t.activo}>
                 <div class="tipo-cab">
@@ -313,7 +313,7 @@
 </div>
 
 <style>
-  .principal { display: grid; gap: 20px; }
+  .principal { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .opciones { display: grid; gap: 10px; }
   @media (min-width: 720px) { .opciones { grid-template-columns: 1fr 1fr; } }
   .opciones label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--p-borde); border-radius: 12px; cursor: pointer; }
@@ -322,9 +322,9 @@
   .opciones small { color: var(--p-texto-2); }
   .tipo { border: 1px solid var(--p-borde); border-radius: 12px; background: var(--p-superficie); }
   .tipo.apagada { opacity: 0.7; }
-  .tipo-cab { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+  .tipo-cab { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 8px 10px; }
   .tipo-icono { display: grid; place-items: center; width: 38px; height: 38px; flex: none; border-radius: 10px; background: var(--p-superficie-2); color: var(--p-roble); }
-  .tipo-titulo { flex: 1; min-width: 0; display: grid; gap: 1px; text-align: left; border: 0; background: none; font: inherit; cursor: pointer; padding: 0; }
+  .tipo-titulo { flex: 1 1 150px; min-width: 0; display: grid; gap: 1px; text-align: left; border: 0; background: none; font: inherit; cursor: pointer; padding: 0; }
   .tipo-titulo small { color: var(--p-texto-2); }
   .tipo-cuerpo { display: grid; gap: 14px; padding: 14px; border-top: 1px solid var(--p-borde); }
   .iconos { display: flex; flex-wrap: wrap; gap: 6px; }
