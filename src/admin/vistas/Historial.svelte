@@ -138,7 +138,7 @@
   .txt strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .elegido { background: #fbf3e7; box-shadow: inset 3px 0 0 var(--p-roble); }
   .msg { margin: 0; padding: 10px; border-radius: 8px; background: var(--p-superficie-2); white-space: pre-wrap; font-family: var(--p-sans); font-size: 0.85rem; color: var(--p-texto-2); }
-  .archivos { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .archivos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
   summary { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; }
   .ruta { overflow-wrap: anywhere; }
   .diff { margin: 6px 0 0; max-height: 300px; overflow: auto; padding: 8px; border-radius: 8px; background: #faf8f5; font-size: 0.74rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }

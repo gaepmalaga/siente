@@ -254,7 +254,7 @@
 </div>
 
 <style>
-  .cifras { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .cifras { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); }
   .numero { display: block; font-size: 2rem; line-height: 1.1; }
   .sesion { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; word-break: break-all; }
   .filtros { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
@@ -266,7 +266,7 @@
   .lista li.cancelada { opacity: 0.55; }
   .lista li.cancelada .datos strong { text-decoration: line-through; }
   .hora { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .datos { display: grid; gap: 2px; min-width: 0; }
+  .datos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; min-width: 0; }
   .datos small { color: var(--p-texto-2); }
   .nota { font-style: italic; }
   .contacto { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; grid-column: 2; }

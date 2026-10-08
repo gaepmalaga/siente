@@ -194,7 +194,7 @@
   .marca span { display: grid; line-height: 1.1; }
   .marca strong { font-family: var(--p-mono); font-size: 1.3rem; letter-spacing: 0.05em; }
   .marca small { color: rgb(239 231 218 / 0.6); font-size: 0.78rem; margin-top: 3px; }
-  nav { flex: 1; overflow: auto; padding: 10px 10px 16px; display: grid; gap: 2px; align-content: start; }
+  nav { flex: 1; overflow: auto; padding: 10px 10px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; align-content: start; }
   .grupo { margin: 14px 10px 6px; font-family: var(--p-mono); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(234 214 188 / 0.55); }
   nav a {
     display: flex;

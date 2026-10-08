@@ -138,7 +138,7 @@
   .lema { text-align: center; color: #fff8ec; font-size: 1.05rem; text-shadow: 0 2px 10px rgb(0 0 0 / 0.5); }
   @keyframes encender { 0% { opacity: 0.15; } 20% { opacity: 0.9; } 28% { opacity: 0.3; } 40% { opacity: 1; } 100% { opacity: 1; } }
   .formulario { display: grid; place-items: center; padding: 40px 20px; background: var(--p-fondo); }
-  form, .cargando { display: grid; gap: 16px; width: min(420px, 100%); }
+  form, .cargando { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; width: min(420px, 100%); }
   .cargando { justify-items: center; text-align: center; }
   .cargando :global(.p-icono) { width: 36px; height: 36px; color: var(--p-roble); }
   h1 { font-size: 1.9rem; font-weight: 800; }
@@ -148,8 +148,8 @@
   .recordar { display: flex; align-items: center; gap: 8px; font-size: 0.92rem; }
   .error { display: flex; gap: 8px; padding: 12px; border-radius: 10px; background: var(--p-error-fondo); color: var(--p-error); font-weight: 700; font-size: 0.92rem; }
   .enlace { display: inline-flex; align-items: center; gap: 6px; justify-self: start; padding: 0; border: 0; background: none; font-weight: 700; color: var(--p-roble-oscuro); cursor: pointer; }
-  .pasos { display: grid; gap: 12px; margin: 0; padding: 16px 16px 16px 36px; border-radius: 12px; background: var(--p-superficie); border: 1px solid var(--p-borde); font-size: 0.93rem; }
-  .pasos li:first-child { display: grid; gap: 6px; justify-items: start; }
+  .pasos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin: 0; padding: 16px 16px 16px 36px; border-radius: 12px; background: var(--p-superficie); border: 1px solid var(--p-borde); font-size: 0.93rem; }
+  .pasos li:first-child { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; justify-items: start; }
   code { padding: 1px 5px; border-radius: 5px; background: var(--p-fondo); }
   .o { display: flex; align-items: center; gap: 10px; color: var(--p-apagado); font-size: 0.85rem; }
   .o::before, .o::after { content: ''; flex: 1; height: 1px; background: var(--p-borde-fuerte); }

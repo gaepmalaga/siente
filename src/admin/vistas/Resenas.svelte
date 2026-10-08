@@ -73,9 +73,9 @@
 </div>
 
 <style>
-  .nota { display: grid; gap: 16px; }
+  .nota { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
   @media (min-width: 760px) { .nota { grid-template-columns: 200px 200px 1fr; align-items: end; } }
-  .resena { display: grid; gap: 10px; }
+  .resena { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .cab { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .estrellas { display: flex; }
   .estrellas button { border: 0; background: none; font-size: 1.6rem; line-height: 1; color: var(--p-borde-fuerte); cursor: pointer; padding: 0 2px; }

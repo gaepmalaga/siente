@@ -154,16 +154,16 @@
 
 <style>
   .nota { display: flex; align-items: center; gap: 6px; }
-  .explica { display: grid; gap: 8px; padding: 12px 14px; border-radius: 12px; background: var(--p-info-fondo); color: #233d80; font-size: 0.88rem; }
+  .explica { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 12px 14px; border-radius: 12px; background: var(--p-info-fondo); color: #233d80; font-size: 0.88rem; }
   .sugerencias { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: -6px; }
   .p-chip.boton { border: 1px solid var(--p-borde-fuerte); background: var(--p-superficie); cursor: pointer; }
   .p-chip.boton:hover { border-color: var(--p-roble); background: #fbf3e7; }
   .grupo { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--p-apagado); }
-  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .checks > li { display: flex; gap: 8px; align-items: flex-start; font-size: 0.88rem; }
-  .txt { display: grid; gap: 3px; min-width: 0; }
+  .txt { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3px; min-width: 0; }
   .txt small { color: var(--p-texto-2); }
-  .detalles { margin: 2px 0 0; padding-left: 1.1em; color: var(--p-texto-2); font-size: 0.82rem; display: grid; gap: 2px; }
+  .detalles { margin: 2px 0 0; padding-left: 1.1em; color: var(--p-texto-2); font-size: 0.82rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .arreglar { justify-self: start; margin-top: 4px; border-color: var(--p-roble); color: var(--p-roble-oscuro); background: #fffaf3; }
   .arreglar:hover { background: #fbf0e0; border-color: var(--p-roble-oscuro); }
   .checks li.bien :global(.p-icono) { color: var(--p-ok); }
@@ -172,11 +172,11 @@
   .checks :global(.p-icono) { margin-top: 2px; }
   .todo-bien { display: flex; gap: 8px; align-items: center; font-weight: 700; color: var(--p-ok); }
   .ver-bien { justify-self: start; display: inline-flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none; color: var(--p-texto-2); font-weight: 700; font-size: 0.85rem; cursor: pointer; }
-  .google { display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid var(--p-borde); }
-  .cifras { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .google { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding-top: 12px; border-top: 1px solid var(--p-borde); }
+  .cifras { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
   .cifras span { display: grid; padding: 8px; border-radius: 10px; background: var(--p-superficie-2); font-size: 0.75rem; color: var(--p-apagado); text-align: center; }
   .cifras strong { font-size: 1.1rem; color: var(--p-texto); font-variant-numeric: tabular-nums; }
-  .consultas { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .consultas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .consultas li { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; }
   .consultas button { padding: 0; border: 0; background: none; font-weight: 700; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: var(--p-roble-claro); text-underline-offset: 3px; }
   .consultas span { white-space: nowrap; font-variant-numeric: tabular-nums; }

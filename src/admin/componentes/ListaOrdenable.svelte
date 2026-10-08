@@ -108,7 +108,7 @@
   }
   .asa:active { cursor: grabbing; background: var(--p-superficie-2); }
   .contenido { flex: 1; min-width: 0; }
-  .flechas { display: grid; gap: 2px; flex: none; }
+  .flechas { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; flex: none; }
   /* En el móvil, las filas con formularios grandes llevan el asa y las flechas
      arriba y el contenido debajo, a todo el ancho. */
   @media (max-width: 640px) {

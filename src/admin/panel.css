@@ -104,7 +104,7 @@ p { margin: 0; }
 .p-btn.solo-icono.pequeno { width: 32px; }
 
 /* ── Formularios ─────────────────────────────────────────────────────────── */
-.p-campo { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.p-campo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; min-width: 0; align-content: start; }
 .p-etiqueta { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-weight: 700; font-size: 0.92rem; }
 .p-etiqueta small { font-weight: 400; color: var(--p-apagado); font-size: 0.82rem; }
 .p-ayuda { font-size: 0.85rem; color: var(--p-apagado); }
@@ -127,9 +127,9 @@ p { margin: 0; }
 .p-contador.bien { color: var(--p-ok); }
 .p-contador.mejorable { color: var(--p-aviso); }
 .p-contador.mal { color: var(--p-error); }
-.p-rejilla { display: grid; gap: 16px; }
-.p-rejilla.dos { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-.p-rejilla.tres { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.p-rejilla { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.p-rejilla.dos { grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); }
+.p-rejilla.tres { grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); }
 
 /* ── Tarjetas ────────────────────────────────────────────────────────────── */
 .p-tarjeta {
@@ -141,14 +141,16 @@ p { margin: 0; }
 .p-tarjeta-cab {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   padding: 16px 20px;
   border-bottom: 1px solid var(--p-borde);
 }
 .p-tarjeta-cab h2 { font-size: 1.05rem; display: flex; align-items: center; gap: 10px; }
 .p-tarjeta-cab h2 .p-icono { color: var(--p-roble-oscuro); }
-.p-tarjeta-cuerpo { padding: 20px; display: grid; gap: 16px; }
+.p-tarjeta-cuerpo { padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+@media (max-width: 520px) { .p-fila { padding-inline: 14px; gap: 10px; } .p-tarjeta-cab, .p-tarjeta-cuerpo { padding-inline: 14px; } .p-tarjeta-pie { padding-inline: 14px; } }
 .p-tarjeta-pie { padding: 14px 20px; border-top: 1px solid var(--p-borde); background: var(--p-superficie-2); border-radius: 0 0 var(--p-radio) var(--p-radio); }
 
 /* ── Chips ───────────────────────────────────────────────────────────────── */
@@ -174,6 +176,7 @@ p { margin: 0; }
 
 /* ── Cabecera de vista ───────────────────────────────────────────────────── */
 .p-vista { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; width: min(100%, 1180px); margin-inline: auto; padding: 24px 24px 120px; }
+@media (max-width: 520px) { .p-vista { padding: 16px 12px 120px; } }
 .p-vista-cab { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
 .p-vista-cab h1 { font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); font-weight: 800; }
 .p-vista-cab p { color: var(--p-texto-2); margin-top: 6px; max-width: 70ch; }
@@ -187,6 +190,7 @@ p { margin: 0; }
 .p-lista > * + * { border-top: 1px solid var(--p-borde); }
 .p-fila {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 14px;
   padding: 12px 20px;

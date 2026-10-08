@@ -78,7 +78,7 @@
   .articulo { gap: 16px; }
   .articulo img, .sin-img { width: 72px; height: 54px; flex: none; border-radius: 10px; object-fit: cover; background: var(--p-fondo); }
   .sin-img { display: grid; place-items: center; color: var(--p-apagado); }
-  .txt { flex: 1; display: grid; gap: 6px; min-width: 0; }
+  .txt { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; min-width: 0; }
   .txt strong { font-size: 1.02rem; }
   .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
   .fecha { font-size: 0.85rem; }

@@ -21,7 +21,7 @@
   .interruptor { display: flex; align-items: center; justify-content: space-between; gap: 16px; cursor: pointer; }
   .interruptor.compacto { flex-direction: row-reverse; justify-content: flex-end; gap: 10px; padding: 8px 12px 8px 8px; border: 1px solid var(--p-borde); border-radius: 12px; background: var(--p-superficie); }
   .interruptor.compacto:has(input:checked) { border-color: #b9dcc6; background: #f5fbf7; }
-  .texto { display: grid; gap: 2px; }
+  .texto { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .etq { font-weight: 700; font-size: 0.95rem; }
   input { position: absolute; opacity: 0; width: 1px; height: 1px; }
   .pista {

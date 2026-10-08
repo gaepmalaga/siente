@@ -217,28 +217,28 @@
 </div>
 
 <style>
-  .principal { display: grid; gap: 20px; }
+  .principal { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .dias { display: grid; }
-  .dia { display: grid; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--p-borde); }
+  .dia { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--p-borde); }
   .dia:last-child { border-bottom: 0; }
-  @media (min-width: 720px) { .dia { grid-template-columns: 220px 1fr; align-items: center; } }
+  @media (min-width: 720px) { .dia { grid-template-columns: 220px minmax(0, 1fr); align-items: center; } }
   .dia.cerrado { background: var(--p-superficie-2); }
   .nombre { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .nombre :global(.interruptor) { flex-direction: row-reverse; gap: 10px; }
   .nombre :global(.etq) { font-weight: 400; color: var(--p-apagado); font-size: 0.88rem; min-width: 56px; }
   .tramos { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-  .tramo { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 4px; border-radius: 12px; background: var(--p-superficie-2); border: 1px solid var(--p-borde); }
-  .hora { width: 112px; min-height: 36px; padding: 4px 8px; font-variant-numeric: tabular-nums; }
-  .errores { display: grid; gap: 4px; color: var(--p-error); font-weight: 700; font-size: 0.9rem; }
+  .tramo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; max-width: 100%; padding: 4px; border-radius: 12px; background: var(--p-superficie-2); border: 1px solid var(--p-borde); }
+  .hora { width: 112px; min-width: 104px; flex: 1 1 104px; min-height: 36px; padding: 4px 8px; font-variant-numeric: tabular-nums; }
+  .errores { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; color: var(--p-error); font-weight: 700; font-size: 0.9rem; }
   .errores p { display: flex; gap: 6px; align-items: center; }
-  .cierre { display: grid; gap: 10px; padding: 14px; border-radius: 12px; border: 1px solid var(--p-borde); }
+  .cierre { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 14px; border-radius: 12px; border: 1px solid var(--p-borde); }
   .cierre.pasado { opacity: 0.6; }
   .cierre-pie { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
   .previa { flex: 1; min-width: 200px; font-size: 0.88rem; color: var(--p-texto-2); font-style: italic; }
   .barra-aviso { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: var(--p-tinta); color: #fff; font-weight: 700; font-size: 0.92rem; text-align: center; }
   .barra-aviso :global(.p-icono) { color: var(--p-luz); }
   .barra-aviso.apagado { opacity: 0.45; }
-  .lateral { display: grid; gap: 20px; }
+  .lateral { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .ahora { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--p-error-fondo); color: var(--p-error); font-weight: 700; }
   .ahora.abierto { background: var(--p-ok-fondo); color: var(--p-ok); }
   .tabla { display: grid; margin: 0; }

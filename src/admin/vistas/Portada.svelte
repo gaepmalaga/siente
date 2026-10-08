@@ -96,10 +96,10 @@
   .previa h2 { display: grid; font-size: clamp(2.2rem, 1.6rem + 2.4vw, 3.6rem); font-weight: 800; letter-spacing: -0.045em; line-height: 0.98; }
   .previa h2 .dos { color: var(--p-roble-oscuro); }
   .sub { max-width: 60ch; font-size: 1.1rem; color: var(--p-texto-2); }
-  .promos-previa { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-  .promo-previa { display: grid; gap: 4px; padding: 14px; border-radius: 14px; background: #fff; box-shadow: var(--p-sombra); font-size: 0.9rem; }
+  .promos-previa { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 10px; }
+  .promo-previa { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 14px; border-radius: 14px; background: #fff; box-shadow: var(--p-sombra); font-size: 0.9rem; }
   .promo-previa .etq { justify-self: start; padding: 2px 8px; border-radius: 999px; background: var(--p-tinta); color: #fff; font-family: var(--p-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
   .promo-previa span:last-child { color: var(--p-apagado); }
-  .promo { display: grid; gap: 10px; }
-  .pie-promo { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; }
+  .promo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .pie-promo { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; }
 </style>

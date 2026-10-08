@@ -184,9 +184,9 @@ const migas = [
   .cita-pagina { padding-block: 28px var(--seccion); }
   .cita-cab { display: grid; gap: 16px; margin: 28px 0 36px; }
   .cita-cab h1 { font-size: var(--paso-5); line-height: 0.98; letter-spacing: -0.045em; }
-  .cita-rejilla { display: grid; gap: 28px; align-items: start; }
+  .cita-rejilla { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }
   @media (min-width: 1040px) {
-    .cita-rejilla { grid-template-columns: 1fr 360px; gap: 40px; }
+    .cita-rejilla { grid-template-columns: minmax(0, 1fr) 360px; gap: 40px; }
     .cita-lateral { position: sticky; top: 110px; }
   }
 
@@ -267,14 +267,14 @@ const migas = [
   .lateral-bloque { display: grid; gap: 14px; padding: 26px; }
   .lateral-bloque h2 { font-size: var(--paso-1); }
 
-  .calendario { display: grid; gap: 8px; max-width: 460px; }
-  .cal-cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-transform: capitalize; font-size: 1.15rem; }
-  .cal-nav { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--linea); background: var(--papel); cursor: pointer; }
+  .calendario { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; max-width: 460px; }
+  .cal-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; text-transform: capitalize; font-size: 1.15rem; }
+  .cal-nav { display: grid; place-items: center; flex: none; width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--linea); background: var(--papel); cursor: pointer; }
   .cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
   .cal-nav :global(.icono) { width: 22px; height: 22px; }
-  .cal-semana, .cal-dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-semana, .cal-dias { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
   .cal-semana { text-align: center; font-weight: 700; color: var(--apagado); font-size: 0.95rem; }
-  .cal-dias :global(button), .cal-dias :global(.vacio) { aspect-ratio: 1; min-height: 44px; }
+  .cal-dias :global(button), .cal-dias :global(.vacio) { aspect-ratio: 1; min-width: 0; padding: 0; }
   .cal-dias :global(button) {
     border-radius: var(--radio-s); border: 2px solid var(--linea); background: var(--papel);
     font: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer;

@@ -58,6 +58,6 @@
   .caja { display: flex; flex-direction: column; max-height: inherit; }
   header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--p-borde); }
   header h2 { font-size: 1.1rem; }
-  .cuerpo { padding: 20px; overflow: auto; display: grid; gap: 16px; }
+  .cuerpo { padding: 20px; overflow: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
   footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--p-borde); background: var(--p-superficie-2); }
 </style>

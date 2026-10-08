@@ -240,11 +240,11 @@
 <style>
   .volver { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; font-weight: 700; color: var(--p-texto-2); text-decoration: none; }
   .volver :global(.girada) { transform: rotate(180deg); }
-  .principal, .lateral { display: grid; gap: 16px; }
+  .principal, .lateral { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .linea { display: flex; gap: 6px; align-items: center; }
-  .bloque { display: grid; gap: 6px; }
+  .bloque { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
   .corta { min-height: 64px; }
-  .iconos { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  .iconos { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 4px; }
   .iconos button { display: grid; place-items: center; aspect-ratio: 1; border: 1px solid var(--p-borde); border-radius: 8px; background: var(--p-superficie); cursor: pointer; color: var(--p-texto-2); }
   .iconos button.sel { background: var(--p-tinta); color: var(--p-luz); border-color: var(--p-tinta); }
   .foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; }

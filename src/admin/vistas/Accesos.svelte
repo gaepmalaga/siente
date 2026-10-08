@@ -172,7 +172,7 @@
 </div>
 
 <style>
-  aside { display: grid; gap: 20px; align-content: start; }
+  aside { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-content: start; }
   .diag { display: flex; gap: 12px; align-items: flex-start; }
   .diag p { font-size: 0.88rem; }
   .luz { width: 12px; height: 12px; margin-top: 5px; flex: none; border-radius: 50%; background: var(--p-borde-fuerte); }
@@ -180,22 +180,22 @@
   .luz.regular { background: #c98a14; box-shadow: 0 0 0 4px var(--p-aviso-fondo); }
   .luz.mal { background: var(--p-error); box-shadow: 0 0 0 4px var(--p-error-fondo); }
   .alerta { display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--p-error-fondo); color: var(--p-error); font-weight: 700; font-size: 0.9rem; text-decoration: none; }
-  .errores { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 220px; overflow: auto; }
+  .errores { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; max-height: 220px; overflow: auto; }
   .errores li { display: grid; padding: 8px 10px; border-radius: 8px; background: var(--p-superficie-2); font-size: 0.85rem; overflow-wrap: anywhere; }
-  .principal { display: grid; gap: 20px; }
+  .principal { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .av { width: 34px; height: 34px; border-radius: 50%; background: var(--p-fondo); flex: none; }
   .av.grande { width: 52px; height: 52px; }
   .av.inicial { display: grid; place-items: center; background: var(--p-roble-claro); color: var(--p-roble-oscuro); font-weight: 800; }
-  .txt { flex: 1; }
-  .opciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
-  .opciones button { display: grid; gap: 2px; padding: 12px; border: 1px solid var(--p-borde); border-radius: 12px; background: var(--p-superficie); text-align: left; cursor: pointer; }
+  .txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .opciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr)); gap: 8px; }
+  .opciones button { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 12px; border: 1px solid var(--p-borde); border-radius: 12px; background: var(--p-superficie); text-align: left; cursor: pointer; }
   .opciones button small { color: var(--p-apagado); }
   .opciones button[aria-selected='true'] { border-color: var(--p-tinta); box-shadow: inset 0 0 0 1px var(--p-tinta); background: var(--p-superficie-2); }
-  .pasos { display: grid; gap: 10px; margin: 0; padding-left: 1.3em; }
+  .pasos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin: 0; padding-left: 1.3em; }
   .pasos a { font-weight: 700; color: var(--p-roble-oscuro); }
   code { padding: 1px 5px; border-radius: 5px; background: var(--p-fondo); font-size: 0.88em; }
   .yo { display: flex; align-items: center; gap: 12px; }
-  .datos { display: grid; gap: 8px; margin: 0; }
+  .datos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin: 0; }
   .datos div { display: flex; justify-content: space-between; gap: 10px; font-size: 0.9rem; }
   .datos dt { color: var(--p-apagado); }
   .datos dd { margin: 0; font-weight: 700; text-align: right; }

@@ -87,7 +87,7 @@
 {/snippet}
 
 <style>
-  .grupo { display: grid; gap: 10px; }
+  .grupo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .grupo h2 { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; color: var(--p-texto-2); }
   .servicio { display: flex; align-items: center; gap: 14px; text-decoration: none; padding: 2px 4px; font-size: 0.8rem; }
   .ic { display: grid; place-items: center; width: 42px; height: 42px; flex: none; border-radius: 12px; background: var(--p-fondo); color: var(--p-roble-oscuro); }

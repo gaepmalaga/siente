@@ -98,7 +98,7 @@
   .fallo { font-size: 0.88rem; color: var(--p-texto-2); }
   .tit { font-family: var(--p-mono); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--p-roble-oscuro); }
   .msg { font-weight: 700; }
-  ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
   li { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--p-apagado); }
   li.ok { color: var(--p-texto); }
   li.ok :global(.p-icono) { color: var(--p-ok); }

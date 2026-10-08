@@ -66,7 +66,7 @@
 </div>
 
 <style>
-  .grafica { display: grid; gap: 8px; }
+  .grafica { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
   svg { width: 100%; height: auto; touch-action: pan-y; }
   .guia { stroke: var(--p-borde); stroke-dasharray: 3 4; }
   .eje { font-size: 11px; fill: var(--p-apagado); font-family: var(--p-sans); }

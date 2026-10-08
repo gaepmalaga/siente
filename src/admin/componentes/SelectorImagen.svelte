@@ -109,7 +109,7 @@
   .buscar :global(.p-icono) { position: absolute; left: 12px; top: 12px; color: var(--p-apagado); }
   .buscar input { padding-left: 38px; }
   label.p-btn { cursor: pointer; }
-  .rejilla { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .rejilla { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); gap: 12px; }
   .rejilla button {
     display: grid;
     gap: 4px;

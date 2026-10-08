@@ -159,10 +159,10 @@
   }
   header { display: flex; justify-content: space-between; gap: 12px; padding: 20px; border-bottom: 1px solid var(--p-borde); }
   header h2 { font-size: 1.25rem; }
-  .lista { flex: 1; overflow: auto; padding: 16px; display: grid; gap: 10px; align-content: start; }
+  .lista { flex: 1; overflow: auto; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-content: start; }
   .alerta { display: flex; gap: 12px; padding: 14px; border-radius: 12px; background: var(--p-error-fondo); color: var(--p-error); }
   .alerta p { color: var(--p-texto-2); font-size: 0.9rem; }
-  .cambio { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--p-borde); border-radius: 12px; }
+  .cambio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 12px; border: 1px solid var(--p-borde); border-radius: 12px; }
   .cambio.con-error { border-color: #e9b8ae; background: #fffaf9; }
   .cab { display: flex; gap: 10px; align-items: flex-start; }
   .tipo { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 10px; background: var(--p-info-fondo); color: var(--p-info); }
@@ -184,7 +184,7 @@
   .previa.lista > :global(.p-icono) { color: var(--p-ok); }
   .previa.error { border-color: #f0c2b8; background: #fffaf9; }
   .previa.error > :global(.p-icono) { color: var(--p-error); }
-  footer { display: grid; gap: 12px; padding: 16px 20px 20px; border-top: 1px solid var(--p-borde); background: var(--p-superficie-2); }
+  footer { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 16px 20px 20px; border-top: 1px solid var(--p-borde); background: var(--p-superficie-2); }
   .botones { display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; }
   .botones .primario { flex: 1; }
 </style>

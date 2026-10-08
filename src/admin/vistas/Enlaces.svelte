@@ -151,19 +151,19 @@
 </div>
 
 <style>
-  .editor { display: grid; gap: 16px; }
-  .boton-ed { display: grid; gap: 12px; }
+  .editor { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .boton-ed { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .boton-ed.oculto .resumen { opacity: 0.55; }
   .resumen { display: flex; align-items: center; gap: 12px; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; }
   .ic { display: grid; place-items: center; width: 38px; height: 38px; flex: none; border-radius: 10px; background: var(--p-tinta); color: var(--p-luz); }
   .ic.wa { background: var(--p-wa); color: #fff; }
   .txt { flex: 1; display: grid; min-width: 0; line-height: 1.25; }
   .txt small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .campos { display: grid; gap: 14px; padding-top: 12px; border-top: 1px solid var(--p-borde); }
+  .campos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; padding-top: 12px; border-top: 1px solid var(--p-borde); }
   .toggles { display: flex; flex-wrap: wrap; gap: 8px; }
   .campos > .p-btn { justify-self: start; }
   .aviso-n { display: flex; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 10px; background: #fdf8ee; font-size: 0.9rem; }
-  .lateral { display: grid; gap: 16px; justify-items: center; }
+  .lateral { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; justify-items: center; }
   .movil { width: 300px; padding: 10px; border-radius: 40px; background: #111; box-shadow: var(--p-sombra-2); }
   .pantalla {
     display: grid;
@@ -196,7 +196,7 @@
   .bt { display: grid; line-height: 1.2; }
   .bt strong { font-size: 0.82rem; }
   .bt small { font-size: 0.68rem; opacity: 0.75; }
-  .sec { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .sec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
   .sec span { padding: 8px; border-radius: 10px; background: rgb(23 20 17 / 0.78); color: #fff; font-size: 0.7rem; font-weight: 700; text-align: center; }
   .qr { width: 100%; }
   .qr .p-tarjeta-cuerpo { justify-items: center; text-align: center; }

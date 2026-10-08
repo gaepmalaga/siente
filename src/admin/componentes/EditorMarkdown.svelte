@@ -172,7 +172,7 @@
   .modos :global(.p-icono) { width: 15px; height: 15px; }
   @media (max-width: 899px) { .solo-ancho { display: none !important; } }
   .zona { display: grid; height: var(--alto); }
-  .zona.dividido { grid-template-columns: 1fr 1fr; }
+  .zona.dividido { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   textarea {
     width: 100%;
     height: 100%;

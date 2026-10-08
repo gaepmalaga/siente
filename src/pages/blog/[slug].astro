@@ -126,11 +126,11 @@ const compartir = `https://wa.me/?text=${encodeURIComponent(`${d.title} ${urlAbs
     .art-portada { justify-self: end; width: 100%; max-width: 440px; }
   }
 
-  .art-cuerpo { display: grid; gap: 48px; padding-bottom: var(--seccion); }
+  .art-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; padding-bottom: var(--seccion); }
   .art-cuerpo .prosa { max-width: 70ch; }
   .art-lateral { display: grid; gap: 18px; align-content: start; }
   @media (min-width: 1000px) {
-    .art-cuerpo { grid-template-columns: 1fr 340px; gap: 72px; }
+    .art-cuerpo { grid-template-columns: minmax(0, 1fr) 340px; gap: 72px; }
     .art-lateral { position: sticky; top: 110px; }
   }
   .compartir { display: grid; gap: 10px; padding: 22px; border-radius: var(--radio); border: 1.5px solid var(--linea-fuerte); }

@@ -255,7 +255,7 @@
 <style>
   .volver { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; font-weight: 700; color: var(--p-texto-2); text-decoration: none; }
   .volver :global(.girada) { transform: rotate(180deg); }
-  .principal { display: grid; gap: 14px; }
+  .principal { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .titulo { font-size: 1.7rem; min-height: 60px; }
   .direccion { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.9rem; }
   .slug { width: auto; flex: 1; min-width: 200px; min-height: 34px; padding: 4px 8px; font-family: var(--p-mono); font-size: 0.88rem; }
@@ -263,8 +263,8 @@
   .enlace-suave { justify-self: start; display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; font-weight: 700; font-size: 0.9rem; color: var(--p-texto-2); cursor: pointer; }
   .enlace-suave:hover { color: var(--p-texto); }
   .desc { min-height: 76px; }
-  .lateral { display: grid; gap: 16px; }
-  .fecha-hora { display: grid; grid-template-columns: 1fr 120px; gap: 10px; }
+  .lateral { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .fecha-hora { display: grid; grid-template-columns: minmax(0, 1fr) 120px; gap: 10px; }
   .estado-pub { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; }
   .estado-pub.ok { background: var(--p-ok-fondo); color: var(--p-ok); }
   .estado-pub.info { background: var(--p-info-fondo); color: var(--p-info); }

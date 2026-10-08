@@ -163,8 +163,8 @@
 
 <style>
   .ir-estadisticas { justify-self: start; }
-  .secciones { display: grid; gap: 20px; }
-  .llegar { display: grid; grid-template-columns: 130px 1fr auto; gap: 8px; align-items: center; }
+  .secciones { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .llegar { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
   .consejo { display: flex; gap: 10px; padding: 12px 14px; border-radius: 10px; background: #fdf8ee; font-size: 0.9rem; }
   .consejo :global(.p-icono) { color: #c98a14; margin-top: 2px; }
 </style>

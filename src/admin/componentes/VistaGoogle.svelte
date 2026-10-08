@@ -18,7 +18,7 @@
 </div>
 
 <style>
-  .google { display: grid; gap: 4px; padding: 14px 16px; border-radius: 12px; background: #fff; border: 1px solid var(--p-borde); font-family: Arial, sans-serif; }
+  .google { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 14px 16px; border-radius: 12px; background: #fff; border: 1px solid var(--p-borde); font-family: Arial, sans-serif; }
   .sitio { display: flex; align-items: center; gap: 10px; }
   .fav { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #f1ece4; font-family: var(--p-mono); font-weight: 700; font-size: 13px; }
   .sitio > span:last-child { display: grid; line-height: 1.25; }
