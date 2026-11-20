@@ -42,6 +42,7 @@ const preguntas = servicios.flatMap((s) => s.data.faqs.slice(0, 1));
           </p>
           <div class="hub-acciones">
             <a class="boton" href={url('/pedir-cita/?servicio=revision-vista')}><Icono nombre="CalendarCheck" /> Revisión gratis</a>
+            <a class="boton secundario" href={url('/test-de-vista-online/')}><Icono nombre="ScanEye" /> Test de vista online</a>
             <a class="boton wa" href={waHref('Hola, tengo una consulta sobre la óptica.')} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> WhatsApp</a>
           </div>
         </div>

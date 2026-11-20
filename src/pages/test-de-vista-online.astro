@@ -1,0 +1,124 @@
+---
+import Base from '../layouts/Base.astro';
+import Migas from '../components/Migas.astro';
+import Icono from '../components/Icono.astro';
+import Faq from '../components/Faq.astro';
+import BandaCita from '../components/BandaCita.astro';
+import TestVista from '../components/TestVista.astro';
+import { esquemaFaq } from '../lib/schema';
+
+const migas = [
+  { nombre: 'Inicio', ruta: '/' },
+  { nombre: 'Óptica', ruta: '/optica-barajas/' },
+  { nombre: 'Test de vista online', ruta: '/test-de-vista-online/' },
+];
+
+const preguntas = [
+  {
+    q: '¿Este test sustituye a una revisión de la vista?',
+    a: 'No. Es una pre-revisión orientativa: detecta señales (visión borrosa, posible astigmatismo, dificultades con el color, alteraciones en el centro de la retina) y te ayuda a llegar a la cita con datos. No mide dioptrías ni la salud del ojo; eso solo se puede hacer en una revisión presencial con un optometrista.',
+  },
+  {
+    q: '¿Por qué hay que calibrar la pantalla con una tarjeta?',
+    a: 'Cada pantalla tiene un tamaño de píxel distinto. Una tarjeta bancaria mide siempre 85,6 × 54 mm, así que sirve como regla universal para dibujar las letras y la cuadrícula con el tamaño exacto que requiere cada prueba.',
+  },
+  {
+    q: '¿Se guardan mis resultados?',
+    a: 'No. Todo el test se hace en tu navegador: no enviamos ni guardamos nada. Solo se recuerda en tu dispositivo el resultado de la calibración para no repetirla. Si quieres, tú decides compartir el resumen con nosotros por WhatsApp.',
+  },
+  {
+    q: '¿Qué hago si el resultado sale mal?',
+    a: 'Pide una revisión de la vista gratuita en Siente: la confirmamos con equipos profesionales y, si hace falta, te graduamos. Si has notado una pérdida brusca de visión, destellos o una sombra en el ojo, no esperes: acude a urgencias oftalmológicas.',
+  },
+  {
+    q: '¿Puedo hacerlo con gafas o lentillas?',
+    a: 'Sí, y es lo recomendable si las usas: así comprobamos si tu graduación actual sigue siendo suficiente. El test te lo recuerda en cada prueba.',
+  },
+];
+---
+
+<Base
+  titulo="Test de vista online gratis: comprueba cómo ves | Siente, óptica en Barajas"
+  descripcion="Test de vista online en 5 minutos: agudeza visual, astigmatismo, color y cuadrícula de Amsler, con resultado en semáforo. Orientativo y sin registro. Confírmalo con tu revisión gratuita en Siente (Barajas, Madrid)."
+  migas={migas}
+  esquemas={[esquemaFaq(preguntas)]}
+>
+  <section class="tv-hero">
+    <div class="contenedor">
+      <Migas migas={migas} />
+      <div class="tv-hero-texto">
+        <span class="antetitulo">Óptica · Barajas, Madrid</span>
+        <h1>Test de vista online</h1>
+        <p class="entradilla">
+          Cinco pruebas guiadas, un resultado en semáforo y, si lo necesitas, tu <strong>revisión gratuita</strong> con los
+          datos ya preparados. Sin registro y sin que nada salga de tu dispositivo.
+        </p>
+        <ul class="tv-puntos-clave" role="list">
+          <li><Icono nombre="Clock" /> 5 minutos</li>
+          <li><Icono nombre="ShieldCheck" /> Privado: no guarda nada</li>
+          <li><Icono nombre="Eye" /> 4 pruebas oculares</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="tv-seccion">
+    <div class="contenedor-estrecho">
+      <TestVista />
+    </div>
+  </section>
+
+  <section class="seccion-s">
+    <div class="contenedor">
+      <div class="cabecera-seccion">
+        <span class="antetitulo">Qué miramos</span>
+        <h2 class="titulo-seccion">Cuatro pruebas, <em>cuatro señales</em></h2>
+      </div>
+      <div class="tv-pruebas">
+        <article class="tarjeta" data-aparecer>
+          <Icono nombre="ScanEye" />
+          <h3>Agudeza visual</h3>
+          <p>Con aros de Landolt del tamaño exacto, calculado para tu pantalla y tu distancia. Mide cuánto detalle distingues con cada ojo.</p>
+        </article>
+        <article class="tarjeta" data-aparecer style="--retraso: 0.08s">
+          <Icono nombre="Sun" />
+          <h3>Astigmatismo</h3>
+          <p>La esfera de líneas revela si hay direcciones que ves más nítidas que otras, el signo típico del astigmatismo.</p>
+        </article>
+        <article class="tarjeta" data-aparecer style="--retraso: 0.16s">
+          <Icono nombre="Palette" />
+          <h3>Visión del color</h3>
+          <p>Láminas de puntos tipo Ishihara para detectar con rapidez dificultades con rojos y verdes.</p>
+        </article>
+        <article class="tarjeta" data-aparecer style="--retraso: 0.24s">
+          <Icono nombre="Grid3x3" />
+          <h3>Cuadrícula de Amsler</h3>
+          <p>La prueba clásica de la retina central: líneas torcidas o zonas que desaparecen merecen mirarse pronto.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion-s">
+    <div class="contenedor-estrecho">
+      <Faq preguntas={preguntas} />
+    </div>
+  </section>
+
+  <BandaCita servicio="revision-vista" titulo="Confírmalo con una revisión gratuita" texto="Un optometrista mide tu graduación y revisa la salud de tus ojos. Sin compromiso y en Barajas." />
+</Base>
+
+<style>
+  .tv-hero { padding-top: clamp(24px, 4vw, 48px); }
+  .tv-hero-texto { display: grid; gap: 18px; padding-block: clamp(16px, 3vw, 32px) clamp(24px, 4vw, 40px); }
+  .tv-hero-texto h1 { font-size: var(--paso-5); line-height: 0.98; }
+  .tv-puntos-clave { display: flex; flex-wrap: wrap; gap: 10px 22px; font-weight: 700; }
+  .tv-puntos-clave li { display: inline-flex; align-items: center; gap: 8px; }
+  .tv-puntos-clave :global(.icono) { width: 22px; height: 22px; color: var(--roble-oscuro); }
+  .tv-seccion { padding-bottom: clamp(40px, 6vw, 80px); }
+  .tv-pruebas { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  .tv-pruebas .tarjeta { padding: 26px; display: grid; gap: 10px; align-content: start; }
+  .tv-pruebas .tarjeta :global(.icono) { width: 34px; height: 34px; color: var(--roble-oscuro); }
+  .tv-pruebas h3 { font-size: 1.3rem; }
+  .tv-pruebas p { color: var(--tinta-2); line-height: 1.55; }
+</style>

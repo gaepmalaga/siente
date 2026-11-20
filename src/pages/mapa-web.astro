@@ -21,6 +21,7 @@ const posts = (await getCollection('blog', esPublico)).sort((a, b) => b.data.dat
       <a href={url('/optica-barajas/')}>Óptica en Barajas</a>
       <ul>{servicios.filter((s) => s.data.area === 'vista').map((s) => <li><a href={url(`/optica-barajas/${s.id}/`)}>{s.data.title}</a></li>)}</ul>
     </li>
+    <li><a href={url('/test-de-vista-online/')}>Test de vista online</a></li>
     <li>
       <a href={url('/audifonos-barajas/')}>Centro auditivo y audífonos</a>
       <ul>{servicios.filter((s) => s.data.area === 'oido').map((s) => <li><a href={url(`/audifonos-barajas/${s.id}/`)}>{s.data.title}</a></li>)}</ul>

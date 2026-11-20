@@ -15,6 +15,7 @@ export async function rutasPublicas(): Promise<Ruta[]> {
     ...servicios
       .filter((s) => s.data.area === 'vista')
       .map((s) => ({ ruta: `/optica-barajas/${s.id}/`, titulo: s.data.h1, prioridad: 0.8 })),
+    { ruta: '/test-de-vista-online/', titulo: 'Test de vista online', prioridad: 0.8 },
     { ruta: '/audifonos-barajas/', titulo: 'Audífonos y centro auditivo en Barajas', prioridad: 0.9 },
     ...servicios
       .filter((s) => s.data.area === 'oido')

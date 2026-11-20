@@ -1,0 +1,1044 @@
+---
+// Test de vista online: pre-revisión guiada de unos 5 minutos (calibración de la
+// pantalla con una tarjeta, agudeza visual, astigmatismo, color, cuadrícula de
+// Amsler) con un informe en semáforo. Todo ocurre en el navegador: no se envía
+// ni se guarda nada. Es orientativo y no sustituye a una revisión.
+//
+// La lógica (tamaños, puntuación, semáforo) está en src/lib/testVista.ts.
+import { negocio, telHref, waHref } from '../lib/negocio';
+import { url } from '../lib/url';
+
+const citaUrl = url('/pedir-cita/?servicio=revision-vista');
+---
+
+<div
+  class="tv"
+  data-tv
+  data-cita={citaUrl}
+  data-wa={waHref()}
+  data-tel={telHref()}
+  data-telefono={negocio.telefono}
+  data-contacto={url('/contacto/')}
+>
+  <noscript>
+    <p class="tv-sinjs">
+      Este test necesita JavaScript. Puedes pedir una revisión de la vista gratuita en
+      <a href={citaUrl}>la página de citas</a> o llamarnos al <a href={telHref()}>{negocio.telefono}</a>.
+    </p>
+  </noscript>
+  <div class="tv-cab" data-cab hidden>
+    <div class="tv-progreso" role="progressbar" aria-label="Progreso del test" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-progreso>
+      <span data-barra></span>
+    </div>
+    <p class="tv-paso" data-paso></p>
+  </div>
+  <div class="tv-escena" data-escena aria-live="polite"></div>
+</div>
+
+<style is:global>
+  .tv {
+    --tv-ok: #1b7a3e;
+    --tv-ok-fondo: #e4f3e8;
+    --tv-revisar: #94560a;
+    --tv-revisar-fondo: #fbefd9;
+    --tv-pronto: #b3261e;
+    --tv-pronto-fondo: #fbe4e1;
+    position: relative;
+    background: var(--blanco);
+    border-radius: var(--radio-l);
+    box-shadow: var(--sombra-2);
+    border: 1px solid var(--linea);
+    overflow: hidden;
+    min-height: 560px;
+  }
+  .tv-sinjs { padding: 32px; font-size: 1.1rem; }
+  .tv-cab { display: grid; gap: 10px; padding: 20px clamp(20px, 4vw, 40px) 0; }
+  .tv-cab[hidden] { display: none; }
+  .tv-progreso { height: 8px; border-radius: 99px; background: var(--papel-2); overflow: hidden; }
+  .tv-progreso span {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--roble), var(--roble-oscuro));
+    transition: width 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .tv-paso { font-size: 0.95rem; font-weight: 700; color: var(--apagado); letter-spacing: 0.02em; }
+
+  .tv-escena { padding: clamp(20px, 4vw, 40px); display: grid; gap: 24px; align-content: start; }
+  @media (prefers-reduced-motion: no-preference) {
+    .tv-escena > * { animation: tv-entra 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+    .tv-escena > *:nth-child(2) { animation-delay: 0.06s; }
+    .tv-escena > *:nth-child(3) { animation-delay: 0.12s; }
+    .tv-escena > *:nth-child(4) { animation-delay: 0.18s; }
+  }
+  @keyframes tv-entra { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  .tv h2, .tv h3 { font-size: var(--paso-3); line-height: 1.1; }
+  .tv h3 { font-size: var(--paso-2); }
+  .tv-texto { font-size: 1.12rem; line-height: 1.55; color: var(--tinta-2); max-width: 56ch; }
+  .tv-texto strong { color: var(--tinta); }
+  .tv-chico { font-size: 0.95rem; color: var(--apagado); max-width: 60ch; }
+  .tv-acciones { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .tv-acciones .boton[disabled] { opacity: 0.4; pointer-events: none; }
+
+  /* Opciones tipo botón de radio */
+  .tv-grupo { display: grid; gap: 10px; border: 0; padding: 0; margin: 0; }
+  .tv-grupo legend { font-weight: 800; font-size: 1.08rem; margin-bottom: 4px; padding: 0; }
+  .tv-opciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  .tv-opcion { position: relative; display: block; cursor: pointer; }
+  .tv-opcion input { position: absolute; opacity: 0; inset: 0; }
+  .tv-opcion span {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 60px;
+    padding: 12px 16px;
+    border-radius: var(--radio-s);
+    border: 2px solid var(--linea-fuerte);
+    font-weight: 700;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .tv-opcion small { display: block; font-weight: 400; color: var(--apagado); font-size: 0.88rem; }
+  .tv-opcion:hover span { background: var(--papel); }
+  .tv-opcion input:checked + span { border-color: var(--tinta); background: var(--papel-2); box-shadow: inset 0 0 0 1px var(--tinta); }
+  .tv-opcion input:focus-visible + span { outline: 3px solid var(--roble-oscuro); outline-offset: 3px; }
+
+  .tv-alerta {
+    display: grid;
+    gap: 12px;
+    padding: 20px;
+    border-radius: var(--radio-s);
+    background: var(--tv-pronto-fondo);
+    border: 2px solid var(--tv-pronto);
+    color: #5c130f;
+  }
+  .tv-alerta strong { font-size: 1.15rem; }
+  .tv-alerta[hidden], .tv [hidden] { display: none !important; }
+  .tv-aviso-legal {
+    display: flex;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: var(--radio-s);
+    background: var(--papel);
+    font-size: 0.95rem;
+    color: var(--tinta-2);
+  }
+  .tv-aviso-legal svg { flex: none; width: 20px; height: 20px; margin-top: 2px; }
+
+  /* Calibración */
+  .tv-calib { display: grid; justify-items: center; gap: 18px; }
+  .tv-tarjeta {
+    position: relative;
+    aspect-ratio: 53.98 / 85.6;
+    border-radius: 3.2% / 2%;
+    background: linear-gradient(135deg, #f1e9dd, #e6d6bf);
+    border: 2px solid var(--tinta);
+    box-shadow: 0 0 0 9999px transparent;
+    display: grid;
+    place-items: center;
+    color: var(--tinta-2);
+    font-weight: 700;
+    text-align: center;
+    padding: 14px;
+    max-width: 100%;
+  }
+  .tv-tarjeta::before, .tv-tarjeta::after {
+    content: '';
+    position: absolute;
+    top: -14px;
+    bottom: -14px;
+    width: 0;
+    border-left: 2px dashed var(--roble-oscuro);
+    pointer-events: none;
+  }
+  .tv-tarjeta::before { left: -1px; }
+  .tv-tarjeta::after { right: -1px; }
+  .tv-calib-control { display: flex; gap: 12px; align-items: center; width: min(100%, 460px); }
+  .tv-calib-control input[type='range'] { flex: 1; accent-color: var(--roble-oscuro); height: 44px; }
+  .tv-paso-boton {
+    width: 52px;
+    height: 52px;
+    flex: none;
+    border-radius: 50%;
+    border: 2px solid var(--tinta);
+    background: var(--blanco);
+    font-size: 1.6rem;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .tv-paso-boton:hover { background: var(--tinta); color: var(--papel); }
+
+  /* Indicador de ojo */
+  .tv-ojo-cab { display: flex; gap: 18px; align-items: center; }
+  .tv-ojos { width: 150px; flex: none; }
+  .tv-ojos .mano { transform-origin: center; animation: tv-mano 2.4s ease-in-out infinite; }
+  @keyframes tv-mano { 50% { transform: translateY(-3px) scale(1.03); } }
+  .tv-ojo-cab p { font-size: 1.25rem; font-weight: 800; line-height: 1.25; }
+  .tv-ojo-cab small { display: block; font-weight: 400; color: var(--apagado); font-size: 0.98rem; margin-top: 2px; }
+
+  /* Distancia */
+  .tv-dist { display: flex; gap: 16px; align-items: center; padding: 16px 20px; border-radius: var(--radio-s); background: var(--papel); }
+  .tv-dist b { font-family: var(--mono); font-size: 2.2rem; line-height: 1; white-space: nowrap; }
+  .tv-dist span { color: var(--tinta-2); }
+
+  /* Escenario de optotipos */
+  .tv-escenario {
+    display: grid;
+    place-items: center;
+    min-height: min(46vh, 340px);
+    background: #fff;
+    border: 2px solid var(--linea-fuerte);
+    border-radius: var(--radio);
+    padding: 20px;
+    overflow: hidden;
+  }
+  .tv-optotipo { display: block; transition: opacity 0.12s; }
+  .tv-optotipo.oculto { opacity: 0; }
+  .tv-cruz { display: grid; grid-template-columns: repeat(3, minmax(0, 76px)); grid-template-rows: repeat(3, 76px); gap: 8px; justify-content: center; }
+  .tv-flecha {
+    border-radius: 18px;
+    border: 2px solid var(--tinta);
+    background: var(--blanco);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.12s, transform 0.12s;
+  }
+  .tv-flecha svg { width: 34px; height: 34px; }
+  .tv-flecha:hover { background: var(--papel-2); }
+  .tv-flecha:active { transform: scale(0.94); background: var(--tinta); color: var(--papel); }
+  .tv-flecha[data-dir='arriba'] { grid-area: 1 / 2; }
+  .tv-flecha[data-dir='izq'] { grid-area: 2 / 1; }
+  .tv-flecha[data-dir='der'] { grid-area: 2 / 3; }
+  .tv-flecha[data-dir='abajo'] { grid-area: 3 / 2; }
+  .tv-nover { grid-area: 2 / 2; font-size: 0.8rem; font-weight: 800; line-height: 1.1; border-radius: 18px; border: 2px dashed var(--linea-fuerte); background: transparent; cursor: pointer; padding: 4px; }
+  .tv-nover:hover { background: var(--papel); }
+  .tv-puntos { display: flex; gap: 6px; justify-content: center; }
+  .tv-puntos i { width: 8px; height: 8px; border-radius: 50%; background: var(--linea-fuerte); }
+  .tv-puntos i.hecho { background: var(--roble-oscuro); }
+
+  /* Astigmatismo */
+  .tv-dial-caja { display: grid; place-items: center; background: #fff; border: 2px solid var(--linea-fuerte); border-radius: var(--radio); padding: 12px; }
+  .tv-dial line.l { stroke: #000; transition: stroke 0.2s; }
+  .tv-dial line.l.sel { stroke: var(--roble-oscuro); }
+  .tv-dial text { font-family: var(--sans); font-weight: 800; fill: var(--apagado); }
+  .tv-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tv-chip { position: relative; cursor: pointer; }
+  .tv-chip input { position: absolute; opacity: 0; inset: 0; }
+  .tv-chip span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 8px 18px;
+    border-radius: 99px;
+    border: 2px solid var(--linea-fuerte);
+    font-weight: 800;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .tv-chip:hover span { background: var(--papel); }
+  .tv-chip input:checked + span { background: var(--tinta); color: var(--papel); border-color: var(--tinta); }
+  .tv-chip input:focus-visible + span { outline: 3px solid var(--roble-oscuro); outline-offset: 3px; }
+
+  /* Color */
+  .tv-lamina { display: grid; place-items: center; }
+  .tv-lamina canvas { max-width: 100%; height: auto; border-radius: 50%; box-shadow: 0 10px 30px -12px rgb(23 20 17 / 0.45); background: #fff; }
+  .tv-numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .tv-numero {
+    min-height: 64px;
+    border-radius: var(--radio-s);
+    border: 2px solid var(--tinta);
+    background: var(--blanco);
+    font: 800 1.7rem var(--sans);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tv-numero:hover { background: var(--papel-2); }
+  .tv-numero:active { background: var(--tinta); color: var(--papel); }
+  .tv-ninguno { min-height: 52px; border-radius: var(--radio-s); border: 2px dashed var(--linea-fuerte); background: transparent; font-weight: 800; cursor: pointer; }
+  .tv-ninguno:hover { background: var(--papel); }
+
+  /* Amsler */
+  .tv-amsler-caja { display: grid; place-items: center; background: #fff; border: 2px solid var(--linea-fuerte); border-radius: var(--radio); padding: 12px; overflow: hidden; }
+  .tv-amsler { touch-action: manipulation; cursor: crosshair; }
+  .tv-amsler rect.marca { fill: rgb(179 38 30 / 0.35); stroke: var(--tv-pronto); stroke-width: 1.5; }
+  .tv-amsler rect.celda { fill: transparent; }
+  .tv-amsler rect.celda:hover { fill: rgb(135 87 44 / 0.12); }
+
+  /* Informe */
+  .tv-veredicto {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: clamp(16px, 3vw, 28px);
+    align-items: center;
+    padding: clamp(20px, 3vw, 32px);
+    border-radius: var(--radio);
+    background: var(--tv-fondo);
+    border: 2px solid var(--tv-color);
+  }
+  .tv-veredicto[data-s='ok'] { --tv-color: var(--tv-ok); --tv-fondo: var(--tv-ok-fondo); }
+  .tv-veredicto[data-s='revisar'] { --tv-color: var(--tv-revisar); --tv-fondo: var(--tv-revisar-fondo); }
+  .tv-veredicto[data-s='pronto'] { --tv-color: var(--tv-pronto); --tv-fondo: var(--tv-pronto-fondo); }
+  .tv-sello { width: clamp(72px, 14vw, 104px); height: clamp(72px, 14vw, 104px); }
+  .tv-sello circle { fill: none; stroke: var(--tv-color); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 327; stroke-dashoffset: 327; transform: rotate(-90deg); transform-origin: center; }
+  .tv-sello path { fill: none; stroke: var(--tv-color); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 90; stroke-dashoffset: 90; }
+  @media (prefers-reduced-motion: no-preference) {
+    .tv-sello circle { animation: tv-trazo 1s 0.15s cubic-bezier(0.3, 0.6, 0.2, 1) forwards; }
+    .tv-sello path { animation: tv-trazo 0.6s 0.9s ease-out forwards; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tv-sello circle, .tv-sello path { stroke-dashoffset: 0; }
+  }
+  @keyframes tv-trazo { to { stroke-dashoffset: 0; } }
+  .tv-veredicto h2 { font-size: var(--paso-3); color: var(--tv-color); }
+  .tv-veredicto p { margin-top: 8px; font-size: 1.1rem; line-height: 1.5; color: var(--tinta-2); }
+
+  .tv-filas { display: grid; gap: 12px; }
+  .tv-fila {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    align-items: start;
+    padding: 18px 20px;
+    border-radius: var(--radio-s);
+    border: 1.5px solid var(--linea-fuerte);
+    border-left: 8px solid var(--tv-color);
+  }
+  .tv-fila[data-s='ok'] { --tv-color: var(--tv-ok); }
+  .tv-fila[data-s='revisar'] { --tv-color: var(--tv-revisar); }
+  .tv-fila[data-s='pronto'] { --tv-color: var(--tv-pronto); }
+  .tv-fila h3 { font-size: 1.15rem; grid-column: 1; }
+  .tv-etiqueta {
+    grid-column: 2;
+    justify-self: end;
+    padding: 3px 12px;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #fff;
+    background: var(--tv-color);
+    white-space: nowrap;
+  }
+  .tv-fila p { grid-column: 1 / -1; color: var(--tinta-2); line-height: 1.5; }
+  .tv-medidor { grid-column: 1 / -1; display: grid; gap: 6px; margin-block: 4px; }
+  .tv-medidor-fila { display: grid; grid-template-columns: 78px 1fr auto; gap: 10px; align-items: center; font-size: 0.95rem; }
+  .tv-segmentos { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; }
+  .tv-segmentos i { height: 12px; border-radius: 4px; background: var(--papel-2); }
+  .tv-segmentos i.on { background: var(--tv-color); }
+  .tv-medidor-fila b { font-family: var(--mono); font-size: 1.05rem; white-space: nowrap; }
+  .tv-seg-ok i.on { background: var(--tv-ok); }
+  .tv-seg-revisar i.on { background: var(--tv-revisar); }
+  .tv-seg-pronto i.on { background: var(--tv-pronto); }
+
+  @media (max-width: 560px) {
+    .tv-veredicto { grid-template-columns: 1fr; justify-items: start; }
+    .tv-ojos { width: 110px; }
+    .tv-cruz { grid-template-columns: repeat(3, minmax(0, 68px)); grid-template-rows: repeat(3, 68px); }
+    .tv-medidor-fila { grid-template-columns: 62px 1fr auto; }
+    .tv-fila { grid-template-columns: 1fr; }
+    .tv-etiqueta { grid-column: 1; justify-self: start; }
+  }
+</style>
+
+<script>
+  import {
+    ACIERTOS_PARA_SUPERAR,
+    DISTANCIA_AMSLER_MM,
+    DISTANCIA_MM,
+    INTENTOS_POR_NIVEL,
+    LAMINAS_COLOR,
+    LINEAS_ASTIGMATISMO,
+    NIVELES,
+    TARJETA_MM,
+    anguloLinea,
+    casillasAmsler,
+    diametroPx,
+    elaborarInforme,
+    opcionesLamina,
+    pxPorMm,
+    resolverAgudeza,
+    resolverColor,
+    resumenTexto,
+    textoDecimal,
+    textoEjeLinea,
+    type Dispositivo,
+    type Ojo,
+    type ResultadoAmsler,
+    type ResultadoAstigmatismo,
+    type Resultados,
+    type Semaforo,
+  } from '../lib/testVista';
+
+  type Paso = { id: string; tipo: 'intro' | 'calibrar' | 'agudeza' | 'astigmatismo' | 'color' | 'amsler' | 'informe'; ojo?: Ojo };
+
+  const PASOS: Paso[] = [
+    { id: 'intro', tipo: 'intro' },
+    { id: 'calibrar', tipo: 'calibrar' },
+    { id: 'agudeza-derecho', tipo: 'agudeza', ojo: 'derecho' },
+    { id: 'agudeza-izquierdo', tipo: 'agudeza', ojo: 'izquierdo' },
+    { id: 'astigmatismo-derecho', tipo: 'astigmatismo', ojo: 'derecho' },
+    { id: 'astigmatismo-izquierdo', tipo: 'astigmatismo', ojo: 'izquierdo' },
+    { id: 'color', tipo: 'color' },
+    { id: 'amsler-derecho', tipo: 'amsler', ojo: 'derecho' },
+    { id: 'amsler-izquierdo', tipo: 'amsler', ojo: 'izquierdo' },
+    { id: 'informe', tipo: 'informe' },
+  ];
+  const TITULOS: Record<string, string> = {
+    intro: 'Antes de empezar',
+    calibrar: 'Calibrar la pantalla',
+    agudeza: 'Agudeza visual',
+    astigmatismo: 'Líneas (astigmatismo)',
+    color: 'Visión del color',
+    amsler: 'Cuadrícula de Amsler',
+    informe: 'Tu resultado',
+  };
+  const NOMBRE_OJO: Record<Ojo, string> = { derecho: 'ojo derecho', izquierdo: 'ojo izquierdo' };
+  const OTRO_OJO: Record<Ojo, Ojo> = { derecho: 'izquierdo', izquierdo: 'derecho' };
+
+  const cuadrar = (m: number) => Math.round(m * 100) / 100;
+  const ico = {
+    flecha: (giro: number) =>
+      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(${giro}deg)" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`,
+    info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>`,
+    cita: `<svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="m9 16 2 2 4-4"/></svg>`,
+    wa: `<svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`,
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-tv]').forEach(iniciar);
+
+  function iniciar(raiz: HTMLElement) {
+    const escena = raiz.querySelector<HTMLElement>('[data-escena]')!;
+    const cab = raiz.querySelector<HTMLElement>('[data-cab]')!;
+    const barra = raiz.querySelector<HTMLElement>('[data-barra]')!;
+    const progreso = raiz.querySelector<HTMLElement>('[data-progreso]')!;
+    const etiquetaPaso = raiz.querySelector<HTMLElement>('[data-paso]')!;
+
+    // ── Estado ────────────────────────────────────────────────────────────
+    let indice = 0;
+    let dispositivo: Dispositivo = window.matchMedia('(pointer: coarse)').matches ? 'movil' : 'ordenador';
+    let usaGafas = false;
+    let pxMm = dispositivo === 'movil' ? 6.3 : 3.78;
+    let anchoTarjetaPx = pxMm * TARJETA_MM.ancho;
+    try {
+      const g = Number(localStorage.getItem('siente-tv-px'));
+      if (g > 1.5 && g < 14) {
+        pxMm = g;
+        anchoTarjetaPx = g * TARJETA_MM.ancho;
+      }
+    } catch {}
+
+    const agudeza: Partial<Record<Ojo, number[]>> = {};
+    const astigmatismo: Partial<Record<Ojo, ResultadoAstigmatismo>> = {};
+    let respuestasColor: (number | null)[] = [];
+    const amsler: Partial<Record<Ojo, ResultadoAmsler>> = {};
+    let alKeydown: ((e: KeyboardEvent) => void) | null = null;
+
+    // ── Utilidades ────────────────────────────────────────────────────────
+    const paso = () => PASOS[indice];
+    const ir = (i: number) => {
+      indice = Math.max(0, Math.min(PASOS.length - 1, i));
+      pintar();
+      if (indice > 0) raiz.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    };
+    const siguiente = () => ir(indice + 1);
+
+    function ojosSvg(tapar: Ojo | null): string {
+      // Se dibuja como te ves tú: tu ojo izquierdo, a la izquierda.
+      const ojo = (cx: number, cubierto: boolean) =>
+        cubierto
+          ? `<g class="mano"><rect x="${cx - 38}" y="14" width="76" height="64" rx="26" fill="#e6c7a4" stroke="#171411" stroke-width="3"/><path d="M${cx - 18} 30v-6M${cx} 28v-8M${cx + 18} 30v-6" stroke="#171411" stroke-width="3" stroke-linecap="round"/></g>`
+          : `<ellipse cx="${cx}" cy="46" rx="32" ry="20" fill="#fff" stroke="#171411" stroke-width="3"/><circle cx="${cx}" cy="46" r="12" fill="#87572c"/><circle cx="${cx}" cy="46" r="5" fill="#171411"/><circle cx="${cx + 4}" cy="42" r="2.5" fill="#fff"/>`;
+      return `<svg class="tv-ojos" viewBox="0 0 220 104" role="img" aria-label="${tapar ? `Tapa el ${NOMBRE_OJO[tapar]}` : 'Con los dos ojos abiertos'}">
+        ${ojo(58, tapar === 'izquierdo')}${ojo(162, tapar === 'derecho')}
+        <text x="58" y="98" text-anchor="middle" font-size="13" font-weight="800" fill="#665e54">Izquierdo</text>
+        <text x="162" y="98" text-anchor="middle" font-size="13" font-weight="800" fill="#665e54">Derecho</text>
+      </svg>`;
+    }
+    const cabeceraOjo = (probar: Ojo, extra = '') => `
+      <div class="tv-ojo-cab">
+        ${ojosSvg(OTRO_OJO[probar])}
+        <p>Tápate el ${NOMBRE_OJO[OTRO_OJO[probar]]}<small>con la palma de la mano, sin apretar. Mira con el ${NOMBRE_OJO[probar]}.${extra}</small></p>
+      </div>`;
+    const avisoGafas = () =>
+      `<p class="tv-chico">${usaGafas ? 'Hazlo con tus gafas o lentillas puestas, como las usas normalmente.' : 'Hazlo sin gafas, como ves normalmente.'}</p>`;
+
+    // ── Pintar según el paso ──────────────────────────────────────────────
+    function pintar() {
+      if (alKeydown) document.removeEventListener('keydown', alKeydown);
+      alKeydown = null;
+      const p = paso();
+      cab.hidden = p.tipo === 'intro';
+      const pct = Math.round((indice / (PASOS.length - 1)) * 100);
+      barra.style.width = `${pct}%`;
+      progreso.setAttribute('aria-valuenow', String(pct));
+      etiquetaPaso.textContent = `${TITULOS[p.tipo]}${p.ojo ? ` · ${NOMBRE_OJO[p.ojo]}` : ''} · paso ${indice} de ${PASOS.length - 1}`;
+      escena.replaceChildren();
+      ({ intro, calibrar, agudeza: pintarAgudeza, astigmatismo: pintarAstigmatismo, color: pintarColor, amsler: pintarAmsler, informe })[p.tipo]();
+      // El foco al principio de la escena ayuda a quien usa lector de pantalla o teclado.
+      const t = escena.querySelector<HTMLElement>('h2, h3');
+      if (t && indice > 0) {
+        t.tabIndex = -1;
+        t.focus({ preventScroll: true });
+      }
+    }
+
+    const html = (s: string) => {
+      escena.insertAdjacentHTML('beforeend', s);
+    };
+    const en = <T extends HTMLElement>(sel: string) => escena.querySelector<T>(sel)!;
+
+    // ── 0 · Intro ─────────────────────────────────────────────────────────
+    function intro() {
+      html(`
+        <div>
+          <span class="antetitulo sin-raya">5 minutos · sin registro · nada sale de tu dispositivo</span>
+          <h2 style="margin-top:10px">Comprueba cómo ves, ahora mismo</h2>
+        </div>
+        <p class="tv-texto">Cinco pruebas guiadas: <strong>agudeza visual, astigmatismo, color y la cuadrícula de Amsler</strong> (la que detecta problemas en el centro de la retina). Al final te damos un resultado en semáforo y, si quieres, <strong>reservas tu revisión gratuita</strong> con los datos ya preparados.</p>
+
+        <fieldset class="tv-grupo">
+          <legend>Antes de nada: ¿tienes ahora mismo alguno de estos síntomas?</legend>
+          <label class="tv-opcion"><input type="checkbox" data-urgente /><span>Pérdida brusca de visión, destellos de luz, una «cortina» o sombra, dolor intenso en el ojo o visión doble repentina.</span></label>
+        </fieldset>
+        <div class="tv-alerta" data-alerta-urgente hidden role="alert">
+          <strong>No hagas el test: necesitas atención médica hoy.</strong>
+          <span>Estos síntomas pueden ser una urgencia oftalmológica. Acude a urgencias de un hospital o llama al 112. No esperes a una cita.</span>
+          <div class="tv-acciones"><a class="boton" href="tel:112" style="--fondo:var(--tv-pronto)">Llamar al 112</a></div>
+        </div>
+
+        <div data-ajustes class="tv-escena" style="padding:0">
+          <fieldset class="tv-grupo">
+            <legend>¿Usas gafas o lentillas para ver de lejos?</legend>
+            <div class="tv-opciones">
+              <label class="tv-opcion"><input type="radio" name="gafas" value="si" /><span>Sí, las llevaré puestas<small>Medimos cómo ves con ellas</small></span></label>
+              <label class="tv-opcion"><input type="radio" name="gafas" value="no" checked /><span>No uso<small>Medimos tu visión natural</small></span></label>
+            </div>
+          </fieldset>
+          <fieldset class="tv-grupo">
+            <legend>¿Desde qué dispositivo lo haces?</legend>
+            <div class="tv-opciones">
+              <label class="tv-opcion"><input type="radio" name="disp" value="movil" ${dispositivo === 'movil' ? 'checked' : ''} /><span>Móvil o tableta<small>Lo sostendrás con el brazo estirado (60 cm)</small></span></label>
+              <label class="tv-opcion"><input type="radio" name="disp" value="ordenador" ${dispositivo === 'ordenador' ? 'checked' : ''} /><span>Ordenador<small>Te sentarás a un metro de la pantalla</small></span></label>
+            </div>
+          </fieldset>
+          <div class="tv-aviso-legal">${ico.info}<span><strong>Es orientativo.</strong> No es una graduación ni un diagnóstico: sirve para detectar señales y llegar a tu revisión con datos. Necesitarás una <strong>tarjeta bancaria</strong> (o cualquier otra del mismo tamaño) para calibrar la pantalla.</span></div>
+          <div class="tv-acciones"><button class="boton" data-accion="empezar" type="button">Empezar el test</button></div>
+        </div>
+      `);
+      const urgente = en<HTMLInputElement>('[data-urgente]');
+      urgente.addEventListener('change', () => {
+        en('[data-alerta-urgente]').hidden = !urgente.checked;
+        en('[data-ajustes]').hidden = urgente.checked;
+      });
+      en('[data-accion="empezar"]').addEventListener('click', () => {
+        usaGafas = (escena.querySelector<HTMLInputElement>('input[name="gafas"]:checked')?.value ?? 'no') === 'si';
+        const d = escena.querySelector<HTMLInputElement>('input[name="disp"]:checked')?.value as Dispositivo | undefined;
+        if (d && d !== dispositivo) {
+          dispositivo = d;
+          let guardado = false;
+          try { guardado = Number(localStorage.getItem('siente-tv-px')) > 0; } catch {}
+          if (!guardado) {
+            pxMm = d === 'movil' ? 6.3 : 3.78;
+            anchoTarjetaPx = pxMm * TARJETA_MM.ancho;
+          }
+        }
+        siguiente();
+      });
+    }
+
+    // ── 1 · Calibración ───────────────────────────────────────────────────
+    function calibrar() {
+      const disponible = Math.max(160, Math.min(escena.clientWidth - 8, 560));
+      anchoTarjetaPx = Math.min(Math.max(anchoTarjetaPx, 120), disponible);
+      html(`
+        <div><h2>Calibremos la pantalla</h2></div>
+        <p class="tv-texto">Para que las letras tengan el tamaño exacto necesitamos saber cuánto mide tu pantalla. <strong>Pon una tarjeta bancaria en vertical contra la pantalla</strong> y ajusta el rectángulo hasta que sus bordes laterales coincidan con las líneas naranjas.</p>
+        <div class="tv-calib">
+          <div class="tv-tarjeta" data-tarjeta style="width:${anchoTarjetaPx}px"><span>Tarjeta<br />bancaria</span></div>
+          <div class="tv-calib-control">
+            <button class="tv-paso-boton" type="button" data-ajuste="-1" aria-label="Más estrecho">−</button>
+            <input type="range" min="120" max="${Math.round(disponible)}" step="0.5" value="${anchoTarjetaPx}" data-rango aria-label="Ancho de la tarjeta en pantalla" />
+            <button class="tv-paso-boton" type="button" data-ajuste="1" aria-label="Más ancho">+</button>
+          </div>
+        </div>
+        <p class="tv-chico">Si no tienes tarjeta, vale cualquier carné de plástico del mismo tamaño (DNI, carné de conducir). Si tu navegador está con zoom, ponlo al 100 %.</p>
+        <div class="tv-acciones">
+          <button class="boton" type="button" data-accion="ok">Ya coincide, continuar</button>
+          <button class="boton secundario" type="button" data-accion="atras">Atrás</button>
+        </div>
+      `);
+      const tarjeta = en('[data-tarjeta]');
+      const rango = en<HTMLInputElement>('[data-rango]');
+      const poner = (v: number) => {
+        anchoTarjetaPx = Math.min(Math.max(v, +rango.min), +rango.max);
+        rango.value = String(anchoTarjetaPx);
+        tarjeta.style.width = `${anchoTarjetaPx}px`;
+      };
+      rango.addEventListener('input', () => poner(+rango.value));
+      escena.querySelectorAll<HTMLElement>('[data-ajuste]').forEach((b) =>
+        b.addEventListener('click', () => poner(anchoTarjetaPx + Number(b.dataset.ajuste) * 1)),
+      );
+      en('[data-accion="atras"]').addEventListener('click', () => ir(0));
+      en('[data-accion="ok"]').addEventListener('click', () => {
+        pxMm = pxPorMm(anchoTarjetaPx);
+        try { localStorage.setItem('siente-tv-px', String(cuadrar(pxMm))); } catch {}
+        siguiente();
+      });
+    }
+
+    // ── 2 · Agudeza visual (optotipo de Landolt) ──────────────────────────
+    const DIRS = [
+      { id: 'der', giro: 0 },
+      { id: 'abajo', giro: 90 },
+      { id: 'izq', giro: 180 },
+      { id: 'arriba', giro: 270 },
+    ] as const;
+
+    function landolt(diametro: number, giro: number): string {
+      const c = 4 * Math.PI;
+      // La abertura mide 1 unidad (el trazo también); se centra a la derecha y se gira.
+      const compensa = (0.5 / c) * 360;
+      return `<svg class="tv-optotipo" viewBox="0 0 5 5" width="${diametro}" height="${diametro}" shape-rendering="geometricPrecision" overflow="visible" aria-hidden="true">
+        <circle cx="2.5" cy="2.5" r="2" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="${c - 1} 1" transform="rotate(${giro + compensa} 2.5 2.5)"/>
+      </svg>`;
+    }
+
+    function pintarAgudeza() {
+      const ojo = paso().ojo!;
+      const distancia = DISTANCIA_MM[dispositivo];
+      html(`
+        <div><h2>Agudeza visual</h2></div>
+        ${cabeceraOjo(ojo)}
+        <div class="tv-dist"><b>${distancia / 10} cm</b><span>${
+          dispositivo === 'movil'
+            ? 'Sostén el móvil con el <strong>brazo estirado</strong> y mantén esa distancia durante toda la prueba.'
+            : 'Siéntate a <strong>un metro</strong> de la pantalla (dos largos de brazo) y mantén la distancia.'
+        }</span></div>
+        ${avisoGafas()}
+        <p class="tv-texto">Verás un aro con un hueco. <strong>Pulsa la flecha hacia donde mira el hueco.</strong> Si no lo distingues, pulsa «No lo veo»: no pasa nada, es parte de la prueba. Pon el brillo de la pantalla al máximo.</p>
+        <div class="tv-acciones"><button class="boton" type="button" data-accion="listo">Estoy listo</button></div>
+      `);
+      en('[data-accion="listo"]').addEventListener('click', () => ensayoAgudeza(ojo));
+    }
+
+    function ensayoAgudeza(ojo: Ojo) {
+      const distancia = DISTANCIA_MM[dispositivo];
+      const aciertos: number[] = [];
+      let nivel = 0;
+      let buenos = 0;
+      let malos = 0;
+      let actual = 0;
+      let ultimaDir = -1;
+      let bloqueado = false;
+
+      escena.replaceChildren();
+      html(`
+        <div class="tv-escenario" data-escenario aria-live="off"></div>
+        <div class="tv-puntos" aria-hidden="true">${NIVELES.map(() => '<i></i>').join('')}</div>
+        <p class="tv-chico" style="text-align:center">${NOMBRE_OJO[ojo][0].toUpperCase() + NOMBRE_OJO[ojo].slice(1)} · ¿Hacia dónde mira el hueco?</p>
+        <div class="tv-cruz" role="group" aria-label="Dirección del hueco">
+          ${DIRS.map((d) => `<button type="button" class="tv-flecha" data-dir="${d.id}" aria-label="${{ der: 'Derecha', abajo: 'Abajo', izq: 'Izquierda', arriba: 'Arriba' }[d.id]}">${ico.flecha(d.giro)}</button>`).join('')}
+          <button type="button" class="tv-nover" data-dir="nover">No lo veo</button>
+        </div>
+      `);
+      const caja = en('[data-escenario]');
+      const puntos = [...escena.querySelectorAll<HTMLElement>('.tv-puntos i')];
+
+      const mostrar = () => {
+        do actual = Math.floor(Math.random() * 4);
+        while (actual === ultimaDir);
+        ultimaDir = actual;
+        const d = Math.max(3, diametroPx(NIVELES[nivel], distancia, pxMm));
+        caja.innerHTML = landolt(d, DIRS[actual].giro);
+        bloqueado = false;
+      };
+      const terminar = () => {
+        agudeza[ojo] = aciertos;
+        if (alKeydown) document.removeEventListener('keydown', alKeydown);
+        alKeydown = null;
+        siguiente();
+      };
+      const responder = (dir: string) => {
+        if (bloqueado) return;
+        bloqueado = true;
+        if (dir === DIRS[actual].id) buenos++;
+        else malos++;
+        const supera = buenos >= ACIERTOS_PARA_SUPERAR;
+        const falla = malos > INTENTOS_POR_NIVEL - ACIERTOS_PARA_SUPERAR;
+        const ocultar = caja.firstElementChild;
+        ocultar?.classList.add('oculto');
+        setTimeout(() => {
+          if (supera || falla) {
+            aciertos.push(buenos);
+            puntos[nivel]?.classList.add('hecho');
+            if (falla || nivel === NIVELES.length - 1) return terminar();
+            nivel++;
+            buenos = malos = 0;
+          }
+          mostrar();
+        }, 160);
+      };
+      escena.querySelectorAll<HTMLElement>('[data-dir]').forEach((b) => b.addEventListener('click', () => responder(b.dataset.dir!)));
+      alKeydown = (e) => {
+        const m: Record<string, string> = { ArrowRight: 'der', ArrowLeft: 'izq', ArrowUp: 'arriba', ArrowDown: 'abajo' };
+        if (m[e.key]) {
+          e.preventDefault();
+          responder(m[e.key]);
+        }
+      };
+      document.addEventListener('keydown', alKeydown);
+      mostrar();
+    }
+
+    // ── 3 · Astigmatismo ──────────────────────────────────────────────────
+    function pintarAstigmatismo() {
+      const ojo = paso().ojo!;
+      const distancia = DISTANCIA_MM[dispositivo];
+      const lado = Math.round(Math.min(escena.clientWidth - 40, 90 * pxMm, 380));
+      const R = lado / 2 - 26;
+      const grosor = Math.max(1.6, 0.32 * pxMm);
+      const lineas = Array.from({ length: LINEAS_ASTIGMATISMO }, (_, i) => {
+        const n = i + 1;
+        const a = ((anguloLinea(n) - 90) * Math.PI) / 180; // 6 = vertical
+        const x = Math.cos(a) * R;
+        const y = Math.sin(a) * R;
+        return `<line class="l" data-linea="${n}" x1="${-x}" y1="${-y}" x2="${x}" y2="${y}" stroke-width="${grosor}"/>`;
+      }).join('');
+      const horas = Array.from({ length: 12 }, (_, i) => {
+        const h = i + 1;
+        const a = ((h * 30 - 90) * Math.PI) / 180;
+        return `<text x="${Math.cos(a) * (R + 15)}" y="${Math.sin(a) * (R + 15) + 5}" text-anchor="middle" font-size="14">${h}</text>`;
+      }).join('');
+      html(`
+        <div><h2>¿Se ven todas las líneas igual?</h2></div>
+        ${cabeceraOjo(ojo, ` A ${distancia / 10} cm.`)}
+        ${avisoGafas()}
+        <div class="tv-dial-caja">
+          <svg class="tv-dial" width="${lado}" height="${lado}" viewBox="${-lado / 2} ${-lado / 2} ${lado} ${lado}" role="img" aria-label="Esfera de líneas numeradas como un reloj">
+            ${lineas}${horas}<circle r="3" fill="#000"/>
+          </svg>
+        </div>
+        <fieldset class="tv-grupo">
+          <legend>Mira el centro. ¿Alguna línea se ve más negra o más nítida que las demás?</legend>
+          <div class="tv-chips">
+            <label class="tv-chip"><input type="radio" name="linea" value="0" /><span>Todas se ven igual</span></label>
+            ${Array.from({ length: LINEAS_ASTIGMATISMO }, (_, i) => `<label class="tv-chip"><input type="radio" name="linea" value="${i + 1}" /><span>La del ${textoEjeLinea(i + 1)}</span></label>`).join('')}
+          </div>
+        </fieldset>
+        <div class="tv-acciones"><button class="boton" type="button" data-accion="sig" disabled>Continuar</button></div>
+      `);
+      const boton = en<HTMLButtonElement>('[data-accion="sig"]');
+      escena.querySelectorAll<HTMLInputElement>('input[name="linea"]').forEach((r) =>
+        r.addEventListener('change', () => {
+          escena.querySelectorAll('.tv-dial line.l').forEach((l) => l.classList.toggle('sel', l.getAttribute('data-linea') === r.value));
+          boton.disabled = false;
+        }),
+      );
+      boton.addEventListener('click', () => {
+        const v = Number(escena.querySelector<HTMLInputElement>('input[name="linea"]:checked')?.value ?? 0);
+        astigmatismo[ojo] = { linea: v === 0 ? null : v };
+        siguiente();
+      });
+    }
+
+    // ── 4 · Color (láminas generadas) ─────────────────────────────────────
+    function aleatorio(semilla: number) {
+      let a = semilla >>> 0;
+      return () => {
+        a = (a + 0x6d2b79f5) >>> 0;
+        let t = a;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const PALETAS = {
+      control: { figura: ['#2b5f8f', '#3d7ab0', '#1f4a74', '#4f8cc0'], fondo: ['#d9c9a3', '#e6d8b7', '#c9b88f', '#efe3c6'] },
+      // Naranjas sobre verdes de luminosidad variable: un daltonismo rojo-verde los confunde.
+      prueba: { figura: ['#d9703a', '#e08a4a', '#c9603a', '#eba35c', '#d6773f'], fondo: ['#8aa04a', '#a3b35c', '#6f8f3f', '#b7c46e', '#93a853'] },
+    };
+    function sombrear(hex: string, f: number) {
+      const n = parseInt(hex.slice(1), 16);
+      const c = (v: number) => Math.max(0, Math.min(255, Math.round(v * f)));
+      return `rgb(${c(n >> 16)}, ${c((n >> 8) & 255)}, ${c(n & 255)})`;
+    }
+
+    function dibujarLamina(canvas: HTMLCanvasElement, numero: number, tipo: 'control' | 'prueba', lado: number) {
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      canvas.width = canvas.height = Math.round(lado * dpr);
+      canvas.style.width = canvas.style.height = `${lado}px`;
+      const ctx = canvas.getContext('2d')!;
+      ctx.scale(dpr, dpr);
+      const rand = aleatorio(numero * 7919 + (tipo === 'control' ? 1 : 2));
+
+      // Máscara del número.
+      const M = 220;
+      const m = document.createElement('canvas');
+      m.width = m.height = M;
+      const mc = m.getContext('2d', { willReadFrequently: true })!;
+      const texto = String(numero);
+      mc.fillStyle = '#000';
+      mc.textAlign = 'center';
+      mc.textBaseline = 'middle';
+      mc.font = `900 ${texto.length === 1 ? 190 : 138}px Arial, Helvetica, "Liberation Sans", sans-serif`;
+      mc.lineWidth = 8;
+      mc.strokeStyle = '#000';
+      mc.strokeText(texto, M / 2, M / 2 + 8);
+      mc.fillText(texto, M / 2, M / 2 + 8);
+      const px = mc.getImageData(0, 0, M, M).data;
+      const dentro = (x: number, y: number) => {
+        const ix = Math.floor(((x + 1) / 2) * M);
+        const iy = Math.floor(((y + 1) / 2) * M);
+        return px[(iy * M + ix) * 4 + 3] > 128;
+      };
+
+      // Empaquetado de círculos (de grandes a pequeños) en un círculo unidad.
+      const celda = 0.16;
+      const rejilla = new Map<string, number[]>();
+      const puntos: { x: number; y: number; r: number }[] = [];
+      const clave = (cx: number, cy: number) => `${cx},${cy}`;
+      const libre = (x: number, y: number, r: number) => {
+        const cx = Math.floor(x / celda), cy = Math.floor(y / celda);
+        for (let i = -1; i <= 1; i++)
+          for (let j = -1; j <= 1; j++)
+            for (const k of rejilla.get(clave(cx + i, cy + j)) ?? []) {
+              const p = puntos[k];
+              const d = Math.hypot(p.x - x, p.y - y);
+              if (d < p.r + r + 0.008) return false;
+            }
+        return true;
+      };
+      const tandas: [number, number][] = [[0.07, 500], [0.055, 900], [0.044, 1500], [0.035, 2400], [0.028, 3500], [0.022, 5000], [0.017, 6000]];
+      for (const [r, intentos] of tandas) {
+        for (let n = 0; n < intentos; n++) {
+          const ang = rand() * Math.PI * 2;
+          const rad = Math.sqrt(rand()) * (0.985 - r);
+          const x = Math.cos(ang) * rad, y = Math.sin(ang) * rad;
+          if (!libre(x, y, r)) continue;
+          puntos.push({ x, y, r });
+          const k = clave(Math.floor(x / celda), Math.floor(y / celda));
+          (rejilla.get(k) ?? rejilla.set(k, []).get(k)!).push(puntos.length - 1);
+        }
+      }
+
+      const pal = PALETAS[tipo];
+      const mitad = lado / 2;
+      ctx.fillStyle = tipo === 'control' ? '#efe3c6' : '#f4ecd8';
+      ctx.fillRect(0, 0, lado, lado);
+      for (const p of puntos) {
+        const lista = dentro(p.x, p.y) ? pal.figura : pal.fondo;
+        ctx.fillStyle = sombrear(lista[Math.floor(rand() * lista.length)], 0.86 + rand() * 0.24);
+        ctx.beginPath();
+        ctx.arc(mitad + p.x * mitad, mitad + p.y * mitad, p.r * mitad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function pintarColor() {
+      respuestasColor = [];
+      lamina(0);
+    }
+
+    function lamina(i: number) {
+      const l = LAMINAS_COLOR[i];
+      escena.replaceChildren();
+      const lado = Math.round(Math.min(escena.clientWidth - 8, 320));
+      html(`
+        <div><h2>${i === 0 ? '¿Qué número ves?' : '¿Y en esta?'}</h2></div>
+        <p class="tv-chico">Con los dos ojos abiertos${usaGafas ? ' y tus gafas puestas' : ''}. Lámina ${i + 1} de ${LAMINAS_COLOR.length}.${i === 0 ? ' Desactiva el modo noche o el filtro de luz azul y sube el brillo.' : ''}</p>
+        <div class="tv-lamina"><canvas role="img" aria-label="Lámina de puntos de colores con un número escondido"></canvas></div>
+        <div class="tv-numeros">${opcionesLamina(l.numero).map((n) => `<button class="tv-numero" type="button" data-n="${n}">${n}</button>`).join('')}</div>
+        <button class="tv-ninguno" type="button" data-n="0">No veo ningún número</button>
+      `);
+      dibujarLamina(en<HTMLCanvasElement>('canvas'), l.numero, l.tipo, lado);
+      escena.querySelectorAll<HTMLElement>('[data-n]').forEach((b) =>
+        b.addEventListener('click', () => {
+          respuestasColor[i] = Number(b.dataset.n) || null;
+          if (i + 1 < LAMINAS_COLOR.length) lamina(i + 1);
+          else siguiente();
+        }),
+      );
+    }
+
+    // ── 5 · Cuadrícula de Amsler ──────────────────────────────────────────
+    function pintarAmsler() {
+      const ojo = paso().ojo!;
+      const disponiblePx = Math.min(escena.clientWidth - 40, 520, Math.max(240, window.innerHeight * 0.6));
+      const casillas = casillasAmsler(disponiblePx / pxMm);
+      const lado = casillas * 5 * pxMm; // casillas de 5 mm
+      const c = lado / casillas;
+      let rejilla = '';
+      for (let i = 0; i <= casillas; i++) {
+        rejilla += `<line x1="${i * c}" y1="0" x2="${i * c}" y2="${lado}"/><line x1="0" y1="${i * c}" x2="${lado}" y2="${i * c}"/>`;
+      }
+      let celdas = '';
+      for (let y = 0; y < casillas; y++)
+        for (let x = 0; x < casillas; x++) celdas += `<rect class="celda" data-c="${x},${y}" x="${x * c}" y="${y * c}" width="${c}" height="${c}"/>`;
+      html(`
+        <div><h2>¿Se ven rectas todas las líneas?</h2></div>
+        ${cabeceraOjo(ojo, ` A ${DISTANCIA_AMSLER_MM / 10} cm (una cuarta de tu cara).`)}
+        <p class="tv-chico">${usaGafas ? 'Con tus gafas de cerca o progresivas, si las usas.' : 'Si usas gafas de cerca, póntelas.'} Mira fijamente el punto negro del centro y no muevas el ojo.</p>
+        <div class="tv-amsler-caja">
+          <svg class="tv-amsler" width="${lado}" height="${lado}" viewBox="0 0 ${lado} ${lado}" role="img" aria-label="Cuadrícula de Amsler con un punto central">
+            <rect width="${lado}" height="${lado}" fill="#fff"/>
+            <g stroke="#000" stroke-width="${Math.max(0.8, 0.2 * pxMm)}">${rejilla}</g>
+            <circle cx="${lado / 2}" cy="${lado / 2}" r="${Math.max(3, 0.7 * pxMm)}" fill="#000"/>
+            <g data-celdas>${celdas}</g><g data-marcas></g>
+          </svg>
+        </div>
+        <p class="tv-texto"><strong>Toca los cuadros</strong> donde las líneas se vean <strong>onduladas, torcidas, borrosas, oscuras o desaparezcan</strong>. Si todo se ve recto y completo, marca la casilla.</p>
+        <label class="tv-opcion"><input type="checkbox" data-normal /><span>Todo se ve recto y completo</span></label>
+        <div class="tv-acciones"><button class="boton" type="button" data-accion="sig" disabled>Continuar</button></div>
+      `);
+      const svg = en<SVGSVGElement>('.tv-amsler');
+      const marcadas = new Set<string>();
+      const capa = svg.querySelector('[data-marcas]')!;
+      const normal = en<HTMLInputElement>('[data-normal]');
+      const boton = en<HTMLButtonElement>('[data-accion="sig"]');
+      const refrescar = () => {
+        boton.disabled = !(normal.checked || marcadas.size > 0);
+        capa.innerHTML = [...marcadas]
+          .map((k) => {
+            const [x, y] = k.split(',').map(Number);
+            return `<rect class="marca" x="${x * c}" y="${y * c}" width="${c}" height="${c}"/>`;
+          })
+          .join('');
+      };
+      svg.addEventListener('click', (e) => {
+        const k = (e.target as Element).getAttribute('data-c');
+        if (!k) return;
+        if (marcadas.has(k)) marcadas.delete(k);
+        else marcadas.add(k);
+        if (marcadas.size) normal.checked = false;
+        refrescar();
+      });
+      normal.addEventListener('change', () => {
+        if (normal.checked) marcadas.clear();
+        refrescar();
+      });
+      boton.addEventListener('click', () => {
+        amsler[ojo] = { marcas: marcadas.size, todoNormal: normal.checked && marcadas.size === 0 };
+        siguiente();
+      });
+    }
+
+    // ── 6 · Informe ───────────────────────────────────────────────────────
+    const ETIQUETA: Record<Semaforo, string> = { ok: 'Todo bien', revisar: 'Conviene revisar', pronto: 'Revisar pronto' };
+
+    function informe() {
+      const r: Resultados = {
+        usaGafas,
+        agudeza: {
+          derecho: resolverAgudeza(agudeza.derecho ?? []),
+          izquierdo: resolverAgudeza(agudeza.izquierdo ?? []),
+        },
+        astigmatismo: {
+          derecho: astigmatismo.derecho ?? { linea: null },
+          izquierdo: astigmatismo.izquierdo ?? { linea: null },
+        },
+        color: resolverColor(respuestasColor),
+        amsler: {
+          derecho: amsler.derecho ?? { marcas: 0, todoNormal: false },
+          izquierdo: amsler.izquierdo ?? { marcas: 0, todoNormal: false },
+        },
+      };
+      const i = elaborarInforme(r);
+      const titulo: Record<Semaforo, [string, string]> = {
+        ok: ['Todo bien en el test', 'No hemos visto señales de alerta. Aun así, un test online no puede valorar la salud del ojo: una revisión al año sigue siendo lo recomendable.'],
+        revisar: ['Conviene que te revisemos', 'Algunas pruebas han salido mejorables. Es muy común y casi siempre tiene solución sencilla. Lo confirmamos contigo en una revisión de la vista gratuita.'],
+        pronto: ['Te recomendamos una revisión pronto', 'Alguna prueba ha dado un resultado que no conviene dejar pasar. No significa que haya nada grave, pero pide tu cita esta semana.'],
+      };
+      const sello = (s: Semaforo) =>
+        `<svg class="tv-sello" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52"/>${
+          s === 'ok' ? '<path d="M36 62l18 18 32-38"/>' : '<path d="M60 34v34M60 86v.5"/>'
+        }</svg>`;
+
+      const medidor = (ojo: Ojo) => {
+        const n = r.agudeza[ojo].nivel;
+        const idx = n ? NIVELES.indexOf(n) + 1 : 0;
+        return `<div class="tv-medidor-fila"><span>${ojo === 'derecho' ? 'Derecho' : 'Izquierdo'}</span>
+          <span class="tv-segmentos tv-seg-${i.agudeza[ojo]}">${NIVELES.map((_, k) => `<i class="${k < idx ? 'on' : ''}"></i>`).join('')}</span>
+          <b>${n ? `${textoDecimal(n.decimal)}` : '<0,1'}</b></div>`;
+      };
+      const peorAgudeza: Semaforo = i.agudeza.derecho === 'pronto' || i.agudeza.izquierdo === 'pronto' ? 'pronto' : i.agudeza.derecho === 'revisar' || i.agudeza.izquierdo === 'revisar' || i.asimetria ? 'revisar' : 'ok';
+      const textoAgudeza =
+        peorAgudeza === 'ok'
+          ? 'Distingues los detalles pequeños con ambos ojos.'
+          : `${usaGafas ? 'Con tus gafas o lentillas no llegas a ver con total nitidez: puede que tu graduación se haya quedado corta.' : 'Te cuesta ver los detalles pequeños: podría ayudarte una graduación.'}${i.asimetria ? ' Además, tus dos ojos ven bastante distinto.' : ''}`;
+
+      const astig = (['derecho', 'izquierdo'] as Ojo[]).filter((o) => r.astigmatismo[o].linea !== null);
+      const textoAstig = astig.length
+        ? `En el ${astig.map((o) => `${NOMBRE_OJO[o]} has visto más nítidas las líneas del ${textoEjeLinea(r.astigmatismo[o].linea!)}`).join(' y en el ')}. Es una señal típica de astigmatismo.`
+        : 'Has visto todas las líneas con la misma intensidad.';
+      const sAstig: Semaforo = astig.length ? 'revisar' : 'ok';
+
+      const textoColor = r.color.controlFallido
+        ? 'No has visto la lámina de prueba: revisa que no tengas activado el modo noche o un filtro de luz azul, sube el brillo y repite el test.'
+        : i.color === 'ok'
+          ? `Has leído ${r.color.aciertos} de ${r.color.total} láminas sin dificultad.`
+          : `Has acertado ${r.color.aciertos} de ${r.color.total} láminas. Puede indicar una alteración en la visión de los colores (daltonismo): se confirma con una prueba completa.`;
+      const sColor: Semaforo = r.color.controlFallido ? 'revisar' : i.color;
+
+      const sAmsler: Semaforo = i.amsler.derecho === 'pronto' || i.amsler.izquierdo === 'pronto' ? 'pronto' : 'ok';
+      const ojosAmsler = (['derecho', 'izquierdo'] as Ojo[]).filter((o) => i.amsler[o] === 'pronto').map((o) => NOMBRE_OJO[o]);
+      const textoAmsler = sAmsler === 'ok' ? 'Las líneas se veían rectas y completas en los dos ojos.' : `Has señalado zonas alteradas en el ${ojosAmsler.join(' y en el ')}. Conviene que lo mire un profesional pronto.`;
+
+      const fila = (s: Semaforo, t: string, cuerpo: string, extra = '') =>
+        `<article class="tv-fila" data-s="${s}"><h3>${t}</h3><span class="tv-etiqueta">${ETIQUETA[s]}</span>${extra}<p>${cuerpo}</p></article>`;
+
+      const resumen = resumenTexto(r, { ...i, color: sColor });
+      const datos = raiz.dataset;
+      const wa = `${datos.wa}?text=${encodeURIComponent(resumen)}`;
+
+      html(`
+        <section class="tv-veredicto" data-s="${i.global}" aria-labelledby="tv-titulo-informe">
+          ${sello(i.global)}
+          <div><h2 id="tv-titulo-informe">${titulo[i.global][0]}</h2><p>${titulo[i.global][1]}</p></div>
+        </section>
+        ${
+          sAmsler === 'pronto'
+            ? `<div class="tv-alerta" role="alert"><strong>Si es un cambio repentino, no esperes</strong><span>Si lo que has visto en la cuadrícula te ha aparecido de golpe, o notas destellos, una cortina o pérdida de visión, acude hoy a urgencias oftalmológicas.</span></div>`
+            : ''
+        }
+        <div class="tv-filas">
+          ${fila(peorAgudeza, 'Agudeza visual', textoAgudeza, `<div class="tv-medidor"><div class="tv-medidor-fila" style="color:var(--apagado)"><span></span><span style="display:flex;justify-content:space-between"><small>borroso</small><small>nítido</small></span><b></b></div>${medidor('derecho')}${medidor('izquierdo')}</div>`)}
+          ${fila(sAstig, 'Líneas (astigmatismo)', textoAstig)}
+          ${fila(sColor, 'Visión del color', textoColor)}
+          ${fila(sAmsler, 'Cuadrícula de Amsler (retina)', textoAmsler)}
+        </div>
+        <div class="tv-aviso-legal">${ico.info}<span><strong>Resultado orientativo.</strong> No es una graduación ni un diagnóstico, y no incluye la salud del ojo (presión, fondo de ojo…). Solo una revisión presencial puede confirmarlo.</span></div>
+        <div class="tv-acciones">
+          <a class="boton" href="${datos.cita}">${ico.cita} Pedir mi revisión gratuita</a>
+          <a class="boton wa" href="${wa}" target="_blank" rel="noopener">${ico.wa} Enviar resultados por WhatsApp</a>
+        </div>
+        <div class="tv-acciones">
+          <button class="boton secundario pequeno" type="button" data-accion="copiar">Copiar resumen</button>
+          <button class="boton secundario pequeno" type="button" data-accion="repetir">Repetir el test</button>
+        </div>
+        <p class="tv-chico" aria-live="polite" data-copiado></p>
+      `);
+      en('[data-accion="repetir"]').addEventListener('click', () => {
+        for (const k of ['derecho', 'izquierdo'] as Ojo[]) {
+          delete agudeza[k];
+          delete astigmatismo[k];
+          delete amsler[k];
+        }
+        respuestasColor = [];
+        ir(0);
+      });
+      en('[data-accion="copiar"]').addEventListener('click', async () => {
+        const aviso = en('[data-copiado]');
+        try {
+          await navigator.clipboard.writeText(resumen);
+          aviso.textContent = 'Resumen copiado. Pégalo donde quieras o enséñalo en tu cita.';
+        } catch {
+          aviso.textContent = 'No se ha podido copiar automáticamente; usa el botón de WhatsApp.';
+        }
+      });
+    }
+
+    pintar();
+  }
+</script>
