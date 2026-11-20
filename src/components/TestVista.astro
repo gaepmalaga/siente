@@ -66,6 +66,8 @@ const citaUrl = url('/pedir-cita/?servicio=revision-vista');
   .tv-paso { font-size: 0.95rem; font-weight: 700; color: var(--apagado); letter-spacing: 0.02em; }
 
   .tv-escena { padding: clamp(20px, 4vw, 40px); display: grid; gap: 24px; align-content: start; }
+  /* Pruebas con respuesta rápida: todo cabe en una pantalla de móvil, sin scroll. */
+  .tv-escena.compacta { gap: 14px; padding-top: 14px; padding-bottom: 16px; }
   @media (prefers-reduced-motion: no-preference) {
     .tv-escena > * { animation: tv-entra 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
     .tv-escena > *:nth-child(2) { animation-delay: 0.06s; }
@@ -187,7 +189,8 @@ const citaUrl = url('/pedir-cita/?servicio=revision-vista');
   .tv-escenario {
     display: grid;
     place-items: center;
-    min-height: min(46vh, 340px);
+    min-height: 190px; /* respaldo */
+    min-height: clamp(140px, 24svh, 230px);
     background: #fff;
     border: 2px solid var(--linea-fuerte);
     border-radius: var(--radio);
@@ -335,7 +338,7 @@ const citaUrl = url('/pedir-cita/?servicio=revision-vista');
   @media (max-width: 560px) {
     .tv-veredicto { grid-template-columns: 1fr; justify-items: start; }
     .tv-ojos { width: 110px; }
-    .tv-cruz { grid-template-columns: repeat(3, minmax(0, 68px)); grid-template-rows: repeat(3, 68px); }
+    .tv-cruz { grid-template-columns: repeat(3, minmax(0, 64px)); grid-template-rows: repeat(3, 64px); gap: 6px; }
     .tv-medidor-fila { grid-template-columns: 62px 1fr auto; }
     .tv-fila { grid-template-columns: 1fr; }
     .tv-etiqueta { grid-column: 1; justify-self: start; }
@@ -512,6 +515,8 @@ const citaUrl = url('/pedir-cita/?servicio=revision-vista');
       if (indice > 0) raiz.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
     };
     const siguiente = () => ir(indice + 1);
+    /** Vuelve al principio del test (las pruebas que se repintan sin cambiar de paso lo necesitan). */
+    const alTope = () => raiz.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
     const esNino = () => perfil === 'nino';
 
     function ojosSvg(tapar: Ojo | null): string {
@@ -545,6 +550,7 @@ const citaUrl = url('/pedir-cita/?servicio=revision-vista');
       progreso.setAttribute('aria-valuenow', String(pct));
       etiquetaPaso.textContent = `${TITULOS[p.tipo]}${p.ojo ? ` · ${NOMBRE_OJO[p.ojo]}` : ''} · paso ${indice} de ${PASOS.length - 1}`;
       escena.replaceChildren();
+      escena.classList.remove('compacta');
       ({ intro, calibrar, agudeza: pintarAgudeza, duocromo: pintarDuocromo, astigmatismo: pintarAstigmatismo, cerca: pintarCerca, color: pintarColor, amsler: pintarAmsler, informe })[p.tipo]();
       // El foco al principio de la escena ayuda a quien usa lector de pantalla o teclado.
       const t = escena.querySelector<HTMLElement>('h2, h3');
@@ -668,12 +674,12 @@ const citaUrl = url('/pedir-cita/?servicio=revision-vista');
         <p class="tv-chico">Si no tienes tarjeta, vale cualquier carné de plástico del mismo tamaño (DNI, carné de conducir). Si tu navegador está con zoom, ponlo al 100 %.</p>
 
         <fieldset class="tv-grupo">
-          <legend>Brillo: ¿cuántos cuadrados distingues del fondo negro?</legend>
+          <legend>Brillo: ¿cuántos cuadrados claros distingues del fondo negro?</legend>
           <div class="tv-grises" aria-hidden="true">${ESCALA_GRISES.map((g) => `<i style="background:rgb(${g},${g},${g})"></i>`).join('')}</div>
-          <p class="tv-chico">Sube el brillo al máximo y desactiva el modo noche o el filtro de luz azul. Deberías ver los cuadrados cada vez más claros hacia la derecha.</p>
+          <p class="tv-chico">Sube el brillo al máximo y desactiva el modo noche o el filtro de luz azul. El primer cuadrado es negro puro y no se ve a propósito: cuenta los otros cinco, cada vez más claros hacia la derecha.</p>
           <div class="tv-opciones">
-            <label class="tv-opcion"><input type="radio" name="brillo" value="bien" checked /><span>Veo al menos cinco</span></label>
-            <label class="tv-opcion"><input type="radio" name="brillo" value="bajo" /><span>Veo menos de cinco</span></label>
+            <label class="tv-opcion"><input type="radio" name="brillo" value="bien" checked /><span>Veo al menos cuatro de los cinco</span></label>
+            <label class="tv-opcion"><input type="radio" name="brillo" value="bajo" /><span>Veo menos de cuatro</span></label>
           </div>
           <p class="tv-chico" data-aviso-brillo hidden><strong>Sube el brillo</strong> o desactiva el modo noche. Si no puedes, sigue, pero el resultado será menos fiable.</p>
         </fieldset>
@@ -822,6 +828,7 @@ const citaUrl = url('/pedir-cita/?servicio=revision-vista');
       let bloqueado = false;
 
       escena.replaceChildren();
+      escena.classList.add('compacta');
       const SR = (window as unknown as { SpeechRecognition?: new () => any; webkitSpeechRecognition?: new () => any });
       const Voz = SR.SpeechRecognition ?? SR.webkitSpeechRecognition;
       html(`
@@ -841,6 +848,8 @@ const citaUrl = url('/pedir-cita/?servicio=revision-vista');
       `);
       const caja = en('[data-escenario]');
       const puntos = [...escena.querySelectorAll<HTMLElement>('.tv-puntos i')];
+      // Después de pintar: si se pide antes, la página aún es corta y el scroll se queda a medias.
+      alTope();
 
       const mostrar = () => {
         do actual = Math.floor(Math.random() * 4);
@@ -1150,6 +1159,7 @@ const citaUrl = url('/pedir-cita/?servicio=revision-vista');
         <button class="tv-ninguno" type="button" data-n="0">No veo ningún número</button>
       `);
       dibujarLamina(en<HTMLCanvasElement>('canvas'), l.numero, l.tipo, lado);
+      if (i > 0) alTope();
       escena.querySelectorAll<HTMLElement>('[data-n]').forEach((b) =>
         b.addEventListener('click', () => {
           respuestasColor[i] = Number(b.dataset.n) || null;

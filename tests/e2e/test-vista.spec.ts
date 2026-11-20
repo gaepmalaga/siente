@@ -81,3 +81,25 @@ test('la nota del test se precarga en la cita', async ({ pagina: p }) => {
   await p.goto('pedir-cita/?memoria&servicio=revision-vista&nota=Test%20online%20de%20prueba');
   await expect(p.locator('textarea[name="nota"]')).toHaveValue('Test online de prueba');
 });
+
+test.describe('en un móvil', () => {
+  test.use({ viewport: { width: 390, height: 780 }, hasTouch: true, isMobile: true });
+
+  test('la prueba del aro cabe en pantalla, bajo la cabecera y sobre la barra de acciones', async ({ pagina: p }) => {
+    await p.goto('test-de-vista-online/');
+    await p.locator('[data-accion="empezar"]').click();
+    await p.locator('[data-accion="ok"]').click();
+    await p.locator('[data-accion="listo"]').click();
+    await p.locator('.tv-optotipo').waitFor();
+    await p.waitForTimeout(900); // termina el desplazamiento suave
+    const caja = async (sel: string) => p.locator(sel).first().evaluate((e) => {
+      const r = e.getBoundingClientRect();
+      return { arriba: r.top, abajo: r.bottom };
+    });
+    const aro = await caja('.tv-optotipo');
+    const cruz = await caja('.tv-cruz');
+    // La cabecera fija mide unos 85 px y la barra de acciones del móvil, unos 90.
+    expect(aro.arriba, 'el aro queda tapado por la cabecera').toBeGreaterThan(90);
+    expect(cruz.abajo, 'las flechas quedan bajo la barra de acciones').toBeLessThan(780 - 90);
+  });
+});
