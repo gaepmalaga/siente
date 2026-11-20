@@ -2,8 +2,17 @@ import { describe, expect, it } from 'vitest';
 import {
   NIVELES,
   LAMINAS_COLOR,
+  alturaMayusculasMm,
   casillasAmsler,
+  consejoDistancia,
   diametroPx,
+  distanciaCamaraMm,
+  icsRecordatorio,
+  notaCita,
+  semaforoCerca,
+  semaforoDuocromo,
+  sumarMeses,
+  umbralesAgudeza,
   elaborarInforme,
   opcionesLamina,
   pxPorMm,
@@ -132,8 +141,12 @@ describe('Amsler', () => {
 });
 
 describe('informe', () => {
-  const normal: Resultados = {
+  const normal: Required<Resultados> = {
     usaGafas: false,
+    perfil: 'adulto',
+    edadNino: 'mayor6',
+    duocromo: { derecho: { lado: 'igual' }, izquierdo: { lado: 'igual' } },
+    cerca: { decimal: 0.8, alejaTexto: false },
     agudeza: { derecho: resolverAgudeza(todos(3)), izquierdo: resolverAgudeza(todos(3)) },
     astigmatismo: { derecho: { linea: null }, izquierdo: { linea: null } },
     color: { aciertos: 4, total: 4, controlFallido: false },
@@ -147,7 +160,7 @@ describe('informe', () => {
   it('astigmatismo sospechado: ámbar', () => {
     const i = elaborarInforme({ ...normal, astigmatismo: { ...normal.astigmatismo, derecho: { linea: 3 } } });
     expect(i.global).toBe('revisar');
-    expect(i.astigmatismo.derecho).toBe('revisar');
+    expect(i.astigmatismo?.derecho).toBe('revisar');
   });
 
   it('una alteración en Amsler: rojo, gane lo que gane el resto', () => {
@@ -175,5 +188,89 @@ describe('informe', () => {
     expect(t).toContain('Agudeza ojo derecho: 1,0 (20/20)');
     expect(t).toContain('Color: 4/4');
     expect(t).toContain('sin gafas');
+  });
+});
+
+describe('duocromo y cerca', () => {
+  it('rojo/verde desigual pide revisión, igual no', () => {
+    expect(semaforoDuocromo({ lado: 'igual' })).toBe('ok');
+    expect(semaforoDuocromo({ lado: 'rojo' })).toBe('revisar');
+    expect(semaforoDuocromo({ lado: 'verde' })).toBe('revisar');
+  });
+
+  it('cerca: leer 0,63 sin alejar es normal; alejar el texto es señal de presbicia', () => {
+    expect(semaforoCerca({ decimal: 0.8, alejaTexto: false })).toBe('ok');
+    expect(semaforoCerca({ decimal: 0.8, alejaTexto: true })).toBe('revisar');
+    expect(semaforoCerca({ decimal: 0.4, alejaTexto: false })).toBe('revisar');
+    expect(semaforoCerca({ decimal: null, alejaTexto: false })).toBe('pronto');
+  });
+
+  it('a 40 cm, 1,0 mide 0,58 mm de mayúscula y 0,2 cinco veces más', () => {
+    expect(alturaMayusculasMm(1, 400)).toBeCloseTo(0.582, 2);
+    expect(alturaMayusculasMm(0.2, 400) / alturaMayusculasMm(1, 400)).toBeCloseTo(5, 1);
+  });
+});
+
+describe('niños', () => {
+  it('menores de 6 años: 0,5 ya es normal', () => {
+    const u = umbralesAgudeza('nino', 'menor6');
+    expect(semaforoAgudeza(resolverAgudeza([3, 3, 3, 3, 3, 0]), u)).toBe('ok'); // 0,5
+    expect(semaforoAgudeza(resolverAgudeza([3, 3, 3, 3, 3, 0]))).toBe('revisar');
+  });
+
+  it('el informe de un niño no exige pruebas de adultos', () => {
+    const i = elaborarInforme({
+      usaGafas: false,
+      perfil: 'nino',
+      edadNino: 'mayor6',
+      agudeza: { derecho: resolverAgudeza(todos(3)), izquierdo: resolverAgudeza(todos(3)) },
+      color: { aciertos: 4, total: 4, controlFallido: false },
+    });
+    expect(i.global).toBe('ok');
+    expect(i.amsler).toBeUndefined();
+  });
+});
+
+describe('cámara', () => {
+  it('una cara de 14 cm que ocupa un tercio de la imagen está a unos 30 cm', () => {
+    const d = distanciaCamaraMm(300, 900);
+    expect(d).toBeGreaterThan(250);
+    expect(d).toBeLessThan(400);
+  });
+
+  it('aconseja acercar, alejar o seguir', () => {
+    expect(consejoDistancia(800, 600)).toBe('acerca');
+    expect(consejoDistancia(400, 600)).toBe('aleja');
+    expect(consejoDistancia(620, 600)).toBe('bien');
+  });
+});
+
+describe('recordatorio y nota de cita', () => {
+  it('sumar meses no desborda el día', () => {
+    expect(sumarMeses(new Date('2026-08-31T00:00:00Z'), 6).toISOString().slice(0, 10)).toBe('2027-02-28');
+    expect(sumarMeses(new Date('2026-11-20T00:00:00Z'), 6).toISOString().slice(0, 10)).toBe('2027-05-20');
+  });
+
+  it('el .ics es de día completo y trae el enlace', () => {
+    const ics = icsRecordatorio(new Date('2026-11-20T10:00:00Z'), 6, 'https://x.es/test/', 'Siente');
+    expect(ics).toContain('DTSTART;VALUE=DATE:20270520');
+    expect(ics).toContain('https://x.es/test/');
+    expect(ics.startsWith('BEGIN:VCALENDAR')).toBe(true);
+  });
+
+  it('la nota cabe en 500 caracteres aunque haya de todo', () => {
+    const r: Resultados = {
+      usaGafas: true,
+      agudeza: { derecho: resolverAgudeza(todos(3)), izquierdo: resolverAgudeza([3, 3, 3, 0]) },
+      astigmatismo: { derecho: { linea: 3 }, izquierdo: { linea: null } },
+      duocromo: { derecho: { lado: 'rojo' }, izquierdo: { lado: 'igual' } },
+      cerca: { decimal: 0.5, alejaTexto: true },
+      color: { aciertos: 3, total: 4, controlFallido: false },
+      amsler: { derecho: { marcas: 0, todoNormal: true }, izquierdo: { marcas: 2, todoNormal: false } },
+    };
+    const nota = notaCita(r, elaborarInforme(r));
+    expect(nota.length).toBeLessThanOrEqual(480);
+    expect(nota).toContain('AV OD 1,0 / OI 0,32');
+    expect(nota).toContain('Amsler OD ok / OI alterado');
   });
 });

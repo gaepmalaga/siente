@@ -1,0 +1,29 @@
+---
+// Banda que lleva al test de vista online desde la portada y la página de óptica.
+import Icono from './Icono.astro';
+import { url } from '../lib/url';
+---
+
+<section class="seccion-s banda-test">
+  <div class="contenedor banda-test-dentro tarjeta" data-aparecer>
+    <div class="banda-test-icono"><Icono nombre="ScanEye" /></div>
+    <div class="banda-test-texto">
+      <span class="antetitulo sin-raya">Nuevo · 5 minutos · gratis</span>
+      <h2 class="banda-test-titulo">¿Cómo ves hoy? Compruébalo desde el móvil</h2>
+      <p>Agudeza, astigmatismo, vista de cerca, color y retina, con resultado en semáforo. Sin registro. También para niños.</p>
+    </div>
+    <a class="boton" href={url('/test-de-vista-online/')}>Hacer el test <Icono nombre="ArrowRight" /></a>
+  </div>
+</section>
+
+<style>
+  .banda-test-dentro { display: grid; grid-template-columns: auto 1fr auto; gap: clamp(16px, 3vw, 32px); align-items: center; padding: clamp(22px, 3.5vw, 40px); }
+  .banda-test-icono { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: var(--papel-2); color: var(--roble-oscuro); }
+  .banda-test-icono :global(.icono) { width: 38px; height: 38px; }
+  .banda-test-texto { display: grid; gap: 8px; min-width: 0; }
+  .banda-test-titulo { font-size: var(--paso-2); line-height: 1.1; }
+  .banda-test-texto p { color: var(--tinta-2); max-width: 60ch; }
+  @media (max-width: 760px) {
+    .banda-test-dentro { grid-template-columns: 1fr; justify-items: start; }
+  }
+</style>

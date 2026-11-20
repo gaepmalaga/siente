@@ -31,6 +31,14 @@ const preguntas = [
     a: 'Pide una revisión de la vista gratuita en Siente: la confirmamos con equipos profesionales y, si hace falta, te graduamos. Si has notado una pérdida brusca de visión, destellos o una sombra en el ojo, no esperes: acude a urgencias oftalmológicas.',
   },
   {
+    q: '¿Sirve para niños?',
+    a: 'Sí, de 3 a 12 años y con un adulto al lado. El test usa la «E» de Snellen, adapta los umbrales a la edad (a los 3-5 años se espera menos que a los 6) y omite las pruebas que no son fiables en niños. Los niños casi nunca se quejan de que ven mal, así que conviene una revisión al año igualmente.',
+  },
+  {
+    q: '¿Para qué sirve la cámara?',
+    a: 'Es opcional y solo aparece si tu navegador sabe detectar caras. Estima a qué distancia estás de la pantalla y te avisa de «acércate» o «aléjate». La imagen no se graba ni sale de tu dispositivo.',
+  },
+  {
     q: '¿Puedo hacerlo con gafas o lentillas?',
     a: 'Sí, y es lo recomendable si las usas: así comprobamos si tu graduación actual sigue siendo suficiente. El test te lo recuerda en cada prueba.',
   },
@@ -39,8 +47,9 @@ const preguntas = [
 
 <Base
   titulo="Test de vista online gratis: comprueba cómo ves | Siente, óptica en Barajas"
-  descripcion="Test de vista online en 5 minutos: agudeza visual, astigmatismo, color y cuadrícula de Amsler, con resultado en semáforo. Orientativo y sin registro. Confírmalo con tu revisión gratuita en Siente (Barajas, Madrid)."
+  descripcion="Test de vista online en 5 minutos: agudeza visual, astigmatismo, vista de cerca, color y cuadrícula de Amsler, con resultado en semáforo. También para niños. Orientativo y sin registro. Confírmalo con tu revisión gratuita en Siente (Barajas, Madrid)."
   migas={migas}
+  imagen="/og/test-de-vista.png"
   esquemas={[esquemaFaq(preguntas)]}
 >
   <section class="tv-hero">
@@ -50,13 +59,13 @@ const preguntas = [
         <span class="antetitulo">Óptica · Barajas, Madrid</span>
         <h1>Test de vista online</h1>
         <p class="entradilla">
-          Cinco pruebas guiadas, un resultado en semáforo y, si lo necesitas, tu <strong>revisión gratuita</strong> con los
+          Seis pruebas guiadas, un resultado en semáforo y, si lo necesitas, tu <strong>revisión gratuita</strong> con los
           datos ya preparados. Sin registro y sin que nada salga de tu dispositivo.
         </p>
         <ul class="tv-puntos-clave" role="list">
           <li><Icono nombre="Clock" /> 5 minutos</li>
           <li><Icono nombre="ShieldCheck" /> Privado: no guarda nada</li>
-          <li><Icono nombre="Eye" /> 4 pruebas oculares</li>
+          <li><Icono nombre="Eye" /> 6 pruebas oculares</li><li><Icono nombre="Baby" /> Modo para niños</li>
         </ul>
       </div>
     </div>
@@ -72,7 +81,7 @@ const preguntas = [
     <div class="contenedor">
       <div class="cabecera-seccion">
         <span class="antetitulo">Qué miramos</span>
-        <h2 class="titulo-seccion">Cuatro pruebas, <em>cuatro señales</em></h2>
+        <h2 class="titulo-seccion">Seis pruebas, <em>seis señales</em></h2>
       </div>
       <div class="tv-pruebas">
         <article class="tarjeta" data-aparecer>
@@ -90,7 +99,17 @@ const preguntas = [
           <h3>Visión del color</h3>
           <p>Láminas de puntos tipo Ishihara para detectar con rapidez dificultades con rojos y verdes.</p>
         </article>
+        <article class="tarjeta" data-aparecer style="--retraso: 0.2s">
+          <Icono nombre="Contrast" />
+          <h3>Rojo y verde</h3>
+          <p>Aros sobre dos fondos de color: una pista de si la vista tira hacia la miopía o la hipermetropía.</p>
+        </article>
         <article class="tarjeta" data-aparecer style="--retraso: 0.24s">
+          <Icono nombre="BookOpen" />
+          <h3>Vista de cerca</h3>
+          <p>Lectura a 40 cm: si tienes que alejar el móvil para leer, es la señal clásica de la presbicia.</p>
+        </article>
+        <article class="tarjeta" data-aparecer style="--retraso: 0.28s">
           <Icono nombre="Grid3x3" />
           <h3>Cuadrícula de Amsler</h3>
           <p>La prueba clásica de la retina central: líneas torcidas o zonas que desaparecen merecen mirarse pronto.</p>

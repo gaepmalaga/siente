@@ -357,6 +357,11 @@ async function iniciar(form: HTMLFormElement, datos: Datos) {
     radio.checked = true;
     tipo = tipoPorId(radio.value);
   }
+  // Resumen del test de vista online (/pedir-cita/?nota=…): el cliente lo ve en el
+  // campo y puede cambiarlo o borrarlo antes de reservar.
+  const notaPrevia = new URLSearchParams(location.search).get('nota');
+  const campoNota = form.querySelector<HTMLTextAreaElement>('textarea[name="nota"]');
+  if (notaPrevia && campoNota && !campoNota.value) campoNota.value = notaPrevia.slice(0, campoNota.maxLength > 0 ? campoNota.maxLength : 500);
   recalcular();
   pintarMisCitas();
 }
