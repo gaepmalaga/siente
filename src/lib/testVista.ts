@@ -293,8 +293,12 @@ export function consejoDistancia(medidaMm: number, objetivoMm: number, toleranci
 
 // ── Brillo de la pantalla ──────────────────────────────────────────────────
 
-/** Gris de cada cuadrado de la prueba de brillo (0-255). Con poco brillo los primeros se funden con el negro. */
-export const ESCALA_GRISES = [0, 4, 8, 12, 16, 22];
+/**
+ * Gris de cada cuadrado de la prueba de brillo (0-255). El primero es negro puro (referencia, no se ve).
+ * Los otros cinco son visibles incluso en pantallas OLED con el brillo al máximo; con poco brillo
+ * o con modo noche, los primeros se funden con el negro. Se pide ver al menos cuatro de cinco.
+ */
+export const ESCALA_GRISES = [0, 8, 14, 22, 34, 50];
 
 // ── Recordatorio de revisión ───────────────────────────────────────────────
 

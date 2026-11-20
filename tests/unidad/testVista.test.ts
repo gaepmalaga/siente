@@ -7,6 +7,7 @@ import {
   consejoDistancia,
   diametroPx,
   distanciaCamaraMm,
+  ESCALA_GRISES,
   icsRecordatorio,
   notaCita,
   semaforoCerca,
@@ -272,5 +273,15 @@ describe('recordatorio y nota de cita', () => {
     expect(nota.length).toBeLessThanOrEqual(480);
     expect(nota).toContain('AV OD 1,0 / OI 0,32');
     expect(nota).toContain('Amsler OD ok / OI alterado');
+  });
+});
+
+describe('prueba de brillo', () => {
+  it('un negro de referencia y cinco grises visibles en una pantalla OLED con brillo máximo', () => {
+    expect(ESCALA_GRISES).toHaveLength(6);
+    expect(ESCALA_GRISES[0]).toBe(0);
+    const resto = ESCALA_GRISES.slice(1);
+    expect(resto.every((g, i) => i === 0 || g > resto[i - 1])).toBe(true);
+    expect(Math.min(...resto)).toBeGreaterThanOrEqual(8);
   });
 });
