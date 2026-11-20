@@ -40,14 +40,14 @@ test('un adulto completa el test y la nota llega a la cita', async ({ pagina: p 
   for (const _ojo of ['derecho', 'izquierdo']) {
     await p.locator('[data-accion="listo"]').click();
     await agudeza(p, 12);
-    await p.locator('input[name="duo"][value="igual"]').check({ force: true });
+    await p.locator('label.tv-opcion', { hasText: 'Igual en los dos' }).click();
     await p.locator('[data-accion="sig"]').click();
-    await p.locator('input[name="linea"][value="0"]').check({ force: true });
+    await p.locator('label.tv-chip', { hasText: 'Todas se ven igual' }).click();
     await p.locator('[data-accion="sig"]').click();
-    await p.locator('[data-normal]').check({ force: true });
+    await p.locator('label.tv-opcion', { hasText: 'Todo se ve recto y completo' }).click();
     await p.locator('[data-accion="sig"]').click();
   }
-  await p.locator('input[name="cerca"][value="0.8"]').check({ force: true });
+  await p.locator('.tv-linea-cerca:has(input[value="0.8"])').click();
   await p.locator('[data-accion="sig"]').click();
   await laminas(p);
   await expect(p.locator('.tv-veredicto')).toBeVisible();
@@ -59,14 +59,14 @@ test('un adulto completa el test y la nota llega a la cita', async ({ pagina: p 
 
 test('una urgencia bloquea el test', async ({ pagina: p }) => {
   await p.goto('test-de-vista-online/');
-  await p.locator('[data-urgente]').check({ force: true });
+  await p.locator('label.tv-opcion', { hasText: 'Pérdida brusca de visión' }).click();
   await expect(p.locator('[data-alerta-urgente]')).toBeVisible();
   await expect(p.locator('[data-accion="empezar"]')).toBeHidden();
 });
 
 test('el modo niño usa la E y solo hace agudeza y color', async ({ pagina: p }) => {
   await p.goto('test-de-vista-online/');
-  await p.locator('input[name="perfil"][value="nino"]').check({ force: true });
+  await p.locator('label.tv-opcion', { hasText: 'Para un niño o niña' }).click();
   await p.locator('[data-accion="empezar"]').click();
   await p.locator('[data-accion="ok"]').click();
   for (const _ojo of ['derecho', 'izquierdo']) {
