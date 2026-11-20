@@ -45,6 +45,7 @@ const anio = new Date().getFullYear();
       <ul role="list">
         <li><a href={url('/optica-barajas/')}>Óptica en Barajas</a></li>
         {vista.map((s) => <li><a href={url(`/optica-barajas/${s.id}/`)}>{s.data.title}</a></li>)}
+        <li><a href={url('/test-de-vista-online/')}>Test de vista online</a></li>
         {planVeoVigente() && <li><a href={url('/plan-veo/')}>Plan VEO</a></li>}
       </ul>
     </div>

@@ -11,6 +11,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const fijas: { slug: string; datos: Datos }[] = [
     { slug: 'inicio', datos: { antetitulo: 'Barajas · Madrid', titulo: 'Óptica y centro auditivo en Barajas', subtitulo: 'Revisión de la vista gratis · Audífonos · Plan VEO' } },
     { slug: 'optica', datos: { antetitulo: 'Óptica', titulo: 'Tu óptica en Barajas', subtitulo: 'Revisión gratis, gafas, progresivas y lentillas' } },
+    { slug: 'test-de-vista', datos: { antetitulo: 'Óptica · Barajas', titulo: 'Test de vista online', subtitulo: 'Agudeza, astigmatismo, cerca, color y retina en 5 minutos' } },
     { slug: 'audifonos', datos: { antetitulo: 'Centro auditivo', titulo: 'Vuelve a oír los detalles', subtitulo: 'Audiometría en cabina y audífonos a medida' } },
     { slug: 'plan-veo', datos: { antetitulo: 'Plan VEO', titulo: 'Gafas para menores de 16 con hasta 100 € de ayuda', subtitulo: 'Lo tramitamos nosotros, al momento' } },
   ];

@@ -10,6 +10,7 @@ import { url } from '../lib/url';
 const ruta = Astro.url.pathname;
 const navegacion = [
   { texto: 'Óptica', ruta: '/optica-barajas/' },
+  { texto: 'Test de vista', ruta: '/test-de-vista-online/' },
   { texto: 'Audífonos', ruta: '/audifonos-barajas/' },
   ...(planVeoVigente() ? [{ texto: 'Plan VEO', ruta: '/plan-veo/' }] : []),
   { texto: 'Blog', ruta: '/blog/' },

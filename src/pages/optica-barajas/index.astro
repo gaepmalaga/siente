@@ -8,6 +8,7 @@ import IconoMarca from '../../components/IconoMarca.astro';
 import TarjetaServicio from '../../components/TarjetaServicio.astro';
 import BandaPlanVeo from '../../components/BandaPlanVeo.astro';
 import Faq from '../../components/Faq.astro';
+import BandaTestVista from '../../components/BandaTestVista.astro';
 import BandaCita from '../../components/BandaCita.astro';
 import { negocio, waHref } from '../../lib/negocio';
 import { url } from '../../lib/url';
@@ -42,6 +43,7 @@ const preguntas = servicios.flatMap((s) => s.data.faqs.slice(0, 1));
           </p>
           <div class="hub-acciones">
             <a class="boton" href={url('/pedir-cita/?servicio=revision-vista')}><Icono nombre="CalendarCheck" /> Revisión gratis</a>
+            <a class="boton secundario" href={url('/test-de-vista-online/')}><Icono nombre="ScanEye" /> Test de vista online</a>
             <a class="boton wa" href={waHref('Hola, tengo una consulta sobre la óptica.')} target="_blank" rel="noopener"><IconoMarca nombre="whatsapp" /> WhatsApp</a>
           </div>
         </div>
@@ -115,6 +117,8 @@ const preguntas = servicios.flatMap((s) => s.data.faqs.slice(0, 1));
       <Faq preguntas={preguntas} titulo="Dudas sobre la óptica" />
     </div>
   </section>
+
+  <BandaTestVista />
 
   <BandaCita servicio="revision-vista" titulo="Revisa tu vista gratis esta semana" />
 </Base>
